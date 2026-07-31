@@ -50,22 +50,46 @@ ControllerConfig provisional_simulator_config() {
   config.azimuth.minimum_angle_deg = 0.0;
   config.azimuth.maximum_angle_deg = 360.0;
   config.azimuth.home_offset_deg = 0.0;
+  config.azimuth.motor_rms_current_ma = 400;
   config.elevation.minimum_angle_deg = -90.0;
   config.elevation.maximum_angle_deg = 90.0;
   config.elevation.home_offset_deg = 0.0;
+  config.elevation.motor_rms_current_ma = 400;
   return config;
 }
 
 SimulatedMotionController::SimulatedMotionController(ControllerConfig config)
     : config_(std::move(config)) {
+  state_.azimuth.last_driver_status.connected = true;
+  state_.elevation.last_driver_status.connected = true;
   if (!config_.valid()) {
     state_.fault = FaultCode::invalid_configuration;
   }
 }
 
-bool SimulatedMotionController::initialize() { return config_.valid(); }
+bool SimulatedMotionController::initialize() {
+  return config_.valid() && state_.azimuth.last_driver_status.connected &&
+         state_.elevation.last_driver_status.connected;
+}
 
-void SimulatedMotionController::service() {}
+void SimulatedMotionController::service() {
+  if (state_.azimuth.last_driver_status.critical_fault()) {
+    state_.azimuth.enabled = false;
+    state_.azimuth.fault =
+        state_.azimuth.last_driver_status.connected
+            ? FaultCode::driver_critical
+            : FaultCode::driver_communication;
+    invalidate(state_.azimuth, TrustLossReason::driver_fault);
+  }
+  if (state_.elevation.last_driver_status.critical_fault()) {
+    state_.elevation.enabled = false;
+    state_.elevation.fault =
+        state_.elevation.last_driver_status.connected
+            ? FaultCode::driver_critical
+            : FaultCode::driver_communication;
+    invalidate(state_.elevation, TrustLossReason::driver_fault);
+  }
+}
 
 const ControllerConfig& SimulatedMotionController::config() const { return config_; }
 
@@ -99,8 +123,23 @@ MotionResult SimulatedMotionController::home(const AxisSelection axis,
   if (state_.stopped) {
     return fail(FaultCode::stopped);
   }
+  if ((axis == AxisSelection::azimuth || axis == AxisSelection::both) &&
+      azimuth_homing_failure_ != FaultCode::none) {
+    state_.azimuth.fault = azimuth_homing_failure_;
+    state_.azimuth.enabled = false;
+    invalidate(state_.azimuth, TrustLossReason::homing_failed);
+    return fail(azimuth_homing_failure_);
+  }
+  if ((axis == AxisSelection::elevation || axis == AxisSelection::both) &&
+      elevation_homing_failure_ != FaultCode::none) {
+    state_.elevation.fault = elevation_homing_failure_;
+    state_.elevation.enabled = false;
+    invalidate(state_.elevation, TrustLossReason::homing_failed);
+    return fail(elevation_homing_failure_);
+  }
   if (axis == AxisSelection::azimuth || axis == AxisSelection::both) {
     state_.azimuth.enabled = true;
+    state_.azimuth.last_driver_status.enabled = true;
     state_.azimuth.commanded_position_deg = config_.azimuth.home_offset_deg;
     state_.azimuth.internal_step_position = 0;
     state_.azimuth.target_step_position = 0;
@@ -111,6 +150,7 @@ MotionResult SimulatedMotionController::home(const AxisSelection axis,
   }
   if (axis == AxisSelection::elevation || axis == AxisSelection::both) {
     state_.elevation.enabled = true;
+    state_.elevation.last_driver_status.enabled = true;
     state_.elevation.commanded_position_deg = config_.elevation.home_offset_deg;
     state_.elevation.internal_step_position = 0;
     state_.elevation.target_step_position = 0;
@@ -189,6 +229,8 @@ MotionResult SimulatedMotionController::clear_fault() {
 MotionResult SimulatedMotionController::set_enabled(const bool enabled) {
   state_.azimuth.enabled = enabled;
   state_.elevation.enabled = enabled;
+  state_.azimuth.last_driver_status.enabled = enabled;
+  state_.elevation.last_driver_status.enabled = enabled;
   if (!enabled) {
     invalidate(state_.azimuth, TrustLossReason::driver_disabled_during_motion);
     invalidate(state_.elevation, TrustLossReason::driver_disabled_during_motion);
@@ -261,6 +303,7 @@ MotionResult SimulatedMotionController::set_axis_enabled(
     const AxisSelection axis, const bool enabled) {
   if (axis == AxisSelection::azimuth || axis == AxisSelection::both) {
     state_.azimuth.enabled = enabled;
+    state_.azimuth.last_driver_status.enabled = enabled;
     if (!enabled) {
       invalidate(state_.azimuth,
                  TrustLossReason::driver_disabled_during_motion);
@@ -268,6 +311,7 @@ MotionResult SimulatedMotionController::set_axis_enabled(
   }
   if (axis == AxisSelection::elevation || axis == AxisSelection::both) {
     state_.elevation.enabled = enabled;
+    state_.elevation.last_driver_status.enabled = enabled;
     if (!enabled) {
       invalidate(state_.elevation,
                  TrustLossReason::driver_disabled_during_motion);
@@ -318,6 +362,41 @@ DriverStatus SimulatedMotionController::driver_status(
     return state_.elevation.last_driver_status;
   }
   return state_.azimuth.last_driver_status;
+}
+
+void SimulatedMotionController::simulate_driver_status(
+    const AxisSelection axis, const DriverStatus status) {
+  if (axis == AxisSelection::azimuth || axis == AxisSelection::both) {
+    state_.azimuth.last_driver_status = status;
+  }
+  if (axis == AxisSelection::elevation || axis == AxisSelection::both) {
+    state_.elevation.last_driver_status = status;
+  }
+}
+
+void SimulatedMotionController::simulate_homing_failure(
+    const AxisSelection axis, const FaultCode fault) {
+  if (axis == AxisSelection::azimuth || axis == AxisSelection::both) {
+    azimuth_homing_failure_ = fault;
+  }
+  if (axis == AxisSelection::elevation || axis == AxisSelection::both) {
+    elevation_homing_failure_ = fault;
+  }
+}
+
+void SimulatedMotionController::simulate_reset(const AxisSelection axis) {
+  if (axis == AxisSelection::azimuth || axis == AxisSelection::both) {
+    state_.azimuth.enabled = false;
+    state_.azimuth.fault = FaultCode::driver_communication;
+    invalidate(state_.azimuth, TrustLossReason::watchdog_reset_during_motion);
+  }
+  if (axis == AxisSelection::elevation || axis == AxisSelection::both) {
+    state_.elevation.enabled = false;
+    state_.elevation.fault = FaultCode::driver_communication;
+    invalidate(state_.elevation,
+               TrustLossReason::watchdog_reset_during_motion);
+  }
+  state_.fault = FaultCode::driver_communication;
 }
 
 void SimulatedMotionController::report_fault(const FaultCode code) { state_.fault = code; }

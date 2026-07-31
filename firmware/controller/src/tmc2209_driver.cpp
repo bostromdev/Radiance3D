@@ -162,7 +162,8 @@ bool Tmc2209Driver::initialize() {
   if (!write_register(kRegisterSlaveconf, 2UL << 8) ||
       !write_register(kRegisterTpowerdown, 10) ||
       !write_register(kRegisterPwmconf,
-                      0xC10D0024UL | kPwmAutoscale | kPwmAutograd)) {
+                      0xC10D0024UL | kPwmAutoscale | kPwmAutograd) ||
+      !write_register(kRegisterGstat, 0x07UL)) {
     return false;
   }
   connected_ = true;

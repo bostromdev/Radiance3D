@@ -20,12 +20,25 @@ enum class DriverFault {
 };
 
 struct DriverCapabilities {
-  bool uart_diagnostics{false};
-  bool configurable_current{false};
-  bool configurable_microsteps{false};
-  bool interpolation{false};
-  bool stealthchop{false};
-  bool spreadcycle{false};
+  bool uart_diagnostics;
+  bool configurable_current;
+  bool configurable_microsteps;
+  bool interpolation;
+  bool stealthchop;
+  bool spreadcycle;
+
+  constexpr DriverCapabilities(bool uart_diagnostics_value = false,
+                               bool configurable_current_value = false,
+                               bool configurable_microsteps_value = false,
+                               bool interpolation_value = false,
+                               bool stealthchop_value = false,
+                               bool spreadcycle_value = false)
+      : uart_diagnostics(uart_diagnostics_value),
+        configurable_current(configurable_current_value),
+        configurable_microsteps(configurable_microsteps_value),
+        interpolation(interpolation_value),
+        stealthchop(stealthchop_value),
+        spreadcycle(spreadcycle_value) {}
 };
 
 struct DriverStatus {

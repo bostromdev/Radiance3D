@@ -124,8 +124,12 @@ struct ControllerState {
 };
 
 struct MotionResult {
-  bool ok{false};
-  FaultCode fault{FaultCode::none};
+  bool ok;
+  FaultCode fault;
+
+  constexpr MotionResult(bool ok_value = false,
+                         FaultCode fault_value = FaultCode::none)
+      : ok(ok_value), fault(fault_value) {}
 };
 
 class MotionController {
@@ -195,9 +199,15 @@ class SimulatedMotionController final : public MotionController {
   DriverStatus driver_status(AxisSelection axis) const override;
   void report_fault(FaultCode code) override;
 
+  void simulate_driver_status(AxisSelection axis, DriverStatus status);
+  void simulate_homing_failure(AxisSelection axis, FaultCode fault);
+  void simulate_reset(AxisSelection axis);
+
  private:
   ControllerConfig config_{};
   ControllerState state_{};
+  FaultCode azimuth_homing_failure_{FaultCode::none};
+  FaultCode elevation_homing_failure_{FaultCode::none};
 
   MotionResult fail(FaultCode code);
   MotionResult succeed();
