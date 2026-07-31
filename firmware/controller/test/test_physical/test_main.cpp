@@ -1,10 +1,15 @@
+#ifdef ESP_PLATFORM
 #include <unity.h>
+#else
+#include "host_test.hpp"
+#endif
 
 #include <cstddef>
 #include <cstdint>
 
 #include "axis_controller.hpp"
 #include "hardware_config.hpp"
+#include "hardware_profile_generated.hpp"
 #include "physical_motion_controller.hpp"
 #include "protocol.hpp"
 
@@ -168,6 +173,40 @@ void test_provisional_gpio_is_valid_and_validation_rejects_conflicts() {
   TEST_ASSERT_NOT_EQUAL_INT64(0, result.bootstrapping_pin_mask);
 }
 
+void test_compiled_defaults_are_generated_from_the_hardware_profile() {
+  const auto config = radiance3d::provisional_esp32_dev_config();
+
+  TEST_ASSERT_EQUAL_STRING(radiance3d::generated_profile::kBoardName,
+                           config.board_name);
+  TEST_ASSERT_EQUAL_INT(radiance3d::generated_profile::kEmergencyStopPin,
+                        config.emergency_stop_pin);
+  TEST_ASSERT_EQUAL_UINT32(radiance3d::generated_profile::kProtocolVersion,
+                           config.protocol_version);
+  TEST_ASSERT_EQUAL_INT(radiance3d::generated_profile::kAzimuth.step_pin,
+                        config.azimuth.driver.step_pin);
+  TEST_ASSERT_EQUAL_INT(radiance3d::generated_profile::kElevation.step_pin,
+                        config.elevation.driver.step_pin);
+  TEST_ASSERT_EQUAL_UINT16(
+      radiance3d::generated_profile::kAzimuth.commissioning_current_ma,
+      config.azimuth.axis.motion.motor_rms_current_ma);
+  TEST_ASSERT_EQUAL_UINT16(
+      radiance3d::generated_profile::kElevation.commissioning_current_ma,
+      config.elevation.axis.motion.motor_rms_current_ma);
+  TEST_ASSERT_EQUAL_UINT8(30, config.azimuth.axis.motion.hold_current_percent);
+  TEST_ASSERT_EQUAL_UINT8(40, config.elevation.axis.motion.hold_current_percent);
+  TEST_ASSERT_EQUAL_UINT16(
+      radiance3d::generated_profile::kAzimuth.maximum_rms_current_ma,
+      config.azimuth.driver.maximum_rms_current_ma);
+  TEST_ASSERT_EQUAL_UINT32(radiance3d::generated_profile::kTmcUartBaud,
+                           config.azimuth.driver.uart_baud);
+  TEST_ASSERT_EQUAL_UINT32(radiance3d::generated_profile::kTmcUartTimeoutMs,
+                           config.elevation.driver.uart_timeout_ms);
+  TEST_ASSERT_TRUE(config.azimuth.driver.uart_single_wire);
+  TEST_ASSERT_TRUE(config.azimuth.driver.write_echo_expected);
+  TEST_ASSERT_EQUAL_INT(1, config.azimuth.axis.motion.gear_ratio.numerator);
+  TEST_ASSERT_EQUAL_INT(1, config.azimuth.axis.motion.gear_ratio.denominator);
+}
+
 void test_safe_startup_initializes_both_axes_disabled_and_untrusted() {
   Fixture fixture;
 
@@ -208,7 +247,11 @@ void test_one_axis_critical_fault_stops_coordinated_move_and_loses_trust() {
       radiance3d::DriverFault::overtemperature_shutdown;
 
   fixture.platform.advance(101000);
-  fixture.controller.service();
+  // Diagnostics are intentionally deferred while motion is active so a TMC
+  // timeout cannot delay native GPTimer pulse scheduling. Finish the move
+  // owner cycle, then invoke the explicit idle-only diagnostic path.
+  fixture.controller.stop();
+  fixture.controller.service_diagnostics();
 
   TEST_ASSERT_FALSE(fixture.azimuth.state().moving);
   TEST_ASSERT_FALSE(fixture.elevation.state().moving);
@@ -239,6 +282,54 @@ void test_emergency_stop_latches_both_axes_and_requires_released_input() {
   fixture.controller.service();
   TEST_ASSERT_TRUE(fixture.controller.clear_fault().ok);
   TEST_ASSERT_FALSE(fixture.controller.state().emergency_stop_active);
+}
+
+void test_latched_estop_rejects_enable_and_runtime_motor_changes() {
+  Fixture fixture;
+  TEST_ASSERT_TRUE(fixture.controller.initialize());
+  fixture.controller.emergency_stop();
+
+  TEST_ASSERT_FALSE(fixture.controller.set_enabled(true).ok);
+  TEST_ASSERT_FALSE(
+      fixture.controller.set_axis_enabled(radiance3d::AxisSelection::azimuth,
+                                          true)
+          .ok);
+  TEST_ASSERT_FALSE(
+      fixture.controller.set_axis_current(radiance3d::AxisSelection::azimuth,
+                                          650)
+          .ok);
+  TEST_ASSERT_FALSE(
+      fixture.controller.set_axis_microsteps(radiance3d::AxisSelection::azimuth,
+                                             8)
+          .ok);
+  TEST_ASSERT_FALSE(fixture.azimuth_driver.enabled);
+  TEST_ASSERT_FALSE(fixture.elevation_driver.enabled);
+}
+
+void test_motor_config_tracks_accepted_runtime_changes() {
+  Fixture fixture;
+  TEST_ASSERT_TRUE(fixture.controller.initialize());
+  TEST_ASSERT_TRUE(
+      fixture.controller.set_axis_current(radiance3d::AxisSelection::azimuth,
+                                          700)
+          .ok);
+  TEST_ASSERT_TRUE(
+      fixture.controller.set_axis_microsteps(radiance3d::AxisSelection::azimuth,
+                                             8)
+          .ok);
+  TEST_ASSERT_EQUAL_UINT16(700, fixture.controller.config().azimuth.motor_rms_current_ma);
+  TEST_ASSERT_EQUAL_UINT16(8, fixture.controller.config().azimuth.microsteps);
+}
+
+void test_physical_protocol_uses_profile_protocol_version() {
+  Fixture fixture;
+  TEST_ASSERT_TRUE(fixture.controller.initialize());
+  radiance3d::ProtocolEngine engine(fixture.controller,
+                                    fixture.config.protocol_version);
+  const std::string identify = engine.handle("IDENTIFY");
+  TEST_ASSERT_NOT_EQUAL(std::string::npos,
+                        identify.find("PROTOCOL=" +
+                                      std::to_string(fixture.config.protocol_version)));
 }
 
 void test_stop_all_stops_both_axes_and_invalidates_active_move() {
@@ -279,10 +370,14 @@ void test_protocol_emits_completion_only_after_both_axes_stop() {
 int main(int, char**) {
   UNITY_BEGIN();
   RUN_TEST(test_provisional_gpio_is_valid_and_validation_rejects_conflicts);
+  RUN_TEST(test_compiled_defaults_are_generated_from_the_hardware_profile);
   RUN_TEST(test_safe_startup_initializes_both_axes_disabled_and_untrusted);
   RUN_TEST(test_coordinated_move_completes_only_after_both_axes_finish);
   RUN_TEST(test_one_axis_critical_fault_stops_coordinated_move_and_loses_trust);
   RUN_TEST(test_emergency_stop_latches_both_axes_and_requires_released_input);
+  RUN_TEST(test_latched_estop_rejects_enable_and_runtime_motor_changes);
+  RUN_TEST(test_motor_config_tracks_accepted_runtime_changes);
+  RUN_TEST(test_physical_protocol_uses_profile_protocol_version);
   RUN_TEST(test_stop_all_stops_both_axes_and_invalidates_active_move);
   RUN_TEST(test_protocol_emits_completion_only_after_both_axes_stop);
   return UNITY_END();

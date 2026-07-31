@@ -1,5 +1,10 @@
+#ifdef ESP_PLATFORM
 #include <unity.h>
+#else
+#include "host_test.hpp"
+#endif
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -13,6 +18,8 @@ class FakePlatform final : public radiance3d::HardwarePlatform {
  public:
   bool uart_present{true};
   bool uart_started{false};
+  bool half_duplex_requested{false};
+  bool echo_read_requests{false};
   bool pin_values[64]{};
   std::array<std::uint32_t, 128> registers{};
 
@@ -34,6 +41,11 @@ class FakePlatform final : public radiance3d::HardwarePlatform {
 
   bool begin_uart(std::uint8_t, int, int, std::uint32_t) override {
     uart_started = true;
+    return true;
+  }
+
+  bool configure_uart_half_duplex(std::uint8_t, bool enabled) override {
+    half_duplex_requested = enabled;
     return true;
   }
 
@@ -64,6 +76,10 @@ class FakePlatform final : public radiance3d::HardwarePlatform {
     if (length == 4 && data[0] == 0x05 && data[1] <= 3 &&
         radiance3d::Tmc2209Driver::calculate_crc(data, 3) == data[3]) {
       pending_register_ = data[2];
+      if (echo_read_requests) {
+        std::copy(data, data + length, echoed_request_.begin());
+        echo_pending_ = true;
+      }
       return true;
     }
     return false;
@@ -71,7 +87,18 @@ class FakePlatform final : public radiance3d::HardwarePlatform {
 
   std::size_t read_uart(std::uint8_t, std::uint8_t* data,
                         std::size_t maximum_length, std::uint32_t) override {
-    if (!uart_present || maximum_length < 8) {
+    if (!uart_present) {
+      return 0;
+    }
+    if (echo_pending_) {
+      if (maximum_length < echoed_request_.size()) {
+        return 0;
+      }
+      std::copy(echoed_request_.begin(), echoed_request_.end(), data);
+      echo_pending_ = false;
+      return echoed_request_.size();
+    }
+    if (maximum_length < 8) {
       return 0;
     }
     const std::uint32_t value = registers[pending_register_];
@@ -88,6 +115,8 @@ class FakePlatform final : public radiance3d::HardwarePlatform {
 
  private:
   std::uint8_t pending_register_{0};
+  std::array<std::uint8_t, 4> echoed_request_{};
+  bool echo_pending_{false};
 };
 
 radiance3d::Tmc2209Config config() {
@@ -117,8 +146,18 @@ void test_successful_initialization_starts_disabled_and_probes_uart() {
   TEST_ASSERT_TRUE(driver.initialize());
   TEST_ASSERT_TRUE(driver.is_connected());
   TEST_ASSERT_TRUE(platform.uart_started);
+  TEST_ASSERT_TRUE(platform.half_duplex_requested);
   TEST_ASSERT_TRUE(platform.pin_values[27]);
   TEST_ASSERT_EQUAL_UINT32(0, platform.registers[0x01]);
+}
+
+void test_single_wire_read_echo_is_ignored_before_crc_valid_reply() {
+  FakePlatform platform;
+  platform.echo_read_requests = true;
+  radiance3d::Tmc2209Driver driver(platform, config());
+
+  TEST_ASSERT_TRUE(driver.initialize());
+  TEST_ASSERT_TRUE(driver.set_microsteps(32));
 }
 
 void test_failed_uart_probe_keeps_driver_disabled() {
@@ -183,6 +222,7 @@ void test_diagnostics_map_faults_and_critical_fault_disables_output() {
 int main(int, char**) {
   UNITY_BEGIN();
   RUN_TEST(test_successful_initialization_starts_disabled_and_probes_uart);
+  RUN_TEST(test_single_wire_read_echo_is_ignored_before_crc_valid_reply);
   RUN_TEST(test_failed_uart_probe_keeps_driver_disabled);
   RUN_TEST(test_invalid_driver_address_is_rejected);
   RUN_TEST(test_current_is_configurable_and_safe_ceiling_is_enforced);

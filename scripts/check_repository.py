@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -21,7 +22,13 @@ REQUIRED_PATHS = (
     "data/schemas/scan-v1.schema.json",
     "data/examples/simulated/dipole-like-scan.json",
     "software/pyproject.toml",
-    "firmware/controller/platformio.ini",
+    "firmware/controller/CMakeLists.txt",
+    "firmware/controller/main/CMakeLists.txt",
+    "firmware/controller/main/Kconfig.projbuild",
+    "firmware/controller/main/idf_component.yml",
+    "firmware/controller/partitions.csv",
+    "firmware/controller/sdkconfig.defaults",
+    "firmware/controller/host/CMakeLists.txt",
     "docs/architecture/overview.md",
     "docs/firmware/protocol.md",
     "docs/software/file-formats.md",
@@ -58,6 +65,60 @@ def check_json() -> list[str]:
     return errors
 
 
+def check_hardware_profile() -> list[str]:
+    generator = ROOT / "scripts" / "generate_hardware_profile_header.py"
+    profile = ROOT / "firmware" / "config" / "provisional-esp32dev-v1.json"
+    try:
+        result = subprocess.run(
+            [sys.executable, str(generator), "--profile", str(profile), "--validate-only"],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+    except OSError as exc:
+        return [f"could not validate hardware profile: {exc}"]
+    if result.returncode != 0:
+        detail = result.stderr.strip() or result.stdout.strip() or "unknown error"
+        return [f"hardware profile validation failed: {detail}"]
+    return []
+
+
+def check_physical_firmware_has_no_arduino_dependency() -> list[str]:
+    forbidden = (
+        "#include <Arduino.h>",
+        "HardwareSerial",
+        "pinMode(",
+        "digitalWrite(",
+        "digitalRead(",
+        "void setup(",
+        "void loop(",
+        "Ticker.h",
+        "ESP32TimerInterrupt",
+        "TMCStepper",
+        "AccelStepper",
+        "ArduinoJson",
+        "framework = arduino",
+    )
+    errors: list[str] = []
+    firmware = ROOT / "firmware" / "controller"
+    for path in firmware.rglob("*"):
+        if not path.is_file() or (
+            path.suffix not in {".cpp", ".hpp", ".h", ".ini", ".cmake"}
+            and path.name != "CMakeLists.txt"
+        ):
+            continue
+        text = path.read_text(encoding="utf-8")
+        for marker in forbidden:
+            if marker in text:
+                errors.append(f"{path.relative_to(ROOT)}: Arduino dependency {marker!r}")
+        for api in ("delay", "millis", "micros"):
+            if re.search(rf"\b{api}\s*\(", text):
+                errors.append(
+                    f"{path.relative_to(ROOT)}: Arduino dependency {api + '()'!r}"
+                )
+    return errors
+
+
 def check_internal_links() -> list[str]:
     errors: list[str] = []
     for markdown in ROOT.rglob("*.md"):
@@ -81,6 +142,10 @@ def check_empty_files() -> list[str]:
     allowed = {ROOT / "software" / "src" / "radiance3d" / "py.typed"}
     errors: list[str] = []
     for path in ROOT.rglob("*"):
+        # ESP-IDF creates empty generated stamp/source placeholders under its
+        # ignored build directory. They are not repository artifacts.
+        if "build" in path.relative_to(ROOT).parts:
+            continue
         if path.is_file() and path.stat().st_size == 0 and path not in allowed:
             errors.append(f"{path.relative_to(ROOT)}: empty file")
     return errors
@@ -90,6 +155,8 @@ def main() -> int:
     errors = [
         *check_required_paths(),
         *check_json(),
+        *check_hardware_profile(),
+        *check_physical_firmware_has_no_arduino_dependency(),
         *check_internal_links(),
         *check_empty_files(),
     ]

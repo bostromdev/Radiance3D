@@ -1,4 +1,8 @@
+#ifdef ESP_PLATFORM
 #include <unity.h>
+#else
+#include "host_test.hpp"
+#endif
 
 #include <cmath>
 #include <cstddef>
@@ -103,6 +107,39 @@ class FakeDriver final : public radiance3d::StepperDriver {
   bool positive_{true};
 };
 
+class FakePulseScheduler final : public radiance3d::StepPulseScheduler {
+ public:
+  bool initialize() override {
+    initialized = true;
+    return true;
+  }
+  bool schedule_pulse(std::uint32_t delay_before_rising_us) override {
+    if (!initialized || active) {
+      return false;
+    }
+    active = true;
+    last_delay_us = delay_before_rising_us;
+    ++scheduled_pulses;
+    return true;
+  }
+  void stop() override { active = false; }
+  std::uint32_t consume_completed_pulses() override {
+    const std::uint32_t value = completed_pulses;
+    completed_pulses = 0;
+    return value;
+  }
+  void complete_one() {
+    active = false;
+    ++completed_pulses;
+  }
+
+  bool initialized{false};
+  bool active{false};
+  std::uint32_t last_delay_us{0};
+  std::uint32_t scheduled_pulses{0};
+  std::uint32_t completed_pulses{0};
+};
+
 radiance3d::PhysicalAxisConfig axis_config() {
   radiance3d::PhysicalAxisConfig config;
   config.name = "elevation";
@@ -110,7 +147,7 @@ radiance3d::PhysicalAxisConfig axis_config() {
   config.motion.motor_full_steps_per_revolution = 200;
   config.motion.microsteps = 1;
   config.motion.motor_rms_current_ma = 400;
-  config.motion.gear_ratio = 1.0;
+  config.motion.gear_ratio = {1, 1};
   config.motion.minimum_angle_deg = -90.0;
   config.motion.maximum_angle_deg = 90.0;
   config.motion.home_offset_deg = 0.0;
@@ -201,6 +238,28 @@ void test_valid_motion_finishes_on_integer_target_and_limits_are_strict() {
                     axis.move_absolute_degrees(91.0, 20.0).fault);
   TEST_ASSERT_EQUAL(radiance3d::FaultCode::limit_reached,
                     axis.move_absolute_degrees(-91.0, 20.0).fault);
+}
+
+void test_timer_scheduler_keeps_integer_position_ownership_in_axis_core() {
+  FakePlatform platform;
+  FakeDriver driver;
+  FakePulseScheduler scheduler;
+  radiance3d::AxisController axis(platform, driver, axis_config(), &scheduler);
+  TEST_ASSERT_TRUE(axis.initialize());
+  axis.mutable_state().position_trusted = true;
+  axis.mutable_state().homed = true;
+
+  TEST_ASSERT_TRUE(axis.move_absolute_degrees(18.0, 20.0, 8).ok);
+  TEST_ASSERT_TRUE(scheduler.active);
+  TEST_ASSERT_TRUE(scheduler.last_delay_us >= 5U);
+  for (int index = 0; index < 10; ++index) {
+    scheduler.complete_one();
+    axis.service();
+  }
+
+  TEST_ASSERT_FALSE(axis.state().moving);
+  TEST_ASSERT_EQUAL_INT64(10, axis.state().internal_step_position);
+  TEST_ASSERT_EQUAL_UINT32(10, scheduler.scheduled_pulses);
 }
 
 void test_stop_and_timeout_disable_motion_and_lose_trust() {
@@ -330,6 +389,7 @@ int main(int, char**) {
   RUN_TEST(test_conversions_use_integer_steps_and_half_away_from_zero_rounding);
   RUN_TEST(test_absolute_and_relative_motion_require_homing);
   RUN_TEST(test_valid_motion_finishes_on_integer_target_and_limits_are_strict);
+  RUN_TEST(test_timer_scheduler_keeps_integer_position_ownership_in_axis_core);
   RUN_TEST(test_stop_and_timeout_disable_motion_and_lose_trust);
   RUN_TEST(test_stuck_active_home_switch_fails_without_motion);
   RUN_TEST(test_homing_times_out_when_switch_never_activates);

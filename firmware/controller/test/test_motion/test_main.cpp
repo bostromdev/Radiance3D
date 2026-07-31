@@ -1,4 +1,8 @@
+#ifdef ESP_PLATFORM
 #include <unity.h>
+#else
+#include "host_test.hpp"
+#endif
 
 #include <string>
 
@@ -16,12 +20,28 @@ void test_angular_conversion_is_derived_from_configuration() {
   AxisConfig config;
   config.motor_full_steps_per_revolution = 200;
   config.microsteps = 16;
-  config.gear_ratio = 3.0;
+  config.gear_ratio = {3, 1};
 
   TEST_ASSERT_FLOAT_WITHIN(0.001f, 9600.0f,
                            static_cast<float>(config.steps_per_output_revolution()));
   TEST_ASSERT_FLOAT_WITHIN(0.0001f, 0.0375f,
                            static_cast<float>(config.commanded_step_angle_deg()));
+}
+
+void test_rational_gear_ratio_is_exact_and_rejects_invalid_denominator() {
+  AxisConfig config;
+  config.motor_full_steps_per_revolution = 200;
+  config.microsteps = 16;
+  config.gear_ratio = {5, 2};
+
+  TEST_ASSERT_FLOAT_WITHIN(0.001f, 8000.0f,
+                           static_cast<float>(config.steps_per_output_revolution()));
+  config.gear_ratio.denominator = 0;
+  TEST_ASSERT_FALSE(config.valid());
+
+  // A fractional output pulse is not representable by a STEP/DIR driver.
+  config.gear_ratio = {1, 3};
+  TEST_ASSERT_FALSE(config.valid());
 }
 
 void test_motion_requires_homing_and_uses_configured_limits() {
@@ -59,6 +79,7 @@ void test_status_labels_position_as_commanded_and_untrusted_at_startup() {
   TEST_ASSERT_NOT_EQUAL(std::string::npos, status.find("POSITION_KIND=COMMANDED"));
   TEST_ASSERT_NOT_EQUAL(std::string::npos, status.find("AZ_TRUSTED=0"));
   TEST_ASSERT_NOT_EQUAL(std::string::npos, status.find("EL_TRUSTED=0"));
+  TEST_ASSERT_TRUE(status.size() < 1024U);
 }
 
 void test_correlated_commands_reject_duplicate_and_stale_ids() {
@@ -169,6 +190,7 @@ void test_simulator_models_homing_failure_and_reset_trust_loss() {
 int main(int, char**) {
   UNITY_BEGIN();
   RUN_TEST(test_angular_conversion_is_derived_from_configuration);
+  RUN_TEST(test_rational_gear_ratio_is_exact_and_rejects_invalid_denominator);
   RUN_TEST(test_motion_requires_homing_and_uses_configured_limits);
   RUN_TEST(test_stop_invalidates_position_and_requires_rehoming);
   RUN_TEST(test_driver_disable_invalidates_position_confidence);
