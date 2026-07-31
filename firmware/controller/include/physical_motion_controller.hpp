@@ -17,6 +17,9 @@ class PhysicalMotionController final : public MotionController {
 
   bool initialize() override;
   void service() override;
+  // Called by the diagnostics task through the motion owner. It is a no-op
+  // while either axis is moving so UART timeouts cannot create pulse gaps.
+  void service_diagnostics();
   const ControllerConfig& config() const override;
   const ControllerState& state() const override;
   MotionResult home(AxisSelection axis,
@@ -64,6 +67,7 @@ class PhysicalMotionController final : public MotionController {
   AxisController* selected_axis(AxisSelection axis);
   const AxisController* selected_axis(AxisSelection axis) const;
   void synchronize_state();
+  FaultCode active_axis_fault() const;
   void update_emergency_input(std::uint64_t now_us);
   bool emergency_input_active_raw() const;
   MotionResult reject(FaultCode fault);

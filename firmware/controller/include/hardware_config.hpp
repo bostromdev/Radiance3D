@@ -20,6 +20,7 @@ struct PhysicalControllerConfig {
   PhysicalAxisDefinition elevation{};
   int emergency_stop_pin{-1};
   bool emergency_stop_active_low{true};
+  PinMode emergency_stop_input_mode{PinMode::input_pullup};
   std::uint32_t emergency_stop_debounce_ms{10};
 };
 

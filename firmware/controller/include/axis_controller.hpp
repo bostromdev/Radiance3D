@@ -2,6 +2,7 @@
 
 #include "hardware_platform.hpp"
 #include "motion_controller.hpp"
+#include "step_pulse_scheduler.hpp"
 #include "stepper_driver.hpp"
 
 #include <cstdint>
@@ -12,15 +13,21 @@ struct PhysicalAxisConfig {
   const char* name{"axis"};
   AxisConfig motion{};
   int home_switch_pin{-1};
+  PinMode home_switch_input_mode{PinMode::input_pullup};
 };
 
 class AxisController {
  public:
   AxisController(HardwarePlatform& platform, StepperDriver& driver,
-                 PhysicalAxisConfig config);
+                 PhysicalAxisConfig config,
+                 StepPulseScheduler* pulse_scheduler = nullptr);
 
   bool initialize();
   void service();
+  // Runs bounded, potentially blocking driver diagnostics only while this
+  // axis is idle.  The physical runtime invokes it from its diagnostics tick
+  // so UART timeouts can never delay scheduling the next STEP pulse.
+  void service_diagnostics();
   MotionResult start_homing(std::uint32_t command_id = 0);
   MotionResult move_absolute_degrees(double target_deg, double speed_deg_per_s,
                                      std::uint32_t command_id = 0);
@@ -53,6 +60,7 @@ class AxisController {
   HardwarePlatform& platform_;
   StepperDriver& driver_;
   PhysicalAxisConfig config_;
+  StepPulseScheduler* pulse_scheduler_{nullptr};
   AxisState state_{};
   MotionPurpose motion_purpose_{MotionPurpose::none};
   std::uint64_t motion_started_us_{0};

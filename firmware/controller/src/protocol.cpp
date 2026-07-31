@@ -8,10 +8,6 @@
 #include <sstream>
 #include <string>
 
-#ifndef RADIANCE3D_PROTOCOL_VERSION
-#define RADIANCE3D_PROTOCOL_VERSION 1
-#endif
-
 namespace radiance3d {
 namespace {
 
@@ -190,9 +186,11 @@ ProtocolEngine::ProtocolEngine()
     : default_controller_(provisional_simulator_config()),
       controller_(&default_controller_) {}
 
-ProtocolEngine::ProtocolEngine(MotionController& controller)
+ProtocolEngine::ProtocolEngine(MotionController& controller,
+                               const std::uint32_t protocol_version)
     : default_controller_(provisional_simulator_config()),
-      controller_(&controller) {}
+      controller_(&controller),
+      protocol_version_(protocol_version) {}
 
 const ControllerState& ProtocolEngine::state() const {
   return controller_->state();
@@ -323,7 +321,7 @@ std::string ProtocolEngine::handle_command(const std::string& line,
     }
     return "OK IDENTIFY DEVICE=Radiance3D CONTROLLER=motion "
            "PROTOCOL=" +
-           std::to_string(RADIANCE3D_PROTOCOL_VERSION) +
+           std::to_string(protocol_version_) +
            " MODE=" + (controller_ == &default_controller_ ? "SIMULATOR"
                                                             : "PHYSICAL");
   }
@@ -489,7 +487,7 @@ std::string ProtocolEngine::handle_command(const std::string& line,
              << "OK MOTOR_CONFIG AXIS=" << axis_text
              << " FULL_STEPS=" << config.motor_full_steps_per_revolution
              << " MICROSTEPS=" << config.microsteps
-             << " GEAR_RATIO=" << config.gear_ratio
+             << " GEAR_RATIO=" << config.gear_ratio.as_double()
              << " MIN_DEG=" << config.minimum_angle_deg
              << " MAX_DEG=" << config.maximum_angle_deg
              << " MAX_SPEED=" << config.maximum_speed_deg_per_s
@@ -632,6 +630,17 @@ std::string ProtocolEngine::service() {
   previous_azimuth_moving_ = current.azimuth.moving;
   previous_elevation_moving_ = current.elevation.moving;
   return event;
+}
+
+std::string ProtocolEngine::host_heartbeat_timeout() {
+  controller_->stop();
+  controller_->set_enabled(false);
+  const ControllerState& current = state();
+  previous_estop_ = current.emergency_stop_active;
+  previous_fault_ = current.fault;
+  previous_azimuth_moving_ = current.azimuth.moving;
+  previous_elevation_moving_ = current.elevation.moving;
+  return "EVENT FAULT CODE=DRIVER_DISABLED DETAIL=HOST_HEARTBEAT_TIMEOUT";
 }
 
 }  // namespace radiance3d

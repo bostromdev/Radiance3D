@@ -10,7 +10,10 @@
     "protocol_version": 1,
     "usb_serial_baud": 115200,
     "emergency_stop_pin": 13,
-    "emergency_stop_active_low": true
+    "emergency_stop_active_low": true,
+    "emergency_stop_pullup": true,
+    "emergency_stop_pulldown": false,
+    "emergency_stop_debounce_ms": 10
   },
   "power": {
     "motor_supply_voltage_v": 12.0,
@@ -30,6 +33,12 @@
     "driver_interface": "UART controlled STEP/DIR",
     "driver_diagnostics_enabled": true,
     "enable_active_low_configurable": true,
+    "enable_active_low": true,
+    "uart_baud": 115200,
+    "uart_timeout_ms": 20,
+    "sense_resistor_milliohms": 110,
+    "single_wire_pdn_uart": true,
+    "write_echo_expected": true,
     "current_configured_in_rms_ma": true,
     "ifcnt_write_verification_required": true,
     "verify": [
@@ -38,7 +47,8 @@
       "sense resistor value",
       "board revision",
       "carrier pinout"
-    ]
+    ],
+    "electrical_profile_status": "provisional; confirm R10 and PDN_UART topology before energizing motors"
   },
   "motors": {
     "manufacturer": "YEJMKJ / LYLANMO",
@@ -67,6 +77,8 @@
       "enable_pin": 27,
       "home_switch_pin": 32,
       "home_switch_normally_closed": true,
+      "home_switch_pullup": true,
+      "home_switch_pulldown": false,
       "homing_direction_negative": true,
       "home_switch_debounce_ms": 10,
       "motor_full_steps_per_revolution": 200,
@@ -100,6 +112,8 @@
       "enable_pin": 23,
       "home_switch_pin": 33,
       "home_switch_normally_closed": true,
+      "home_switch_pullup": true,
+      "home_switch_pulldown": false,
       "homing_direction_negative": true,
       "home_switch_debounce_ms": 10,
       "motor_full_steps_per_revolution": 200,
@@ -111,7 +125,7 @@
       "home_offset_deg": 0.0,
       "commissioning_current_ma": 650,
       "maximum_rms_current_ma": 1000,
-      "hold_current_percent": 30,
+      "hold_current_percent": 40,
       "max_speed_deg_s": 8.0,
       "acceleration_deg_s2": 15.0,
       "home_speed_deg_s": 4.0,

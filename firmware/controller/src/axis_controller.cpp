@@ -8,9 +8,11 @@
 namespace radiance3d {
 namespace {
 
-constexpr std::uint64_t kStepPulseWidthUs = 2;
-constexpr std::uint64_t kDirectionSetupUs = 2;
-constexpr std::uint64_t kMinimumStepLowUs = 2;
+// GPTimer's documented practical minimum alarm period is 5 us.  This remains
+// comfortably above the TMC2209 STEP/DIR minima and avoids sub-period races.
+constexpr std::uint64_t kStepPulseWidthUs = 5;
+constexpr std::uint64_t kDirectionSetupUs = 5;
+constexpr std::uint64_t kMinimumStepLowUs = 5;
 constexpr std::uint64_t kDriverStatusIntervalUs = 100000;
 
 bool elapsed(const std::uint64_t now, const std::uint64_t started,
@@ -21,8 +23,12 @@ bool elapsed(const std::uint64_t now, const std::uint64_t started,
 }  // namespace
 
 AxisController::AxisController(HardwarePlatform& platform, StepperDriver& driver,
-                               PhysicalAxisConfig config)
-    : platform_(platform), driver_(driver), config_(config) {}
+                               PhysicalAxisConfig config,
+                               StepPulseScheduler* pulse_scheduler)
+    : platform_(platform),
+      driver_(driver),
+      config_(config),
+      pulse_scheduler_(pulse_scheduler) {}
 
 const PhysicalAxisConfig& AxisController::config() const { return config_; }
 
@@ -43,9 +49,14 @@ bool AxisController::degrees_to_steps(const double degrees,
   if (!std::isfinite(degrees) || !config_.motion.valid()) {
     return false;
   }
+  std::int64_t steps_per_revolution = 0;
+  if (!config_.motion.steps_per_output_revolution_exact(
+          steps_per_revolution)) {
+    return false;
+  }
   const long double scaled =
       static_cast<long double>(degrees) *
-      static_cast<long double>(config_.motion.steps_per_output_revolution()) /
+      static_cast<long double>(steps_per_revolution) /
       360.0L;
   if (scaled >
           static_cast<long double>(std::numeric_limits<std::int64_t>::max()) ||
@@ -58,23 +69,29 @@ bool AxisController::degrees_to_steps(const double degrees,
 }
 
 double AxisController::steps_to_degrees(const std::int64_t steps) const {
+  std::int64_t steps_per_revolution = 0;
+  if (!config_.motion.steps_per_output_revolution_exact(
+          steps_per_revolution)) {
+    return 0.0;
+  }
   return static_cast<double>(steps) * 360.0 /
-         config_.motion.steps_per_output_revolution();
+         static_cast<double>(steps_per_revolution);
 }
 
 bool AxisController::motor_full_steps_to_output_steps(
     const std::int64_t motor_full_steps, std::int64_t& output_steps) const {
-  const long double scaled =
-      static_cast<long double>(motor_full_steps) *
-      static_cast<long double>(config_.motion.microsteps) *
-      static_cast<long double>(config_.motion.gear_ratio);
-  if (scaled >
-          static_cast<long double>(std::numeric_limits<std::int64_t>::max()) ||
-      scaled <
-          static_cast<long double>(std::numeric_limits<std::int64_t>::min())) {
+  std::int64_t output_steps_per_full_step = 0;
+  if (!config_.motion.output_steps_per_motor_full_step(
+          output_steps_per_full_step) ||
+      (motor_full_steps > 0 &&
+       motor_full_steps > std::numeric_limits<std::int64_t>::max() /
+                              output_steps_per_full_step) ||
+      (motor_full_steps < 0 &&
+       motor_full_steps < std::numeric_limits<std::int64_t>::min() /
+                              output_steps_per_full_step)) {
     return false;
   }
-  output_steps = static_cast<std::int64_t>(std::llround(scaled));
+  output_steps = motor_full_steps * output_steps_per_full_step;
   return true;
 }
 
@@ -97,7 +114,8 @@ bool AxisController::initialize() {
   if (config_.name == nullptr || config_.name[0] == '\0' ||
       config_.home_switch_pin < 0 || !config_.motion.valid() ||
       config_.motion.motor_rms_current_ma == 0 ||
-      !platform_.configure_pin(config_.home_switch_pin, PinMode::input_pullup) ||
+      !platform_.configure_pin(config_.home_switch_pin,
+                               config_.home_switch_input_mode) ||
       !driver_.initialize()) {
     state_.fault = driver_.is_connected()
                        ? FaultCode::invalid_configuration
@@ -110,6 +128,11 @@ bool AxisController::initialize() {
       !driver_.set_microsteps(config_.motion.microsteps) ||
       !driver_.set_interpolation(true) ||
       !driver_.set_chopper_mode(ChopperMode::stealthchop)) {
+    driver_.disable();
+    state_.fault = FaultCode::invalid_configuration;
+    return false;
+  }
+  if (pulse_scheduler_ != nullptr && !pulse_scheduler_->initialize()) {
     driver_.disable();
     state_.fault = FaultCode::invalid_configuration;
     return false;
@@ -230,7 +253,14 @@ MotionResult AxisController::start_step_move(
   current_speed_steps_s_ =
       std::min(requested_speed_steps_s_,
                std::max(1.0, std::sqrt(2.0 * acceleration_steps_s2)));
-  next_edge_us_ = motion_started_us_ + kDirectionSetupUs;
+  if (pulse_scheduler_ != nullptr) {
+    if (!pulse_scheduler_->schedule_pulse(kDirectionSetupUs)) {
+      return fail(FaultCode::driver_communication,
+                  TrustLossReason::driver_fault, true);
+    }
+  } else {
+    next_edge_us_ = motion_started_us_ + kDirectionSetupUs;
+  }
   step_high_ = false;
   return succeed();
 }
@@ -334,6 +364,9 @@ std::uint64_t AxisController::step_interval_us(
 }
 
 void AxisController::stop_pulse_generation() {
+  if (pulse_scheduler_ != nullptr) {
+    pulse_scheduler_->stop();
+  }
   if (step_high_) {
     driver_.set_step(false);
   }
@@ -351,6 +384,35 @@ void AxisController::finish_motion() {
 }
 
 void AxisController::service_step_generator(const std::uint64_t now_us) {
+  if (pulse_scheduler_ != nullptr) {
+    if (pulse_scheduler_->consume_scheduler_fault()) {
+      fail(FaultCode::driver_communication, TrustLossReason::driver_fault,
+           true);
+      return;
+    }
+    const std::uint32_t completed = pulse_scheduler_->consume_completed_pulses();
+    for (std::uint32_t index = 0; index < completed && state_.moving; ++index) {
+      state_.internal_step_position += step_direction_;
+      state_.commanded_position_deg =
+          steps_to_degrees(state_.internal_step_position);
+      const std::int64_t remaining =
+          std::llabs(state_.target_step_position - state_.internal_step_position);
+      if (remaining == 0) {
+        finish_motion();
+        break;
+      }
+      const std::uint64_t interval = step_interval_us(remaining);
+      const std::uint64_t low_time_us =
+          std::max(kMinimumStepLowUs, interval - kStepPulseWidthUs);
+      if (!pulse_scheduler_->schedule_pulse(
+              static_cast<std::uint32_t>(low_time_us))) {
+        fail(FaultCode::driver_communication, TrustLossReason::driver_fault,
+             true);
+        break;
+      }
+    }
+    return;
+  }
   if (!state_.moving || now_us < next_edge_us_) {
     return;
   }
@@ -466,6 +528,16 @@ void AxisController::service_driver_status(const std::uint64_t now_us) {
   }
 }
 
+void AxisController::service_diagnostics() {
+  // TMC UART receives may wait for their bounded timeout.  A scheduler-backed
+  // move relies on this task to arm the next one-shot GPTimer pulse, so never
+  // perform that I/O while an axis is moving.
+  if (state_.moving) {
+    return;
+  }
+  service_driver_status(platform_.monotonic_micros());
+}
+
 void AxisController::service() {
   const std::uint64_t now_us = platform_.monotonic_micros();
   update_home_switch(now_us);
@@ -485,7 +557,6 @@ void AxisController::service() {
   }
   service_step_generator(now_us);
   service_homing(now_us);
-  service_driver_status(now_us);
 }
 
 MotionResult AxisController::stop(const bool invalidate_position) {

@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <cstdlib>
+#include <limits>
 #include <utility>
 
 namespace radiance3d {
@@ -16,9 +17,21 @@ bool angle_in_range(const double value, const AxisConfig& config) {
 
 }  // namespace
 
+bool RationalGearRatio::valid() const {
+  return numerator > 0 && denominator > 0;
+}
+
+double RationalGearRatio::as_double() const {
+  return valid() ? static_cast<double>(numerator) /
+                       static_cast<double>(denominator)
+                 : 0.0;
+}
+
 double AxisConfig::steps_per_output_revolution() const {
-  return static_cast<double>(motor_full_steps_per_revolution) *
-         static_cast<double>(microsteps) * gear_ratio;
+  std::int64_t steps = 0;
+  return steps_per_output_revolution_exact(steps)
+             ? static_cast<double>(steps)
+             : 0.0;
 }
 
 double AxisConfig::commanded_step_angle_deg() const {
@@ -27,8 +40,10 @@ double AxisConfig::commanded_step_angle_deg() const {
 }
 
 bool AxisConfig::valid() const {
+  std::int64_t steps = 0;
   return motor_full_steps_per_revolution > 0 && microsteps > 0 &&
-         finite_positive(gear_ratio) && std::isfinite(home_offset_deg) &&
+         gear_ratio.valid() && steps_per_output_revolution_exact(steps) &&
+         std::isfinite(home_offset_deg) &&
          std::isfinite(minimum_angle_deg) && std::isfinite(maximum_angle_deg) &&
          minimum_angle_deg < maximum_angle_deg &&
          home_offset_deg >= minimum_angle_deg && home_offset_deg <= maximum_angle_deg &&
@@ -39,6 +54,33 @@ bool AxisConfig::valid() const {
          finite_positive(homing.speed_deg_per_s) && finite_positive(homing.backoff_deg) &&
          finite_positive(homing.slow_approach_deg_per_s) &&
          homing.timeout_ms > 0;
+}
+
+bool AxisConfig::output_steps_per_motor_full_step(
+    std::int64_t& steps) const {
+  if (microsteps == 0 || !gear_ratio.valid()) {
+    return false;
+  }
+  const std::int64_t scaled =
+      static_cast<std::int64_t>(microsteps) * gear_ratio.numerator;
+  if (scaled <= 0 || scaled % gear_ratio.denominator != 0) {
+    return false;
+  }
+  steps = scaled / gear_ratio.denominator;
+  return steps > 0;
+}
+
+bool AxisConfig::steps_per_output_revolution_exact(
+    std::int64_t& steps) const {
+  std::int64_t per_full_step = 0;
+  if (motor_full_steps_per_revolution == 0 ||
+      !output_steps_per_motor_full_step(per_full_step) ||
+      per_full_step > std::numeric_limits<std::int64_t>::max() /
+                          motor_full_steps_per_revolution) {
+    return false;
+  }
+  steps = per_full_step * motor_full_steps_per_revolution;
+  return steps > 0;
 }
 
 bool ControllerConfig::valid() const {

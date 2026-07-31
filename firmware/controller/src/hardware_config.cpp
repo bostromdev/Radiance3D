@@ -1,5 +1,7 @@
 #include "hardware_config.hpp"
 
+#include "hardware_profile_generated.hpp"
+
 #include <array>
 #include <cstddef>
 
@@ -14,82 +16,88 @@ bool bootstrapping_gpio(const int pin) {
   return pin == 0 || pin == 2 || pin == 5 || pin == 12 || pin == 15;
 }
 
-AxisConfig azimuth_motion() {
+PinMode input_mode(const bool pullup, const bool pulldown) {
+  if (pullup) {
+    return PinMode::input_pullup;
+  }
+  if (pulldown) {
+    return PinMode::input_pulldown;
+  }
+  return PinMode::input;
+}
+
+AxisConfig motion_from_profile(
+    const generated_profile::AxisProfile& profile) {
   AxisConfig config;
-  config.motor_full_steps_per_revolution = 200;
-  config.microsteps = 16;
-  config.motor_rms_current_ma = 650;
-  config.hold_current_percent = 30;
-  config.gear_ratio = 1.0;
-  config.direction_inverted = false;
-  config.home_offset_deg = 0.0;
-  config.minimum_angle_deg = 0.0;
-  config.maximum_angle_deg = 360.0;
-  config.maximum_speed_deg_per_s = 10.0;
-  config.acceleration_deg_per_s2 = 20.0;
-  config.settling_time_ms = 250;
-  config.motion_timeout_ms = 60000;
-  config.maximum_bench_test_steps = 3200;
-  config.homing.switch_normally_closed = true;
-  config.homing.direction_negative = true;
-  config.homing.debounce_ms = 10;
-  config.homing.speed_deg_per_s = 5.0;
-  config.homing.slow_approach_deg_per_s = 1.0;
-  config.homing.backoff_deg = 3.0;
-  config.homing.timeout_ms = 60000;
+  config.motor_full_steps_per_revolution =
+      profile.motor_full_steps_per_revolution;
+  config.microsteps = profile.microsteps;
+  config.motor_rms_current_ma = profile.commissioning_current_ma;
+  config.hold_current_percent = profile.hold_current_percent;
+  config.gear_ratio = {profile.gear_ratio_numerator,
+                       profile.gear_ratio_denominator};
+  config.direction_inverted = profile.direction_inverted;
+  config.home_offset_deg = profile.home_offset_deg;
+  config.minimum_angle_deg = profile.minimum_angle_deg;
+  config.maximum_angle_deg = profile.maximum_angle_deg;
+  config.maximum_speed_deg_per_s = profile.maximum_speed_deg_per_s;
+  config.acceleration_deg_per_s2 = profile.acceleration_deg_per_s2;
+  config.settling_time_ms = profile.settling_time_ms;
+  config.motion_timeout_ms = profile.motion_timeout_ms;
+  config.maximum_bench_test_steps = profile.maximum_bench_test_steps;
+  config.homing.switch_normally_closed = profile.home_switch_normally_closed;
+  config.homing.direction_negative = profile.homing_direction_negative;
+  config.homing.debounce_ms = profile.home_switch_debounce_ms;
+  config.homing.speed_deg_per_s = profile.home_speed_deg_per_s;
+  config.homing.slow_approach_deg_per_s = profile.slow_home_speed_deg_per_s;
+  config.homing.backoff_deg = profile.homing_backoff_deg;
+  config.homing.timeout_ms = profile.motion_timeout_ms;
   return config;
 }
 
-AxisConfig elevation_motion() {
-  AxisConfig config = azimuth_motion();
-  config.minimum_angle_deg = -90.0;
-  config.maximum_angle_deg = 90.0;
-  config.maximum_speed_deg_per_s = 8.0;
-  config.acceleration_deg_per_s2 = 15.0;
-  config.homing.speed_deg_per_s = 4.0;
-  return config;
+PhysicalAxisDefinition axis_from_profile(
+    const generated_profile::AxisProfile& profile) {
+  PhysicalAxisDefinition definition;
+  definition.axis.name = profile.name;
+  definition.axis.motion = motion_from_profile(profile);
+  definition.axis.home_switch_pin = profile.home_switch_pin;
+  definition.axis.home_switch_input_mode =
+      input_mode(profile.home_switch_pullup, profile.home_switch_pulldown);
+  definition.driver.uart_channel = profile.uart_channel;
+  definition.driver.address = profile.uart_address;
+  definition.driver.uart_tx_pin = profile.uart_tx_pin;
+  definition.driver.uart_rx_pin = profile.uart_rx_pin;
+  definition.driver.step_pin = profile.step_pin;
+  definition.driver.direction_pin = profile.direction_pin;
+  definition.driver.enable_pin = profile.enable_pin;
+  definition.driver.enable_active_low = generated_profile::kTmcEnableActiveLow;
+  definition.driver.direction_inverted = profile.direction_inverted;
+  definition.driver.sense_resistor_milliohms =
+      generated_profile::kTmcSenseResistorMilliohms;
+  definition.driver.maximum_rms_current_ma = profile.maximum_rms_current_ma;
+  definition.driver.uart_baud = generated_profile::kTmcUartBaud;
+  definition.driver.uart_timeout_ms = generated_profile::kTmcUartTimeoutMs;
+  definition.driver.uart_single_wire =
+      generated_profile::kTmcSingleWirePdnUart;
+  definition.driver.write_echo_expected =
+      generated_profile::kTmcWriteEchoExpected;
+  return definition;
 }
 
 }  // namespace
 
 PhysicalControllerConfig provisional_esp32_dev_config() {
   PhysicalControllerConfig config;
-  config.board_name = "esp32dev-v1-baseline";
-  config.protocol_version = 1;
-
-  config.azimuth.axis.name = "azimuth";
-  config.azimuth.axis.motion = azimuth_motion();
-  config.azimuth.axis.home_switch_pin = 32;
-  config.azimuth.driver.uart_channel = 1;
-  config.azimuth.driver.address = 0;
-  // GPIO assignments remain provisional until the exact ESP32 development-board
-  // revision and carrier pinout are confirmed.
-  config.azimuth.driver.uart_tx_pin = 22;
-  config.azimuth.driver.uart_rx_pin = 21;
-  config.azimuth.driver.step_pin = 25;
-  config.azimuth.driver.direction_pin = 26;
-  config.azimuth.driver.enable_pin = 27;
-  config.azimuth.driver.direction_inverted =
-      config.azimuth.axis.motion.direction_inverted;
-  config.azimuth.driver.maximum_rms_current_ma = 1000;
-
-  config.elevation.axis.name = "elevation";
-  config.elevation.axis.motion = elevation_motion();
-  config.elevation.axis.home_switch_pin = 33;
-  config.elevation.driver.uart_channel = 2;
-  config.elevation.driver.address = 0;
-  config.elevation.driver.uart_tx_pin = 17;
-  config.elevation.driver.uart_rx_pin = 16;
-  config.elevation.driver.step_pin = 18;
-  config.elevation.driver.direction_pin = 19;
-  config.elevation.driver.enable_pin = 23;
-  config.elevation.driver.direction_inverted =
-      config.elevation.axis.motion.direction_inverted;
-  config.elevation.driver.maximum_rms_current_ma = 1000;
-
-  config.emergency_stop_pin = 13;
-  config.emergency_stop_active_low = true;
-  config.emergency_stop_debounce_ms = 10;
+  config.board_name = generated_profile::kBoardName;
+  config.protocol_version = generated_profile::kProtocolVersion;
+  config.azimuth = axis_from_profile(generated_profile::kAzimuth);
+  config.elevation = axis_from_profile(generated_profile::kElevation);
+  config.emergency_stop_pin = generated_profile::kEmergencyStopPin;
+  config.emergency_stop_active_low = generated_profile::kEmergencyStopActiveLow;
+  config.emergency_stop_input_mode = input_mode(
+      generated_profile::kEmergencyStopPullup,
+      generated_profile::kEmergencyStopPulldown);
+  config.emergency_stop_debounce_ms = generated_profile::kEmergencyStopDebounceMs;
   return config;
 }
 

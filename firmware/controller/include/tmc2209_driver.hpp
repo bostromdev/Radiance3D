@@ -22,6 +22,8 @@ struct Tmc2209Config {
   std::uint16_t maximum_rms_current_ma{800};
   std::uint32_t uart_baud{115200};
   std::uint32_t uart_timeout_ms{20};
+  bool uart_single_wire{true};
+  bool write_echo_expected{true};
 };
 
 class Tmc2209Driver final : public StepperDriver {
@@ -62,6 +64,7 @@ class Tmc2209Driver final : public StepperDriver {
 
   bool valid_config() const;
   bool write_register(std::uint8_t address, std::uint32_t value);
+  bool write_register_verified(std::uint8_t address, std::uint32_t value);
   bool read_register(std::uint8_t address, std::uint32_t& value);
   bool verify_write_counter(std::uint8_t before);
   static bool microstep_code(std::uint16_t microsteps, std::uint8_t& code);

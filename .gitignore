@@ -20,8 +20,15 @@ venv/
 dist/
 build/
 
-# PlatformIO
+# Native ESP-IDF and host CMake build artifacts
 .pio/
+firmware/controller/build/
+firmware/controller/build-host/
+firmware/controller/sdkconfig
+firmware/controller/sdkconfig.old
+CMakeFiles/
+CMakeCache.txt
+Testing/
 
 # Temporary and generated data
 data/raw/

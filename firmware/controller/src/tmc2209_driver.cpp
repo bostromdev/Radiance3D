@@ -50,6 +50,7 @@ std::uint16_t Tmc2209Driver::configured_microsteps() const {
 
 bool Tmc2209Driver::valid_config() const {
   return config_.address <= 3 && config_.uart_channel > 0 &&
+         config_.uart_channel <= 2 &&
          config_.uart_tx_pin >= 0 && config_.uart_rx_pin >= 0 &&
          config_.step_pin >= 0 && config_.direction_pin >= 0 &&
          config_.enable_pin >= 0 && config_.sense_resistor_milliohms > 0 &&
@@ -103,24 +104,30 @@ bool Tmc2209Driver::read_register(const std::uint8_t address,
     return false;
   }
 
-  std::uint8_t response[16] = {};
-  const std::size_t received =
-      platform_.read_uart(config_.uart_channel, response, sizeof(response),
-                          config_.uart_timeout_ms);
-  if (received < 8) {
-    return false;
-  }
-  for (std::size_t offset = 0; offset + 8 <= received; ++offset) {
-    const std::uint8_t* frame = response + offset;
-    if (frame[0] != kSync || frame[1] != kMasterAddress ||
-        frame[2] != address || calculate_crc(frame, 7) != frame[7]) {
-      continue;
+  // A PDN_UART line can echo the request before returning the driver's reply.
+  // Read a bounded number of chunks and scan the aggregate buffer for a CRC
+  // valid reply rather than assuming the first bytes are the reply frame.
+  std::uint8_t response[32] = {};
+  std::size_t received = 0;
+  const std::uint8_t maximum_reads = config_.write_echo_expected ? 4 : 2;
+  for (std::uint8_t read_count = 0;
+       read_count < maximum_reads && received < sizeof(response);
+       ++read_count) {
+    received += platform_.read_uart(
+        config_.uart_channel, response + received, sizeof(response) - received,
+        config_.uart_timeout_ms);
+    for (std::size_t offset = 0; offset + 8 <= received; ++offset) {
+      const std::uint8_t* frame = response + offset;
+      if (frame[0] != kSync || frame[1] != kMasterAddress ||
+          frame[2] != address || calculate_crc(frame, 7) != frame[7]) {
+        continue;
+      }
+      value = (static_cast<std::uint32_t>(frame[3]) << 24) |
+              (static_cast<std::uint32_t>(frame[4]) << 16) |
+              (static_cast<std::uint32_t>(frame[5]) << 8) |
+              static_cast<std::uint32_t>(frame[6]);
+      return true;
     }
-    value = (static_cast<std::uint32_t>(frame[3]) << 24) |
-            (static_cast<std::uint32_t>(frame[4]) << 16) |
-            (static_cast<std::uint32_t>(frame[5]) << 8) |
-            static_cast<std::uint32_t>(frame[6]);
-    return true;
   }
   return false;
 }
@@ -130,6 +137,13 @@ bool Tmc2209Driver::verify_write_counter(const std::uint8_t before) {
   return read_register(kRegisterIfcnt, after) &&
          static_cast<std::uint8_t>(after) ==
              static_cast<std::uint8_t>(before + 1U);
+}
+
+bool Tmc2209Driver::write_register_verified(const std::uint8_t address,
+                                            const std::uint32_t value) {
+  std::uint32_t before = 0;
+  return read_register(kRegisterIfcnt, before) && write_register(address, value) &&
+         verify_write_counter(static_cast<std::uint8_t>(before));
 }
 
 bool Tmc2209Driver::initialize() {
@@ -145,25 +159,20 @@ bool Tmc2209Driver::initialize() {
   platform_.write_pin(config_.direction_pin, config_.direction_inverted);
   disable();
   if (!platform_.begin_uart(config_.uart_channel, config_.uart_tx_pin,
-                            config_.uart_rx_pin, config_.uart_baud)) {
+                            config_.uart_rx_pin, config_.uart_baud) ||
+      !platform_.configure_uart_half_duplex(config_.uart_channel,
+                                             config_.uart_single_wire)) {
     return false;
   }
 
-  std::uint32_t ifcnt = 0;
-  if (!read_register(kRegisterIfcnt, ifcnt)) {
-    return false;
-  }
   gconf_ = kGconfPdnDisable | kGconfMstepRegisterSelect |
            kGconfMultistepFilter;
-  if (!write_register(kRegisterGconf, gconf_) ||
-      !verify_write_counter(static_cast<std::uint8_t>(ifcnt))) {
-    return false;
-  }
-  if (!write_register(kRegisterSlaveconf, 2UL << 8) ||
-      !write_register(kRegisterTpowerdown, 10) ||
-      !write_register(kRegisterPwmconf,
-                      0xC10D0024UL | kPwmAutoscale | kPwmAutograd) ||
-      !write_register(kRegisterGstat, 0x07UL)) {
+  if (!write_register_verified(kRegisterGconf, gconf_) ||
+      !write_register_verified(kRegisterSlaveconf, 2UL << 8) ||
+      !write_register_verified(kRegisterTpowerdown, 10) ||
+      !write_register_verified(kRegisterPwmconf,
+                               0xC10D0024UL | kPwmAutoscale | kPwmAutograd) ||
+      !write_register_verified(kRegisterGstat, 0x07UL)) {
     return false;
   }
   connected_ = true;
@@ -234,8 +243,8 @@ bool Tmc2209Driver::set_current_milliamps(
   const std::uint32_t ihold_irun =
       static_cast<std::uint32_t>(hold) |
       (static_cast<std::uint32_t>(run) << 8) | (6UL << 16);
-  if (!write_register(kRegisterChopconf, chopconf_) ||
-      !write_register(kRegisterIholdIrun, ihold_irun)) {
+  if (!write_register_verified(kRegisterChopconf, chopconf_) ||
+      !write_register_verified(kRegisterIholdIrun, ihold_irun)) {
     connected_ = false;
     disable();
     return false;
@@ -286,7 +295,7 @@ bool Tmc2209Driver::set_microsteps(const std::uint16_t microsteps) {
   }
   chopconf_ = (chopconf_ & ~kChopconfMresMask) |
               (static_cast<std::uint32_t>(code) << 24);
-  if (!write_register(kRegisterChopconf, chopconf_)) {
+  if (!write_register_verified(kRegisterChopconf, chopconf_)) {
     connected_ = false;
     disable();
     return false;
@@ -305,7 +314,12 @@ bool Tmc2209Driver::set_interpolation(const bool enabled) {
   } else {
     chopconf_ &= ~kChopconfInterpolation;
   }
-  return write_register(kRegisterChopconf, chopconf_);
+  if (!write_register_verified(kRegisterChopconf, chopconf_)) {
+    connected_ = false;
+    disable();
+    return false;
+  }
+  return true;
 }
 
 bool Tmc2209Driver::set_chopper_mode(const ChopperMode mode) {
@@ -318,7 +332,12 @@ bool Tmc2209Driver::set_chopper_mode(const ChopperMode mode) {
   } else {
     gconf_ &= ~kGconfSpreadcycle;
   }
-  return write_register(kRegisterGconf, gconf_);
+  if (!write_register_verified(kRegisterGconf, gconf_)) {
+    connected_ = false;
+    disable();
+    return false;
+  }
+  return true;
 }
 
 DriverFault Tmc2209Driver::primary_fault(const DriverStatus& status) {

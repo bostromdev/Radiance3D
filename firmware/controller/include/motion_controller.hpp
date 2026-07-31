@@ -68,12 +68,23 @@ struct HomingConfig {
   std::uint32_t timeout_ms{60000};
 };
 
+// The protocol continues to expose GEAR_RATIO as a decimal number.  Internally
+// the motion core stores the build profile as an exact ratio so conversion math
+// does not accumulate floating-point configuration error.
+struct RationalGearRatio {
+  std::int32_t numerator{1};
+  std::int32_t denominator{1};
+
+  bool valid() const;
+  double as_double() const;
+};
+
 struct AxisConfig {
   std::uint16_t motor_full_steps_per_revolution{200};
   std::uint16_t microsteps{16};
   std::uint16_t motor_rms_current_ma{0};
   std::uint8_t hold_current_percent{30};
-  double gear_ratio{1.0};
+  RationalGearRatio gear_ratio{};
   bool direction_inverted{false};
   double home_offset_deg{0.0};
   double minimum_angle_deg{0.0};
@@ -87,6 +98,8 @@ struct AxisConfig {
 
   double steps_per_output_revolution() const;
   double commanded_step_angle_deg() const;
+  bool output_steps_per_motor_full_step(std::int64_t& steps) const;
+  bool steps_per_output_revolution_exact(std::int64_t& steps) const;
   bool valid() const;
 };
 

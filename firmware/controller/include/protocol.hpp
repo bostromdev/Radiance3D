@@ -2,6 +2,7 @@
 
 #include "motion_controller.hpp"
 
+#include <cstdint>
 #include <string>
 
 namespace radiance3d {
@@ -9,15 +10,18 @@ namespace radiance3d {
 class ProtocolEngine {
  public:
   ProtocolEngine();
-  explicit ProtocolEngine(MotionController& controller);
+  explicit ProtocolEngine(MotionController& controller,
+                          std::uint32_t protocol_version = 1);
 
   std::string handle(const std::string& line);
   std::string service();
+  std::string host_heartbeat_timeout();
   const ControllerState& state() const;
 
  private:
   SimulatedMotionController default_controller_;
   MotionController* controller_;
+  std::uint32_t protocol_version_{1};
   std::uint32_t last_command_id_{0};
   FaultCode previous_fault_{FaultCode::none};
   bool previous_estop_{false};

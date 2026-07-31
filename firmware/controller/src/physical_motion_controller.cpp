@@ -102,9 +102,27 @@ void PhysicalMotionController::synchronize_state() {
   state_.azimuth = azimuth_.state();
   state_.elevation = elevation_.state();
   state_.emergency_stop_active = emergency_latched_;
+  if (emergency_latched_) {
+    state_.fault = FaultCode::emergency_stop;
+  } else {
+    const FaultCode axis_fault = active_axis_fault();
+    if (axis_fault != FaultCode::none) {
+      state_.fault = axis_fault;
+    }
+  }
   state_.stopped = emergency_latched_ ||
                    (!state_.azimuth.moving && !state_.elevation.moving &&
                     state_.fault == FaultCode::stopped);
+}
+
+FaultCode PhysicalMotionController::active_axis_fault() const {
+  // Emergency stop is handled by synchronize_state() first.  Prefer an
+  // azimuth fault only when both occur in the same service cycle; either is
+  // promoted to the controller so protocol events cannot claim completion.
+  if (azimuth_.state().fault != FaultCode::none) {
+    return azimuth_.state().fault;
+  }
+  return elevation_.state().fault;
 }
 
 bool PhysicalMotionController::initialize() {
@@ -117,7 +135,7 @@ bool PhysicalMotionController::initialize() {
   }
   if (physical_config_.emergency_stop_pin >= 0 &&
       !platform_.configure_pin(physical_config_.emergency_stop_pin,
-                               PinMode::input_pullup)) {
+                               physical_config_.emergency_stop_input_mode)) {
     state_.fault = FaultCode::invalid_configuration;
     return false;
   }
@@ -172,6 +190,16 @@ void PhysicalMotionController::service() {
       state_.fault = FaultCode::none;
     }
   }
+  synchronize_state();
+}
+
+void PhysicalMotionController::service_diagnostics() {
+  if (!initialized_ || emergency_latched_ || azimuth_.state().moving ||
+      elevation_.state().moving) {
+    return;
+  }
+  azimuth_.service_diagnostics();
+  elevation_.service_diagnostics();
   synchronize_state();
 }
 
@@ -233,6 +261,10 @@ MotionResult PhysicalMotionController::move_absolute(
 MotionResult PhysicalMotionController::move_relative(
     const AxisSelection axis, const double delta_deg,
     const double speed_deg_per_s, const std::uint32_t command_id) {
+  if (!initialized_ || emergency_latched_) {
+    return reject(emergency_latched_ ? FaultCode::emergency_stop
+                                     : FaultCode::invalid_configuration);
+  }
   if (axis == AxisSelection::both) {
     const MotionResult azimuth_result = azimuth_.move_relative_degrees(
         delta_deg, speed_deg_per_s, command_id);
@@ -250,9 +282,8 @@ MotionResult PhysicalMotionController::move_relative(
     return MotionResult{true, FaultCode::none};
   }
   AxisController* selected = selected_axis(axis);
-  if (selected == nullptr || emergency_latched_) {
-    return reject(emergency_latched_ ? FaultCode::emergency_stop
-                                     : FaultCode::invalid_argument);
+  if (selected == nullptr) {
+    return reject(FaultCode::invalid_argument);
   }
   const MotionResult result = selected->move_relative_degrees(
       delta_deg, speed_deg_per_s, command_id);
@@ -263,10 +294,13 @@ MotionResult PhysicalMotionController::move_relative(
 MotionResult PhysicalMotionController::bench_move_steps(
     const AxisSelection axis, const std::int64_t signed_steps,
     const std::uint32_t command_id) {
-  AxisController* selected = selected_axis(axis);
-  if (selected == nullptr || emergency_latched_) {
+  if (!initialized_ || emergency_latched_) {
     return reject(emergency_latched_ ? FaultCode::emergency_stop
-                                     : FaultCode::invalid_argument);
+                                     : FaultCode::invalid_configuration);
+  }
+  AxisController* selected = selected_axis(axis);
+  if (selected == nullptr) {
+    return reject(FaultCode::invalid_argument);
   }
   const MotionResult result =
       selected->bench_move_steps(signed_steps, command_id);
@@ -326,12 +360,17 @@ MotionResult PhysicalMotionController::clear_fault() {
 }
 
 MotionResult PhysicalMotionController::set_enabled(const bool enabled) {
+  if (!initialized_ || emergency_latched_) {
+    return reject(emergency_latched_ ? FaultCode::emergency_stop
+                                     : FaultCode::invalid_configuration);
+  }
   const MotionResult azimuth_result = azimuth_.set_enabled(enabled);
   const MotionResult elevation_result = elevation_.set_enabled(enabled);
   if (!azimuth_result.ok || !elevation_result.ok) {
     return reject(!azimuth_result.ok ? azimuth_result.fault
                                      : elevation_result.fault);
   }
+  state_.fault = enabled ? FaultCode::none : FaultCode::driver_disabled;
   synchronize_state();
   return MotionResult{true, enabled ? FaultCode::none
                                    : FaultCode::driver_disabled};
@@ -339,6 +378,10 @@ MotionResult PhysicalMotionController::set_enabled(const bool enabled) {
 
 MotionResult PhysicalMotionController::set_axis_enabled(
     const AxisSelection axis, const bool enabled) {
+  if (!initialized_ || emergency_latched_) {
+    return reject(emergency_latched_ ? FaultCode::emergency_stop
+                                     : FaultCode::invalid_configuration);
+  }
   if (axis == AxisSelection::both) {
     return set_enabled(enabled);
   }
@@ -347,28 +390,59 @@ MotionResult PhysicalMotionController::set_axis_enabled(
     return reject(FaultCode::invalid_argument);
   }
   const MotionResult result = selected->set_enabled(enabled);
+  if (result.ok) {
+    state_.fault = enabled ? FaultCode::none : FaultCode::driver_disabled;
+  }
   synchronize_state();
   return result;
 }
 
 MotionResult PhysicalMotionController::set_axis_current(
     const AxisSelection axis, const std::uint16_t rms_current_ma) {
+  if (!initialized_ || emergency_latched_) {
+    return reject(emergency_latched_ ? FaultCode::emergency_stop
+                                     : FaultCode::invalid_configuration);
+  }
   AxisController* selected = selected_axis(axis);
   if (selected == nullptr) {
     return reject(FaultCode::invalid_argument);
   }
   const MotionResult result = selected->set_current(rms_current_ma);
+  if (result.ok) {
+    if (axis == AxisSelection::azimuth) {
+      config_.azimuth = azimuth_.config().motion;
+      physical_config_.azimuth.axis.motion = config_.azimuth;
+    } else {
+      config_.elevation = elevation_.config().motion;
+      physical_config_.elevation.axis.motion = config_.elevation;
+    }
+    state_.fault = FaultCode::none;
+  }
   synchronize_state();
   return result;
 }
 
 MotionResult PhysicalMotionController::set_axis_microsteps(
     const AxisSelection axis, const std::uint16_t microsteps) {
+  if (!initialized_ || emergency_latched_) {
+    return reject(emergency_latched_ ? FaultCode::emergency_stop
+                                     : FaultCode::invalid_configuration);
+  }
   AxisController* selected = selected_axis(axis);
   if (selected == nullptr) {
     return reject(FaultCode::invalid_argument);
   }
   const MotionResult result = selected->set_microsteps(microsteps);
+  if (result.ok) {
+    if (axis == AxisSelection::azimuth) {
+      config_.azimuth = azimuth_.config().motion;
+      physical_config_.azimuth.axis.motion = config_.azimuth;
+    } else {
+      config_.elevation = elevation_.config().motion;
+      physical_config_.elevation.axis.motion = config_.elevation;
+    }
+    state_.fault = FaultCode::none;
+  }
   synchronize_state();
   return result;
 }
