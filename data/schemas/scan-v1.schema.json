@@ -1,0 +1,220 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/bostromdev/Radiance3D/blob/main/data/schemas/scan-v1.schema.json",
+  "title": "Radiance3D scan dataset",
+  "description": "Version 1 schema for a stored scan and its provenance.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "scan_id",
+    "scan_name",
+    "timestamp",
+    "software_version",
+    "firmware_version",
+    "hardware_configuration",
+    "antenna_under_test",
+    "rf_source",
+    "receiver",
+    "frequency_hz",
+    "transmit_power",
+    "calibration_reference",
+    "environmental_notes",
+    "warnings",
+    "provenance",
+    "samples"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "scan_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "scan_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "software_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "firmware_version": {
+      "type": ["string", "null"],
+      "description": "Null only when no physical or simulated motion firmware participated."
+    },
+    "hardware_configuration": {
+      "$ref": "#/$defs/namedMetadata"
+    },
+    "antenna_under_test": {
+      "$ref": "#/$defs/namedMetadata"
+    },
+    "rf_source": {
+      "$ref": "#/$defs/namedMetadata"
+    },
+    "receiver": {
+      "$ref": "#/$defs/namedMetadata"
+    },
+    "frequency_hz": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "transmit_power": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/valueWithUnit"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "calibration_reference": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/namedMetadata"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "environmental_notes": {
+      "type": "string"
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["data_kind", "created_by"],
+      "properties": {
+        "data_kind": {
+          "enum": ["measured", "simulated", "imported", "processed"]
+        },
+        "created_by": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_dataset_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "method": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "samples": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/sample"
+      }
+    }
+  },
+  "$defs": {
+    "namedMetadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "manufacturer": {
+          "type": ["string", "null"]
+        },
+        "model": {
+          "type": ["string", "null"]
+        },
+        "serial_number": {
+          "type": ["string", "null"]
+        },
+        "revision": {
+          "type": ["string", "null"]
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "valueWithUnit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "unit"],
+      "properties": {
+        "value": {
+          "type": "number"
+        },
+        "unit": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "sample": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sample_timestamp",
+        "azimuth_angle_deg",
+        "elevation_angle_deg",
+        "measured_value",
+        "measurement_unit"
+      ],
+      "properties": {
+        "sample_timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "azimuth_angle_deg": {
+          "type": "number",
+          "minimum": -360,
+          "maximum": 360
+        },
+        "elevation_angle_deg": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180
+        },
+        "measured_value": {
+          "type": "number"
+        },
+        "measurement_unit": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Receiver-native or processed unit; not restricted to RSSI."
+        },
+        "quality_flags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      }
+    }
+  }
+}

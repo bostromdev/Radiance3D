@@ -1,0 +1,82 @@
+{
+  "schema_version": "1.0.0",
+  "scan_id": "simulated-dipole-like-azimuth-001",
+  "scan_name": "Simulated dipole-like azimuth demonstration",
+  "timestamp": "2026-07-30T18:00:00Z",
+  "software_version": "0.1.0.dev0",
+  "firmware_version": "simulator-0.1.0",
+  "hardware_configuration": {
+    "name": "Software-only demonstration",
+    "notes": "No physical scanner or receiver participated."
+  },
+  "antenna_under_test": {
+    "name": "Idealized dipole-like model",
+    "manufacturer": null,
+    "model": null,
+    "notes": "Mathematical demonstration only; not a model of a tested antenna."
+  },
+  "rf_source": {
+    "name": "Simulated constant source",
+    "notes": "No RF energy was transmitted."
+  },
+  "receiver": {
+    "name": "Deterministic pattern generator",
+    "notes": "Values are generated and are not receiver readings."
+  },
+  "frequency_hz": 2450000000,
+  "transmit_power": null,
+  "calibration_reference": null,
+  "environmental_notes": "Not applicable to simulated data.",
+  "warnings": [
+    "SIMULATED DATA — not captured from physical hardware.",
+    "Values must not be used to infer measurement accuracy or antenna gain."
+  ],
+  "provenance": {
+    "data_kind": "simulated",
+    "created_by": "Radiance3D repository example",
+    "method": "Hand-authored symmetric values for schema and visualization testing.",
+    "notes": "No random inputs and no physical observations."
+  },
+  "samples": [
+    {
+      "sample_timestamp": "2026-07-30T18:00:00.000Z",
+      "azimuth_angle_deg": 0,
+      "elevation_angle_deg": 0,
+      "measured_value": 0,
+      "measurement_unit": "dB_relative",
+      "quality_flags": ["simulated"]
+    },
+    {
+      "sample_timestamp": "2026-07-30T18:00:00.100Z",
+      "azimuth_angle_deg": 45,
+      "elevation_angle_deg": 0,
+      "measured_value": -3.01,
+      "measurement_unit": "dB_relative",
+      "quality_flags": ["simulated"]
+    },
+    {
+      "sample_timestamp": "2026-07-30T18:00:00.200Z",
+      "azimuth_angle_deg": 90,
+      "elevation_angle_deg": 0,
+      "measured_value": -40,
+      "measurement_unit": "dB_relative",
+      "quality_flags": ["simulated", "floor-clamped"]
+    },
+    {
+      "sample_timestamp": "2026-07-30T18:00:00.300Z",
+      "azimuth_angle_deg": 135,
+      "elevation_angle_deg": 0,
+      "measured_value": -3.01,
+      "measurement_unit": "dB_relative",
+      "quality_flags": ["simulated"]
+    },
+    {
+      "sample_timestamp": "2026-07-30T18:00:00.400Z",
+      "azimuth_angle_deg": 180,
+      "elevation_angle_deg": 0,
+      "measured_value": 0,
+      "measurement_unit": "dB_relative",
+      "quality_flags": ["simulated"]
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+name: Hardware issue
+description: Report a reproducible motion, electronics, power, or RF integration issue.
+title: "[Hardware]: "
+labels: ["hardware", "needs-triage"]
+body:
+  - type: textarea
+    id: configuration
+    attributes:
+      label: Hardware configuration
+      description: Controller board, firmware version, driver, motors, and power supply.
+    validations:
+      required: true
+  - type: textarea
+    id: wiring
+    attributes:
+      label: Wiring description
+      description: Connections, cable lengths, grounding, and relevant photos or diagrams.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+      placeholder: "1. Begin with power disconnected…"
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs and measurements
+      render: shell
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety confirmation
+      options:
+        - label: Power was disconnected before wiring changes.
+          required: true
+        - label: The report contains no unverified accuracy claim.
+          required: true
