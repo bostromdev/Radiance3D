@@ -6,6 +6,7 @@
 #include "axis_controller.hpp"
 #include "hardware_config.hpp"
 #include "physical_motion_controller.hpp"
+#include "protocol.hpp"
 
 namespace {
 
@@ -159,6 +160,12 @@ void test_provisional_gpio_is_valid_and_validation_rejects_conflicts() {
   result = radiance3d::validate_esp32_gpio(config);
   TEST_ASSERT_FALSE(result.valid);
   TEST_ASSERT_EQUAL_INT(34, result.invalid_output_pin);
+
+  config = radiance3d::provisional_esp32_dev_config();
+  config.azimuth.driver.step_pin = 0;
+  result = radiance3d::validate_esp32_gpio(config);
+  TEST_ASSERT_TRUE(result.valid);
+  TEST_ASSERT_NOT_EQUAL_INT64(0, result.bootstrapping_pin_mask);
 }
 
 void test_safe_startup_initializes_both_axes_disabled_and_untrusted() {
@@ -234,6 +241,41 @@ void test_emergency_stop_latches_both_axes_and_requires_released_input() {
   TEST_ASSERT_FALSE(fixture.controller.state().emergency_stop_active);
 }
 
+void test_stop_all_stops_both_axes_and_invalidates_active_move() {
+  Fixture fixture;
+  TEST_ASSERT_TRUE(fixture.controller.initialize());
+  fixture.trust_positions();
+  TEST_ASSERT_TRUE(
+      fixture.controller.move_absolute(90.0, 45.0, 10.0, 45).ok);
+
+  TEST_ASSERT_TRUE(fixture.controller.stop().ok);
+
+  TEST_ASSERT_FALSE(fixture.azimuth.state().moving);
+  TEST_ASSERT_FALSE(fixture.elevation.state().moving);
+  TEST_ASSERT_FALSE(fixture.azimuth.state().position_trusted);
+  TEST_ASSERT_FALSE(fixture.elevation.state().position_trusted);
+}
+
+void test_protocol_emits_completion_only_after_both_axes_stop() {
+  Fixture fixture;
+  TEST_ASSERT_TRUE(fixture.controller.initialize());
+  fixture.trust_positions();
+  radiance3d::ProtocolEngine engine(fixture.controller);
+
+  const std::string accepted =
+      engine.handle("CMD 50 SCAN_STEP 18 9 20");
+  TEST_ASSERT_NOT_EQUAL(std::string::npos, accepted.find("READY=0"));
+  std::string event;
+  for (std::uint32_t index = 0; index < 2000 && event.empty(); ++index) {
+    fixture.platform.advance(100000);
+    event = engine.service();
+  }
+
+  TEST_ASSERT_TRUE(event.find("EVENT MOTION_COMPLETE ID=50") == 0);
+  TEST_ASSERT_NOT_EQUAL(std::string::npos, event.find("AZ_DONE=1"));
+  TEST_ASSERT_NOT_EQUAL(std::string::npos, event.find("EL_DONE=1"));
+}
+
 int main(int, char**) {
   UNITY_BEGIN();
   RUN_TEST(test_provisional_gpio_is_valid_and_validation_rejects_conflicts);
@@ -241,5 +283,7 @@ int main(int, char**) {
   RUN_TEST(test_coordinated_move_completes_only_after_both_axes_finish);
   RUN_TEST(test_one_axis_critical_fault_stops_coordinated_move_and_loses_trust);
   RUN_TEST(test_emergency_stop_latches_both_axes_and_requires_released_input);
+  RUN_TEST(test_stop_all_stops_both_axes_and_invalidates_active_move);
+  RUN_TEST(test_protocol_emits_completion_only_after_both_axes_stop);
   return UNITY_END();
 }

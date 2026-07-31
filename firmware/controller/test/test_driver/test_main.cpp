@@ -47,10 +47,16 @@ class FakePlatform final : public radiance3d::HardwarePlatform {
     if (length == 8 && data[0] == 0x05 && data[1] <= 3 &&
         radiance3d::Tmc2209Driver::calculate_crc(data, 7) == data[7]) {
       const std::uint8_t address = static_cast<std::uint8_t>(data[2] & 0x7FU);
-      registers[address] = (static_cast<std::uint32_t>(data[3]) << 24) |
-                           (static_cast<std::uint32_t>(data[4]) << 16) |
-                           (static_cast<std::uint32_t>(data[5]) << 8) |
-                           static_cast<std::uint32_t>(data[6]);
+      const std::uint32_t value =
+          (static_cast<std::uint32_t>(data[3]) << 24) |
+          (static_cast<std::uint32_t>(data[4]) << 16) |
+          (static_cast<std::uint32_t>(data[5]) << 8) |
+          static_cast<std::uint32_t>(data[6]);
+      if (address == 0x01) {
+        registers[address] &= ~value;
+      } else {
+        registers[address] = value;
+      }
       registers[0x02] = static_cast<std::uint8_t>(registers[0x02] + 1U);
       pending_register_ = address;
       return true;
@@ -105,12 +111,14 @@ void tearDown() {}
 
 void test_successful_initialization_starts_disabled_and_probes_uart() {
   FakePlatform platform;
+  platform.registers[0x01] = 1U;
   radiance3d::Tmc2209Driver driver(platform, config());
 
   TEST_ASSERT_TRUE(driver.initialize());
   TEST_ASSERT_TRUE(driver.is_connected());
   TEST_ASSERT_TRUE(platform.uart_started);
   TEST_ASSERT_TRUE(platform.pin_values[27]);
+  TEST_ASSERT_EQUAL_UINT32(0, platform.registers[0x01]);
 }
 
 void test_failed_uart_probe_keeps_driver_disabled() {

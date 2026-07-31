@@ -288,6 +288,27 @@ void test_successful_two_pass_homing_applies_offset_and_trusts_position() {
   TEST_ASSERT_EQUAL_UINT32(12, axis.state().last_completed_command);
 }
 
+void test_homing_fails_when_switch_does_not_release_after_backoff() {
+  FakePlatform platform;
+  FakeDriver driver;
+  radiance3d::AxisController axis(platform, driver, axis_config());
+  TEST_ASSERT_TRUE(axis.initialize());
+  TEST_ASSERT_TRUE(axis.start_homing(14).ok);
+
+  for (int index = 0; index < 6; ++index) {
+    platform.advance(100000);
+    axis.service();
+  }
+  settle_switch(axis, platform, false);
+  service_until_stopped(axis, platform);
+  axis.service();
+
+  TEST_ASSERT_EQUAL(radiance3d::FaultCode::homing_switch_failed_release,
+                    axis.state().fault);
+  TEST_ASSERT_FALSE(axis.state().position_trusted);
+  TEST_ASSERT_FALSE(axis.state().enabled);
+}
+
 void test_emergency_stop_during_homing_disables_and_loses_trust() {
   FakePlatform platform;
   FakeDriver driver;
@@ -313,6 +334,7 @@ int main(int, char**) {
   RUN_TEST(test_stuck_active_home_switch_fails_without_motion);
   RUN_TEST(test_homing_times_out_when_switch_never_activates);
   RUN_TEST(test_successful_two_pass_homing_applies_offset_and_trusts_position);
+  RUN_TEST(test_homing_fails_when_switch_does_not_release_after_backoff);
   RUN_TEST(test_emergency_stop_during_homing_disables_and_loses_trust);
   return UNITY_END();
 }
