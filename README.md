@@ -7,7 +7,7 @@ Radiance3D is an open-source platform for automated three-dimensional antenna ra
 The project separates host applications, reusable software packages, embedded firmware, simulation, hardware documentation, and measurement data behind versioned interfaces.
 
 > [!IMPORTANT]
-> Radiance3D is in active development. It has not been validated as laboratory-grade measurement equipment, and simulated or provisional results must not be represented as calibrated physical measurements.
+> Radiance3D is in active development. It has not been validated as laboratory-grade measurement equipment, and simulated or provisional results must not be represented as calibrated physical measurements(this is to avoid getting sued, wish I didn't have to put it in.)
 
 ## Current status
 
@@ -25,19 +25,19 @@ The current validated baseline includes:
 - Portable firmware tests
 - Python host-to-simulator integration tests
 
-The simulator and host integration tests pass. Physical motor commissioning, RF receiver integration, calibration, and production visualization remain incomplete.
+The simulator and host integration tests pass. Physical motor commissioning, RF receiver integration, calibration, and production visualization coming soon! This is a very exciting project for me.
 
 ## System architecture
 
 ```text
-Host applications
-        |
-Reusable Python packages
-        |
-Motion client and protocol
-        |
-   +----+------------------+
-   |                       |
+Host applications----------------------/\
+        |                             /--\
+Reusable Python packages-------------/----\
+        |                           /------\
+Motion client and protocol--------_/--------\
+        |                     (MAC,LINUX,WINDOWS)       
+   +----+------------------+                  
+   |                       |   
 Simulator              ESP32 firmware
                            |
                     Physical motion layer
