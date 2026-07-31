@@ -1,0 +1,371 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/bostromdev/Radiance3D/blob/main/data/schemas/scan-v1.schema.json",
+  "title": "Radiance3D scan dataset",
+  "description": "Version 1 schema for a stored scan and its provenance.",
+  "type": "object",
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "schema_version": {
+            "const": "1.1.0"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "protocol_version",
+          "hardware_revision",
+          "step_size_deg",
+          "measurement_units",
+          "calibration_status",
+          "operator_notes"
+        ],
+        "properties": {
+          "samples": {
+            "items": {
+              "required": [
+                "sequence_number",
+                "measurement_source",
+                "position_kind",
+                "validity",
+                "warnings"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "calibration_status": {
+            "const": "calibrated"
+          }
+        },
+        "required": ["calibration_status"]
+      },
+      "then": {
+        "properties": {
+          "calibration_reference": {
+            "$ref": "#/$defs/namedMetadata"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "provenance": {
+            "properties": {
+              "data_kind": {
+                "const": "processed"
+              }
+            },
+            "required": ["data_kind"]
+          }
+        },
+        "required": ["provenance"]
+      },
+      "then": {
+        "properties": {
+          "provenance": {
+            "required": ["source_dataset_ids", "method"],
+            "properties": {
+              "source_dataset_ids": {
+                "minItems": 1
+              },
+              "method": {
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "required": [
+    "schema_version",
+    "scan_id",
+    "scan_name",
+    "timestamp",
+    "software_version",
+    "firmware_version",
+    "hardware_configuration",
+    "antenna_under_test",
+    "rf_source",
+    "receiver",
+    "frequency_hz",
+    "transmit_power",
+    "calibration_reference",
+    "environmental_notes",
+    "warnings",
+    "provenance",
+    "samples"
+  ],
+  "properties": {
+    "schema_version": {
+      "enum": ["1.0.0", "1.1.0"],
+      "description": "1.0.0 remains readable; new datasets must use 1.1.0."
+    },
+    "scan_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "scan_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "software_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "firmware_version": {
+      "type": ["string", "null"],
+      "description": "Null only when no physical or simulated motion firmware participated."
+    },
+    "protocol_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "hardware_revision": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Use an explicit value such as 'simulator' or 'prototype-unassigned'; do not omit uncertainty."
+    },
+    "hardware_configuration": {
+      "$ref": "#/$defs/namedMetadata"
+    },
+    "antenna_under_test": {
+      "$ref": "#/$defs/namedMetadata"
+    },
+    "rf_source": {
+      "$ref": "#/$defs/namedMetadata"
+    },
+    "receiver": {
+      "$ref": "#/$defs/namedMetadata"
+    },
+    "frequency_hz": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "step_size_deg": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["azimuth", "elevation"],
+      "properties": {
+        "azimuth": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "elevation": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      },
+      "description": "Commanded scan increment, not a claim of mechanical resolution or accuracy."
+    },
+    "measurement_units": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "calibration_status": {
+      "enum": [
+        "uncalibrated",
+        "reference-measured",
+        "calibrated",
+        "not-applicable",
+        "unknown"
+      ]
+    },
+    "operator_notes": {
+      "type": "string"
+    },
+    "transmit_power": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/valueWithUnit"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "calibration_reference": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/namedMetadata"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "environmental_notes": {
+      "type": "string"
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["data_kind", "created_by"],
+      "properties": {
+        "data_kind": {
+          "enum": ["measured", "simulated", "imported", "processed"]
+        },
+        "created_by": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_dataset_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "method": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "samples": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/sample"
+      }
+    }
+  },
+  "$defs": {
+    "namedMetadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "manufacturer": {
+          "type": ["string", "null"]
+        },
+        "model": {
+          "type": ["string", "null"]
+        },
+        "serial_number": {
+          "type": ["string", "null"]
+        },
+        "revision": {
+          "type": ["string", "null"]
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "valueWithUnit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "unit"],
+      "properties": {
+        "value": {
+          "type": "number"
+        },
+        "unit": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "sample": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sample_timestamp",
+        "azimuth_angle_deg",
+        "elevation_angle_deg",
+        "measured_value",
+        "measurement_unit"
+      ],
+      "properties": {
+        "sample_timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "azimuth_angle_deg": {
+          "type": "number",
+          "minimum": -360,
+          "maximum": 360
+        },
+        "elevation_angle_deg": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180
+        },
+        "measured_value": {
+          "type": "number"
+        },
+        "measurement_unit": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Receiver-native or processed unit; not restricted to RSSI."
+        },
+        "sequence_number": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "measurement_source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "position_kind": {
+          "enum": ["commanded", "observed"],
+          "description": "Version 1 is commanded/open-loop; observed is reserved for future feedback."
+        },
+        "validity": {
+          "enum": ["valid", "invalid", "timeout"]
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "quality_flags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      }
+    }
+  }
+}
