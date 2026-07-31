@@ -52,11 +52,12 @@ driver-neutral behind `StepperDriver`.
 
 The profile at `firmware/config/provisional-esp32dev-v1.json` and compiled
 defaults in `src/hardware_config.cpp` duplicate the same provisional hardware
-configuration.  The native build will generate one validated configuration
-header from the JSON profile and test it for consistency.  The request says
-the elevation hold current is 40%, while the source profile and current
-firmware say 30%.  The migration preserves the existing documented 30%
-baseline until that physical-hardware decision is separately validated.
+configuration. The native build generates one validated configuration header
+from the JSON profile and tests it for consistency. The audit found an elevation
+hold-current mismatch (30% in the pre-migration profile versus 40% in the
+Version 1 request); the migrated profile now uses the requested 40% elevation
+value while retaining 30% for azimuth. Both remain physically unvalidated
+commissioning values.
 
 The current public `GEAR_RATIO` is a decimal value and the profile is `1.0`.
 No unvalidated gear-ratio change is part of this migration; portable
@@ -66,13 +67,14 @@ conversion code remains host-testable.
 
 The documented maximum pulse rates are below 90 steps/second per axis.  Two
 independent one-shot GPTimer schedulers are the simplest native mechanism for
-the required two-microsecond pulse and direction setup timing while retaining
-immediate shutdown.  This is an architecture decision, not a claim of
-measured timing accuracy; logic-analyzer validation remains required.
+the required timing boundary while retaining immediate shutdown. ESP-IDF GPTimer
+documents sub-5-us alarm periods as unsuitable for reliable control, so the
+implementation uses conservative 5-us STEP high/setup/low minima. This is an
+architecture decision, not a claim of measured timing accuracy; logic-analyzer
+validation remains required.
 
 ## Validation constraints at inventory time
 
-No usable `idf.py` or PlatformIO executable is installed locally.  The native
-project will pin ESP-IDF v5.5.4 in documentation and CI.  Portable CMake/CTest
-and Python checks can run locally; ESP-IDF compile, target component tests, and
-hardware tests require a provisioned ESP-IDF environment and target hardware.
+The native project pins ESP-IDF v5.5.4 in documentation and CI. Portable CMake/CTest
+and Python checks run locally; an ESP-IDF build verifies target compilation. Physical
+timing, target component tests, and hardware tests still require a provisioned target.

@@ -15,14 +15,15 @@ BIGTREETECH TMC2209 V1.3 drivers. The motors are YEJMKJ/LYLANMO NEMA 17 bipolar
 ESP32 board revision, TMC2209 carrier revision, UART wiring, R10 setting, sense
 resistor, and pinout remain pending validation.
 
-Startup sets STEP low, keeps the enable pins inactive, validates pins/configuration,
-starts the UARTs, probes each driver, reads diagnostics, writes current/microstep
-settings, reads switches and the e-stop input, and leaves both axes disabled and
-untrusted. A missing driver is a structured fault and cannot be enabled.
+Native ESP-IDF startup sets STEP low, keeps the enable pins inactive, validates the
+generated profile, configures GPIO/UART/GPTimer resources, probes each driver, reads
+diagnostics, writes current/microstep settings, reads switches and the e-stop input,
+and leaves both axes disabled and untrusted. A missing driver is a structured fault and
+cannot be enabled.
 
-The firmware follows the TMC2209 datagram/CRC/register definition and verifies
-register writes with IFCNT. STEP timing remains conservative and must be measured on
-hardware before final claims are made. See the
+The firmware follows the TMC2209 datagram/CRC/register definition, bounds UART reads,
+filters expected write echo, and verifies register writes with IFCNT. STEP timing
+remains conservative and must be measured on hardware before final claims are made. See the
 [Analog Devices TMC2209 datasheet](https://www.analog.com/media/en/technical-documentation/data-sheets/TMC2209_datasheet_rev1.09.pdf).
 
 ## Version 1 hardware profile
@@ -79,7 +80,7 @@ rated phase current
 
 Final current must be verified using actual torque requirements, motor temperature,
 driver temperature, and long-duration testing. Reduced hold current is configured as
-30% while stationary.
+30% for azimuth and 40% for elevation in the current provisional profile.
 
 ## Homing and position trust
 

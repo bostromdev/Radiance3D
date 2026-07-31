@@ -25,6 +25,11 @@ The controller also emits `EVENT FAULT CODE=<fault>` and
 the accepted scan/move command and both axes are done. It then applies the configured
 settling delay.
 
+At native physical startup, the controller emits
+`EVENT STARTUP READY=<0|1> DRIVERS_ENABLED=0 BOARD=<profile> RESET=<reason>`.
+`RESET` is additive diagnostic information; it does not change protocol version 1 or
+restore position trust after a reset.
+
 ## General commands
 
 | Command | Arguments | Purpose |
@@ -69,7 +74,8 @@ interrupted motion, driver disable, configuration changes affecting scale, and f
 homing make position untrusted. Clearing a fault does not restore trust; successful
 homing does.
 
-On the physical ESP32 target, two seconds without a command/heartbeat while a driver
-is enabled stops motion, disables both drivers, and emits a host-timeout fault event.
-The Python motion client sends heartbeats while waiting. This watchdog does not make
-USB serial or software an emergency-rated control path.
+On the physical ESP32 target and native simulator, two seconds without a
+command/heartbeat while a driver is enabled stops motion, disables both drivers, and
+emits `EVENT FAULT CODE=DRIVER_DISABLED DETAIL=HOST_HEARTBEAT_TIMEOUT`. The Python
+motion client sends heartbeats while waiting. This watchdog does not make USB serial or
+software an emergency-rated control path.

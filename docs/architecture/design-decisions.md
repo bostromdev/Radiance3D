@@ -15,6 +15,7 @@ records become worthwhile.
 | D-008 | Accepted | Use degrees and the documented forward/right/up coordinate convention at public boundaries. | It keeps firmware configuration and scan files inspectable; radians remain internal to math utilities. |
 | D-009 | Accepted | Treat Version 1 position as open-loop commanded position with explicit confidence. | Step counting is not independent verification; fault, reset, disable, stop, or suspected missed steps must force re-homing. |
 | D-010 | Accepted | Preserve schema 1.0.0 reads while requiring schema 1.1.0 metadata for new scans. | Existing examples and external prototypes can migrate without weakening the new provenance contract. |
+| D-011 | Accepted | Use native ESP-IDF v5.5.4 for physical motion firmware. | Explicit native task, timer, UART, watchdog, GPIO, and reset control are required while the portable C++ core remains testable. See [ADR](adr-native-esp-idf.md). |
 
 New entries should state context, alternatives, consequences, and evidence. Changing
 an accepted data or protocol contract requires a versioning and migration plan.

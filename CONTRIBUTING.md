@@ -16,7 +16,8 @@ documented interface, testable behavior, or an evidence-backed design decision.
 2. Keep commits focused and avoid generated artifacts.
 3. Run `python scripts/check_repository.py`.
 4. For software changes, run Ruff, mypy, and pytest from `software/`.
-5. For firmware changes, run the native simulator build with PlatformIO.
+5. For firmware changes, run the host CMake/CTest suite and `idf.py build` when
+   ESP-IDF is available.
 6. Update relevant documentation and the changelog when behavior changes.
 
 Pull requests should explain the problem, the chosen design, validation performed,
