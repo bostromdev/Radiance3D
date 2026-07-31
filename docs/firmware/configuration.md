@@ -1,8 +1,10 @@
 # Firmware configuration
 
-Version 1 separates board/pin configuration from driver-neutral motion behavior. The
-implemented simulator uses typed controller configuration; a physical target must
-populate the same fields from a versioned configuration record.
+Version 1 separates board/pin configuration from driver-neutral motion behavior.
+The physical target and simulator use the same typed motion fields. The clearly
+provisional development record is
+[`firmware/config/provisional-esp32dev-v1.json`](../../firmware/config/provisional-esp32dev-v1.json);
+the compiled defaults live together in `hardware_config.cpp`.
 
 ## Axis fields
 
@@ -10,15 +12,15 @@ Each azimuth and elevation axis defines:
 
 - `motor_full_steps_per_revolution` (provisionally 200 for a typical 1.8° motor);
 - `microsteps`;
-- configurable `motor_rms_current_ma` (`0` means deliberately unset in the simulator;
-  a physical driver must refuse operation until a safe value is selected);
+- configurable `motor_rms_current_ma`;
+- configurable maximum RMS-current ceiling and hold-current percentage;
 - `gear_ratio`;
 - calculated `steps_per_output_revolution`;
 - direction inversion;
 - home offset in degrees;
 - minimum and maximum angle in degrees;
 - maximum speed in degrees per second;
-- acceleration in degrees per second squared; and
+- acceleration, settling time, motion timeout, and bench-test step ceiling; and
 - switch normally-closed state, debounce milliseconds, homing direction, homing
   speed, back-off degrees, and second slow-approach speed.
 
@@ -28,13 +30,13 @@ but Version 1 does not implement it.
 
 ## Controller fields
 
-Controller configuration contains motion timeout, emergency-stop active polarity,
-protocol version, USB serial rate, board definition, physical pin mapping, and
-simulator/physical mode. A TMC2209-specific physical configuration will additionally
-record UART address/connection, sense-resistor/module revision, and safely selected RMS
-motor current. Current remains unset until the exact motors and thermal design exist.
+Controller configuration includes emergency-stop pin/polarity/debounce, protocol
+version, serial rate, board name, and all GPIO assignments. Startup rejects duplicate
+pins and input-only STEP/DIR/ENABLE/TX assignments and reports ESP32 bootstrapping-pin
+use as a warning.
 
-No default pinout or physical motor calibration is supplied because none is verified.
-ESP32 signals are 3.3 V and no attached module is assumed 5 V tolerant. Firmware build
-constants are not substitutes for a wiring record, thermal test, or mechanical-limit
-test.
+The example uses 400 mA RMS with an 800 mA software ceiling only as conservative
+development placeholders. Before energizing a motor, replace them using the selected
+motor rating, the carrier's actual sense resistor and schematic, cooling, load, and
+measured temperatures. ESP32 signals are 3.3 V and no attached module is assumed 5 V
+tolerant. The example is not a verified pinout or motor calibration.

@@ -19,13 +19,20 @@ to use semantic versioning once releases begin.
   quantization, configured limits, homing, position confidence, enable, stop, and
   emergency-stop simulator behavior.
 - Native firmware behavior tests and software planner/coordinator tests.
+- Physical ESP32 motion layer with TMC2209 UART diagnostics and current control,
+  non-blocking dual-axis STEP/DIR motion, two-pass switch homing, and latched
+  emergency-stop behavior.
+- Correlated motor protocol commands, configuration/state inspection, completion and
+  fault events, heartbeat timeout handling, and an optional pyserial host transport.
+- Stage 2 simulator fault injection, native/host tests, provisional GPIO/current
+  configuration, and a safety-focused commissioning guide.
 
 ### Changed
 
 - Scan schema 1.1 adds protocol/hardware revisions, commanded step sizes, units,
   calibration/operator context, per-reading source/validity/warnings, and sequence
   numbers while retaining schema 1.0 reads.
-- Stage 1 roadmap now represents the complete Version 1 architecture; physical
-  two-axis hardware remains Stage 2.
+- Stage 2 is implemented and compile/unit-test validated; physical commissioning and
+  thermal/mechanical validation remain pending.
 
 [Unreleased]: https://github.com/bostromdev/Radiance3D

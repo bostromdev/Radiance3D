@@ -1,6 +1,8 @@
 # Wiring
 
-Verified pin assignments do not exist. The Version 1 wiring record must identify the
+Verified final pin assignments do not exist. A provisional ESP32 development map is
+listed in the [TMC2209 commissioning guide](tmc2209-commissioning.md). The Version 1
+wiring record must identify the
 exact ESP32 board and every connector pin, signal reference, voltage domain, wire
 rating, shielding, grounding point, switch behavior, and emergency isolation before a
 physical build is called supported.

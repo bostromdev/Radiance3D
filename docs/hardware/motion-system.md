@@ -11,16 +11,16 @@ Each axis uses one NEMA 17 bipolar stepper, provisionally assumed to be 1.8° fu
 only when configuration does not override it. Exact current rating, holding torque,
 winding resistance, and required gearbox are unresolved.
 
-TMC2209 is the Version 1 target driver. Prefer UART configuration so RMS motor current,
-microstepping, and diagnostic state are reproducible. STEP, DIR, and enable are driven
-by the ESP32. Current is never hardcoded before motor selection; it must be configured
-from motor ratings, the module's sense-resistor implementation, load testing, and
-thermal limits. Drivers need heatsinking/airflow appropriate to measured dissipation.
+TMC2209 is the implemented Version 1 driver. UART configuration makes RMS motor
+current, microstepping, mode, and diagnostic state reproducible; STEP, DIR, and enable
+are driven by the ESP32. Current remains configuration-driven and must be selected
+from motor ratings, the carrier's sense-resistor implementation, load testing, and
+thermal limits. Drivers need cooling appropriate to measured dissipation.
 
-The firmware `MotionController` interface contains no TMC2209 type. A later physical
-implementation may use that device or another stepper driver without changing the
-serial or host scan API. Generic axis configuration reserves motor RMS current with
-an unset simulator value rather than inventing a motor-specific default.
+The public firmware `MotionController` interface contains no TMC2209 type. The device
+is behind `StepperDriver`, so a future driver can preserve the serial and host scan
+API. The 400 mA development value is explicitly provisional, not a motor-specific
+rating. See [TMC2209 commissioning](tmc2209-commissioning.md).
 
 ## Configuration-derived movement
 

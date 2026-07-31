@@ -1,13 +1,22 @@
 # Firmware overview
 
-The planned ESP32 controller owns two motion axes and exposes a host protocol. The
-implemented firmware `MotionController` interface covers configured absolute moves,
-homing, stop, emergency stop, driver enable, open-loop commanded position, confidence,
-limits, and faults. `SimulatedMotionController` is the first implementation. TMC2209
-or another physical driver must stay behind the same interface.
+The ESP32 firmware now has physical and simulated implementations behind the same
+`MotionController` and `StepperDriver` boundaries. The physical path consists of an
+Arduino ESP32 platform adapter, two TMC2209 UART/STEP/DIR drivers, one reusable
+non-blocking axis controller per motor, a dual-axis coordinator, and protocol engine.
 
-The simulator calculates command quantization from axis configuration, applies
-configured azimuth/elevation limits, requires homing, and invalidates confidence after
-stop, emergency stop, or disable. It does not access GPIO, drive motors, read switches,
-apply real acceleration, or detect missed steps. `esp32dev` is a provisional
-compilation target, not a statement of supported hardware or pinout.
+The controller uses integer microsteps as authoritative position. It services STEP
+edges, acceleration, switch debounce, homing, driver diagnostics, emergency stop, and
+serial input without long delay loops. A coordinated command completes only after
+both axes stop. Critical faults stop both axes when a coordinated move is active.
+
+The TMC2209 implementation is a small, datasheet-based register driver rather than a
+third-party motion library. This keeps timer ownership, stop behavior, dual-axis
+servicing, and native tests explicit. It supports addressed UART checks, IFCNT write
+verification, RMS current and hold-current configuration, microsteps, interpolation,
+stealthChop/spreadCycle selection, and diagnostic mapping.
+
+The simulator models the public state/fault contract, not electrical waveforms.
+The `esp32dev` environment compiles the physical implementation, but its board and
+pin map remain provisional until the exact board and carrier modules are inspected.
+See the [commissioning guide](../hardware/tmc2209-commissioning.md).

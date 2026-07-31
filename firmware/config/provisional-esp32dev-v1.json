@@ -23,6 +23,8 @@
       "enable_pin": 27,
       "home_switch_pin": 32,
       "home_switch_normally_closed": true,
+      "homing_direction_negative": true,
+      "home_switch_debounce_ms": 10,
       "motor_full_steps_per_revolution": 200,
       "microsteps": 16,
       "gear_ratio": 1.0,
@@ -38,6 +40,8 @@
       "home_speed_deg_s": 5.0,
       "slow_home_speed_deg_s": 1.0,
       "homing_backoff_deg": 3.0,
+      "settling_time_ms": 250,
+      "maximum_bench_test_steps": 3200,
       "motion_timeout_ms": 60000
     },
     "elevation": {
@@ -51,6 +55,8 @@
       "enable_pin": 23,
       "home_switch_pin": 33,
       "home_switch_normally_closed": true,
+      "homing_direction_negative": true,
+      "home_switch_debounce_ms": 10,
       "motor_full_steps_per_revolution": 200,
       "microsteps": 16,
       "gear_ratio": 1.0,
@@ -66,6 +72,8 @@
       "home_speed_deg_s": 4.0,
       "slow_home_speed_deg_s": 1.0,
       "homing_backoff_deg": 3.0,
+      "settling_time_ms": 250,
+      "maximum_bench_test_steps": 3200,
       "motion_timeout_ms": 60000
     }
   }

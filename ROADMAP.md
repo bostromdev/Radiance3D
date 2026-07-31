@@ -22,6 +22,11 @@ ESP32 GPIO, replaceable driver implementation, two NEMA 17 axes, switches, emerg
 stop, acceleration, timeouts, and synchronized stepping. Exit requires documented
 electrical safety checks, fault behavior, cable limits, and repeatable zeroing.
 
+**Implementation status:** firmware, host protocol, simulator parity, tests, and
+commissioning documentation are complete on the Stage 2 feature branch. Physical
+bring-up, thermal characterization, exact-board pin confirmation, repeatable homing,
+and cable-envelope evidence remain required before the stage exit is claimed.
+
 ## Stage 3 — RF acquisition
 
 At least one host-side receiver adapter, timestamped native measurements, raw capture,

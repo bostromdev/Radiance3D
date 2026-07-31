@@ -69,12 +69,12 @@ See the [repository layout](docs/development/repository-layout.md) for details.
 
 ## Current project status
 
-Stage 1 now defines the complete Version 1 two-axis hardware boundary, configurable
-motion/position-confidence model, receiver-neutral host interfaces, raster scan
-coordination, and schema 1.1 provenance contract. The controller and adapters remain
-simulator/interface-only: no physical scanner, receiver integration, measurement
-accuracy, calibrated antenna gain, or production-ready workflow is claimed. Example
-datasets may be simulated and are labeled in their metadata.
+Stage 2 now implements the first physical motion-control layer: a compilable ESP32
+target, two TMC2209 driver instances, non-blocking dual-axis stepping, two-pass homing,
+latched emergency stop, diagnostics, command correlation, a serial host adapter, and
+simulator parity. It is compiled and unit tested but has not yet been exercised on
+connected hardware. No physical scanner motion, receiver integration, measurement
+accuracy, calibrated antenna gain, or production-ready workflow is claimed.
 
 ## Getting started
 
@@ -97,6 +97,8 @@ Start at the [documentation index](docs/index.md), then review the
 [architecture overview](docs/architecture/overview.md), [scan file
 format](docs/software/file-formats.md), [Version 1 engineering
 baseline](docs/architecture/version-1.md), and [roadmap](ROADMAP.md).
+For physical preparation, use the
+[TMC2209 commissioning guide](docs/hardware/tmc2209-commissioning.md).
 
 ## Contributing
 

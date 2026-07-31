@@ -11,6 +11,7 @@ interfaces unless a page explicitly marks behavior as implemented and tested.
 - [Data flow](architecture/data-flow.md)
 - [Scan file format](software/file-formats.md)
 - [Motion protocol](firmware/protocol.md)
+- [TMC2209 commissioning](hardware/tmc2209-commissioning.md)
 - [Development setup](development/setup.md)
 - [Roadmap](development/roadmap.md)
 - [Glossary](glossary.md)
