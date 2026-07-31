@@ -34,6 +34,20 @@ const char* fault_name(const FaultCode code) {
       return "DRIVER_DISABLED";
     case FaultCode::emergency_stop:
       return "EMERGENCY_STOP";
+    case FaultCode::driver_communication:
+      return "DRIVER_COMMUNICATION";
+    case FaultCode::driver_critical:
+      return "DRIVER_CRITICAL";
+    case FaultCode::homing_stuck_switch:
+      return "HOMING_STUCK_SWITCH";
+    case FaultCode::homing_switch_never_triggered:
+      return "HOMING_SWITCH_NEVER_TRIGGERED";
+    case FaultCode::homing_switch_failed_release:
+      return "HOMING_SWITCH_FAILED_RELEASE";
+    case FaultCode::homing_timeout:
+      return "HOMING_TIMEOUT";
+    case FaultCode::unexpected_home_switch:
+      return "UNEXPECTED_HOME_SWITCH";
     case FaultCode::stopped:
       return "STOPPED";
   }

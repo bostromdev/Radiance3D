@@ -1,0 +1,72 @@
+{
+  "status": "provisional-development-only",
+  "controller": {
+    "board": "esp32dev",
+    "protocol_version": 1,
+    "usb_serial_baud": 115200,
+    "emergency_stop_pin": 13,
+    "emergency_stop_active_low": true
+  },
+  "power": {
+    "motor_supply_voltage": 12.0,
+    "esp32_supply": "regulated board-supported input from buck converter"
+  },
+  "axes": {
+    "azimuth": {
+      "driver": "tmc2209",
+      "uart_channel": 1,
+      "uart_address": 0,
+      "uart_tx_pin": 22,
+      "uart_rx_pin": 21,
+      "step_pin": 25,
+      "direction_pin": 26,
+      "enable_pin": 27,
+      "home_switch_pin": 32,
+      "home_switch_normally_closed": true,
+      "motor_full_steps_per_revolution": 200,
+      "microsteps": 16,
+      "gear_ratio": 1.0,
+      "direction_inverted": false,
+      "minimum_angle_deg": 0.0,
+      "maximum_angle_deg": 360.0,
+      "home_offset_deg": 0.0,
+      "rms_current_ma": 400,
+      "maximum_rms_current_ma": 800,
+      "hold_current_percent": 30,
+      "max_speed_deg_s": 10.0,
+      "acceleration_deg_s2": 20.0,
+      "home_speed_deg_s": 5.0,
+      "slow_home_speed_deg_s": 1.0,
+      "homing_backoff_deg": 3.0,
+      "motion_timeout_ms": 60000
+    },
+    "elevation": {
+      "driver": "tmc2209",
+      "uart_channel": 2,
+      "uart_address": 0,
+      "uart_tx_pin": 17,
+      "uart_rx_pin": 16,
+      "step_pin": 18,
+      "direction_pin": 19,
+      "enable_pin": 23,
+      "home_switch_pin": 33,
+      "home_switch_normally_closed": true,
+      "motor_full_steps_per_revolution": 200,
+      "microsteps": 16,
+      "gear_ratio": 1.0,
+      "direction_inverted": false,
+      "minimum_angle_deg": -90.0,
+      "maximum_angle_deg": 90.0,
+      "home_offset_deg": 0.0,
+      "rms_current_ma": 400,
+      "maximum_rms_current_ma": 800,
+      "hold_current_percent": 30,
+      "max_speed_deg_s": 8.0,
+      "acceleration_deg_s2": 15.0,
+      "home_speed_deg_s": 4.0,
+      "slow_home_speed_deg_s": 1.0,
+      "homing_backoff_deg": 3.0,
+      "motion_timeout_ms": 60000
+    }
+  }
+}

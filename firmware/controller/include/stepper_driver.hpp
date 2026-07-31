@@ -47,7 +47,8 @@ struct DriverStatus {
   DriverFault fault{DriverFault::none};
 
   bool critical_fault() const {
-    return !connected || undervoltage || overtemperature_shutdown ||
+    return !connected || reset_detected || undervoltage ||
+           overtemperature_shutdown ||
            short_to_ground_a || short_to_ground_b || short_to_supply_a ||
            short_to_supply_b;
   }
