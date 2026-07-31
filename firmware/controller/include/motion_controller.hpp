@@ -1,0 +1,122 @@
+#pragma once
+
+#include <cstdint>
+
+namespace radiance3d {
+
+enum class AxisSelection { azimuth, elevation, both };
+
+enum class FaultCode {
+  none,
+  invalid_command,
+  invalid_argument,
+  invalid_configuration,
+  not_homed,
+  position_untrusted,
+  limit_reached,
+  motion_timeout,
+  driver_disabled,
+  emergency_stop,
+  stopped,
+};
+
+struct HomingConfig {
+  bool switch_normally_closed{true};
+  bool direction_negative{true};
+  std::uint32_t debounce_ms{10};
+  double speed_deg_per_s{5.0};
+  double backoff_deg{2.0};
+  double slow_approach_deg_per_s{1.0};
+};
+
+struct AxisConfig {
+  std::uint16_t motor_full_steps_per_revolution{200};
+  std::uint16_t microsteps{16};
+  std::uint16_t motor_rms_current_ma{0};
+  double gear_ratio{1.0};
+  bool direction_inverted{false};
+  double home_offset_deg{0.0};
+  double minimum_angle_deg{0.0};
+  double maximum_angle_deg{360.0};
+  double maximum_speed_deg_per_s{20.0};
+  double acceleration_deg_per_s2{40.0};
+  HomingConfig homing{};
+
+  double steps_per_output_revolution() const;
+  double commanded_step_angle_deg() const;
+  bool valid() const;
+};
+
+struct ControllerConfig {
+  AxisConfig azimuth{};
+  AxisConfig elevation{};
+  std::uint32_t motion_timeout_ms{120000};
+  bool emergency_stop_active_low{true};
+
+  bool valid() const;
+};
+
+struct AxisState {
+  double commanded_position_deg{0.0};
+  bool homed{false};
+  bool position_trusted{false};
+  bool enabled{true};
+  bool home_switch_active{false};
+};
+
+struct ControllerState {
+  AxisState azimuth{};
+  AxisState elevation{};
+  FaultCode fault{FaultCode::none};
+  bool stopped{false};
+  bool emergency_stop_active{false};
+};
+
+struct MotionResult {
+  bool ok{false};
+  FaultCode fault{FaultCode::none};
+};
+
+class MotionController {
+ public:
+  virtual ~MotionController() = default;
+
+  virtual const ControllerConfig& config() const = 0;
+  virtual const ControllerState& state() const = 0;
+  virtual MotionResult home(AxisSelection axis) = 0;
+  virtual MotionResult move_absolute(double azimuth_deg, double elevation_deg,
+                                     double speed_deg_per_s) = 0;
+  virtual MotionResult stop() = 0;
+  virtual MotionResult emergency_stop() = 0;
+  virtual MotionResult clear_fault() = 0;
+  virtual MotionResult set_enabled(bool enabled) = 0;
+  virtual void report_fault(FaultCode code) = 0;
+};
+
+class SimulatedMotionController final : public MotionController {
+ public:
+  explicit SimulatedMotionController(ControllerConfig config = {});
+
+  const ControllerConfig& config() const override;
+  const ControllerState& state() const override;
+  MotionResult home(AxisSelection axis) override;
+  MotionResult move_absolute(double azimuth_deg, double elevation_deg,
+                             double speed_deg_per_s) override;
+  MotionResult stop() override;
+  MotionResult emergency_stop() override;
+  MotionResult clear_fault() override;
+  MotionResult set_enabled(bool enabled) override;
+  void report_fault(FaultCode code) override;
+
+ private:
+  ControllerConfig config_{};
+  ControllerState state_{};
+
+  MotionResult fail(FaultCode code);
+  MotionResult succeed();
+  static void invalidate(AxisState& axis);
+};
+
+ControllerConfig provisional_simulator_config();
+
+}  // namespace radiance3d

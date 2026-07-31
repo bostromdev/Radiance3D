@@ -7,11 +7,18 @@ versioned serial protocol. The controller reports its believed state and faults.
 future physical implementation must enforce machine-specific soft limits and
 independent hardware safety; protocol range checks are not safety controls.
 
+The host-facing `MotionController` protocol is transport-neutral. The firmware-facing
+`MotionController` interface owns homing, limits, position confidence, enable, stop,
+and emergency-stop behavior; a TMC2209 implementation must stay behind that boundary.
+Reported Version 1 position is open-loop commanded position, never independently
+verified physical position.
+
 ## Measurement boundary
 
-A receiver adapter will return a numeric value, unit, sample timestamp, and device
-metadata. RSSI is one possible value, not a required representation. Receiver setup,
-settling, overload, and uncertainty remain device-specific.
+A receiver adapter returns a numeric value, native unit, sample timestamp, source
+identifier, validity state, and optional warnings. RSSI is one possible value, not a
+required representation. Receiver setup, settling, overload, and uncertainty remain
+device-specific. The motion controller never calls this interface.
 
 ## Dataset boundary
 

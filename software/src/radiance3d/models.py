@@ -9,7 +9,14 @@ from math import isfinite
 from typing import Any, Literal, cast
 
 DataKind = Literal["measured", "simulated", "imported", "processed"]
-TOP_LEVEL_FIELDS = {
+CalibrationStatus = Literal[
+    "uncalibrated",
+    "reference-measured",
+    "calibrated",
+    "not-applicable",
+    "unknown",
+]
+BASE_TOP_LEVEL_FIELDS = {
     "schema_version",
     "scan_id",
     "scan_name",
@@ -28,13 +35,28 @@ TOP_LEVEL_FIELDS = {
     "provenance",
     "samples",
 }
-SAMPLE_FIELDS = {
+V1_1_TOP_LEVEL_FIELDS = {
+    "protocol_version",
+    "hardware_revision",
+    "step_size_deg",
+    "measurement_units",
+    "calibration_status",
+    "operator_notes",
+}
+BASE_SAMPLE_FIELDS = {
     "sample_timestamp",
     "azimuth_angle_deg",
     "elevation_angle_deg",
     "measured_value",
     "measurement_unit",
     "quality_flags",
+}
+V1_1_SAMPLE_FIELDS = {
+    "sequence_number",
+    "measurement_source",
+    "position_kind",
+    "validity",
+    "warnings",
 }
 
 
@@ -146,19 +168,82 @@ class HardwareMetadata:
 
 
 @dataclass(frozen=True)
+class AngularStep:
+    """Commanded raster step sizes in degrees, independent of physical accuracy."""
+
+    azimuth_deg: float
+    elevation_deg: float
+
+    def __post_init__(self) -> None:
+        if not isfinite(self.azimuth_deg) or not isfinite(self.elevation_deg):
+            raise ValueError("step_size_deg values must be finite")
+        if self.azimuth_deg <= 0 or self.elevation_deg <= 0:
+            raise ValueError("step_size_deg values must be greater than zero")
+
+    @classmethod
+    def from_mapping(cls, value: object) -> AngularStep:
+        item = _mapping(value, "step_size_deg")
+        unexpected = set(item) - {"azimuth", "elevation"}
+        if unexpected:
+            raise ValueError(f"step_size_deg contains unsupported fields: {sorted(unexpected)}")
+        return cls(
+            _number(item.get("azimuth"), "step_size_deg.azimuth"),
+            _number(item.get("elevation"), "step_size_deg.elevation"),
+        )
+
+
+@dataclass(frozen=True)
 class Sample:
     timestamp: datetime
     azimuth: Angle
     elevation: Angle
     measurement: RFMeasurement
     quality_flags: tuple[str, ...] = ()
+    sequence_number: int | None = None
+    measurement_source: str | None = None
+    position_kind: Literal["commanded", "observed"] | None = None
+    validity: Literal["valid", "invalid", "timeout"] | None = None
+    warnings: tuple[str, ...] = ()
 
     @classmethod
-    def from_mapping(cls, value: object, index: int) -> Sample:
+    def from_mapping(cls, value: object, index: int, *, schema_version: str) -> Sample:
         item = _mapping(value, f"samples[{index}]")
-        unexpected = set(item) - SAMPLE_FIELDS
+        allowed_fields = (
+            BASE_SAMPLE_FIELDS | V1_1_SAMPLE_FIELDS
+            if schema_version == "1.1.0"
+            else BASE_SAMPLE_FIELDS
+        )
+        unexpected = set(item) - allowed_fields
         if unexpected:
             raise ValueError(f"samples[{index}] contains unsupported fields: {sorted(unexpected)}")
+        if schema_version == "1.1.0":
+            missing = V1_1_SAMPLE_FIELDS - set(item)
+            if missing:
+                raise ValueError(f"samples[{index}] missing required fields: {sorted(missing)}")
+            sequence_value = item.get("sequence_number")
+            if isinstance(sequence_value, bool) or not isinstance(sequence_value, int):
+                raise ValueError(f"samples[{index}].sequence_number must be an integer")
+            if sequence_value < 0:
+                raise ValueError(f"samples[{index}].sequence_number must not be negative")
+            source = _text(
+                item.get("measurement_source"),
+                f"samples[{index}].measurement_source",
+            )
+            position_kind_value = item.get("position_kind")
+            if position_kind_value not in {"commanded", "observed"}:
+                raise ValueError(f"samples[{index}].position_kind must be commanded or observed")
+            position_kind = cast(Literal["commanded", "observed"], position_kind_value)
+            validity_value = item.get("validity")
+            if validity_value not in {"valid", "invalid", "timeout"}:
+                raise ValueError(f"samples[{index}].validity must be valid, invalid, or timeout")
+            validity = cast(Literal["valid", "invalid", "timeout"], validity_value)
+            warnings = _string_list(item.get("warnings"), f"samples[{index}].warnings")
+        else:
+            sequence_value = None
+            source = None
+            position_kind = None
+            validity = None
+            warnings = ()
         return cls(
             timestamp=_timestamp(
                 item.get("sample_timestamp"),
@@ -180,6 +265,11 @@ class Sample:
                 item.get("quality_flags", []),
                 f"samples[{index}].quality_flags",
             ),
+            sequence_number=sequence_value,
+            measurement_source=source,
+            position_kind=position_kind,
+            validity=validity,
+            warnings=warnings,
         )
 
 
@@ -191,7 +281,13 @@ class Scan:
     timestamp: datetime
     software_version: str
     firmware_version: str | None
+    protocol_version: str | None
+    hardware_revision: str | None
     frequency_hz: float
+    step_size: AngularStep | None
+    measurement_units: tuple[str, ...]
+    calibration_status: CalibrationStatus | None
+    operator_notes: str
     hardware: HardwareMetadata
     antenna_under_test: HardwareMetadata
     rf_source: HardwareMetadata
@@ -206,16 +302,21 @@ class Scan:
     @classmethod
     def from_mapping(cls, value: object) -> Scan:
         data = _mapping(value, "scan")
-        missing = TOP_LEVEL_FIELDS - set(data)
+        version = _text(data.get("schema_version"), "schema_version")
+        if version not in {"1.0.0", "1.1.0"}:
+            raise ValueError(f"unsupported schema_version: {version}")
+
+        required_fields = (
+            BASE_TOP_LEVEL_FIELDS | V1_1_TOP_LEVEL_FIELDS
+            if version == "1.1.0"
+            else BASE_TOP_LEVEL_FIELDS
+        )
+        missing = required_fields - set(data)
         if missing:
             raise ValueError(f"missing required fields: {sorted(missing)}")
-        unexpected = set(data) - TOP_LEVEL_FIELDS
+        unexpected = set(data) - required_fields
         if unexpected:
             raise ValueError(f"unsupported top-level fields: {sorted(unexpected)}")
-
-        version = _text(data.get("schema_version"), "schema_version")
-        if version != "1.0.0":
-            raise ValueError(f"unsupported schema_version: {version}")
 
         provenance = _mapping(data.get("provenance"), "provenance")
         data_kind_value = provenance.get("data_kind")
@@ -231,6 +332,14 @@ class Scan:
         for field in ("method", "notes"):
             if field in provenance:
                 _string(provenance[field], f"provenance.{field}")
+        if data_kind == "processed":
+            source_ids = _string_list(
+                provenance.get("source_dataset_ids"),
+                "provenance.source_dataset_ids",
+            )
+            if not source_ids:
+                raise ValueError("processed datasets require source_dataset_ids")
+            _text(provenance.get("method"), "provenance.method")
 
         samples_value = data.get("samples")
         if not isinstance(samples_value, list) or not samples_value:
@@ -239,6 +348,34 @@ class Scan:
         frequency_hz = _number(data.get("frequency_hz"), "frequency_hz")
         if frequency_hz <= 0:
             raise ValueError("frequency_hz must be greater than zero")
+
+        if version == "1.1.0":
+            protocol_version = _text(data.get("protocol_version"), "protocol_version")
+            hardware_revision = _text(data.get("hardware_revision"), "hardware_revision")
+            step_size = AngularStep.from_mapping(data.get("step_size_deg"))
+            measurement_units = _string_list(
+                data.get("measurement_units"),
+                "measurement_units",
+            )
+            calibration_value_raw = data.get("calibration_status")
+            allowed_calibration = {
+                "uncalibrated",
+                "reference-measured",
+                "calibrated",
+                "not-applicable",
+                "unknown",
+            }
+            if calibration_value_raw not in allowed_calibration:
+                raise ValueError("calibration_status contains an unsupported value")
+            calibration_status = cast(CalibrationStatus, calibration_value_raw)
+            operator_notes = _string(data.get("operator_notes"), "operator_notes")
+        else:
+            protocol_version = None
+            hardware_revision = None
+            step_size = None
+            measurement_units = ()
+            calibration_status = None
+            operator_notes = ""
 
         transmit_power_value = data.get("transmit_power")
         transmit_power = (
@@ -252,6 +389,20 @@ class Scan:
             if calibration_value is None
             else HardwareMetadata.from_mapping(calibration_value, "calibration_reference")
         )
+        if calibration_status == "calibrated" and calibration_reference is None:
+            raise ValueError("calibrated datasets require calibration_reference metadata")
+
+        samples = tuple(
+            Sample.from_mapping(item, index, schema_version=version)
+            for index, item in enumerate(samples_value)
+        )
+        if version == "1.1.0":
+            sequence_numbers = tuple(sample.sequence_number for sample in samples)
+            if sequence_numbers != tuple(range(len(samples))):
+                raise ValueError("sample sequence_number values must be contiguous from zero")
+            sample_units = {sample.measurement.unit for sample in samples}
+            if sample_units != set(measurement_units):
+                raise ValueError("measurement_units must exactly match sample measurement units")
 
         return cls(
             schema_version=version,
@@ -260,7 +411,13 @@ class Scan:
             timestamp=_timestamp(data.get("timestamp"), "timestamp"),
             software_version=_text(data.get("software_version"), "software_version"),
             firmware_version=_optional_text(data.get("firmware_version"), "firmware_version"),
+            protocol_version=protocol_version,
+            hardware_revision=hardware_revision,
             frequency_hz=frequency_hz,
+            step_size=step_size,
+            measurement_units=measurement_units,
+            calibration_status=calibration_status,
+            operator_notes=operator_notes,
             hardware=HardwareMetadata.from_mapping(
                 data.get("hardware_configuration"), "hardware_configuration"
             ),
@@ -273,8 +430,6 @@ class Scan:
             calibration_reference=calibration_reference,
             environmental_notes=_string(data.get("environmental_notes"), "environmental_notes"),
             data_kind=data_kind,
-            samples=tuple(
-                Sample.from_mapping(item, index) for index, item in enumerate(samples_value)
-            ),
+            samples=samples,
             warnings=_string_list(data.get("warnings"), "warnings"),
         )

@@ -69,10 +69,12 @@ See the [repository layout](docs/development/repository-layout.md) for details.
 
 ## Current project status
 
-Stage 0 establishes terminology, architecture, schemas, contribution standards,
-and automated checks. No physical scanner, receiver integration, measurement
-accuracy, calibrated antenna gain, or production-ready workflow is claimed.
-Example datasets may be simulated and are labeled in their metadata.
+Stage 1 now defines the complete Version 1 two-axis hardware boundary, configurable
+motion/position-confidence model, receiver-neutral host interfaces, raster scan
+coordination, and schema 1.1 provenance contract. The controller and adapters remain
+simulator/interface-only: no physical scanner, receiver integration, measurement
+accuracy, calibrated antenna gain, or production-ready workflow is claimed. Example
+datasets may be simulated and are labeled in their metadata.
 
 ## Getting started
 
@@ -93,7 +95,8 @@ For the full development setup, see [docs/development/setup.md](docs/development
 
 Start at the [documentation index](docs/index.md), then review the
 [architecture overview](docs/architecture/overview.md), [scan file
-format](docs/software/file-formats.md), and [roadmap](ROADMAP.md).
+format](docs/software/file-formats.md), [Version 1 engineering
+baseline](docs/architecture/version-1.md), and [roadmap](ROADMAP.md).
 
 ## Contributing
 

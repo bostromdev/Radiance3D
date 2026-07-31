@@ -41,4 +41,5 @@ flowchart TB
   data kind independently of any specific receiver.
 
 Only the schema, dependency-free scan validation, and motion-protocol simulator exist
-at this stage.
+at this stage. The [Version 1 engineering baseline](version-1.md) defines the complete
+hardware, motion, synchronization, and data architecture that these interfaces serve.

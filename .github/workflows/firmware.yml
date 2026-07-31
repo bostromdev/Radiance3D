@@ -27,3 +27,6 @@ jobs:
       - name: Build native simulator
         working-directory: firmware/controller
         run: pio run -e native
+      - name: Test motion and protocol behavior
+        working-directory: firmware/controller
+        run: pio test -e native

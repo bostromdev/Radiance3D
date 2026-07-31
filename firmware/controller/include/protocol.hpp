@@ -1,38 +1,22 @@
 #pragma once
 
+#include "motion_controller.hpp"
+
 #include <string>
 
 namespace radiance3d {
 
-enum class FaultCode {
-  none,
-  invalid_command,
-  invalid_argument,
-  not_homed,
-  limit_reached,
-  stopped,
-};
-
-struct AxisState {
-  double position_deg{0.0};
-  bool homed{false};
-  bool limit_active{false};
-};
-
-struct ControllerState {
-  AxisState azimuth{};
-  AxisState elevation{};
-  FaultCode fault{FaultCode::none};
-  bool stopped{false};
-};
-
 class ProtocolEngine {
  public:
+  ProtocolEngine();
+  explicit ProtocolEngine(MotionController& controller);
+
   std::string handle(const std::string& line);
   const ControllerState& state() const;
 
  private:
-  ControllerState state_{};
+  SimulatedMotionController default_controller_;
+  MotionController* controller_;
 
   std::string status() const;
   std::string fault(FaultCode code, const std::string& detail);

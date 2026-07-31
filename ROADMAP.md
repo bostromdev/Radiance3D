@@ -8,20 +8,25 @@ only when its outputs are documented and reproducible.
 Architecture, terminology, schemas, contribution standards, and CI. Exit when the
 simulated example validates and software and firmware simulator checks pass.
 
-## Stage 1 — Motion-control prototype
+## Stage 1 — Version 1 engineering architecture
 
-Single-axis movement, repeatable positioning, command protocol, and simulator mode.
-Exit requires documented test conditions and repeatability results.
+Two-axis configurable motion interfaces, commanded-position confidence, homing and
+safety semantics, receiver-neutral host boundaries, raster planning, synchronized
+sampling, complete raw-data provenance, and simulator tests. Exit requires all
+interfaces and provisional hardware assumptions to be documented without physical
+performance claims.
 
-## Stage 2 — Two-axis scanner
+## Stage 2 — Physical two-axis scanner
 
-Azimuth and elevation, homing, safety limits, and synchronized stepping. Exit
-requires safe fault behavior and repeatable zeroing.
+ESP32 GPIO, replaceable driver implementation, two NEMA 17 axes, switches, emergency
+stop, acceleration, timeouts, and synchronized stepping. Exit requires documented
+electrical safety checks, fault behavior, cable limits, and repeatable zeroing.
 
 ## Stage 3 — RF acquisition
 
-Receiver integration, timestamped measurements, raw capture, and reference
-measurements. Exit requires receiver-specific limitations and provenance.
+At least one host-side receiver adapter, timestamped native measurements, raw capture,
+and reference measurements. Exit requires receiver-specific limitations, retry/timeout
+tests, and complete provenance.
 
 ## Stage 4 — Data processing
 

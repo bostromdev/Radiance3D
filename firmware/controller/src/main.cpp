@@ -19,7 +19,7 @@ void loop() {
     }
   }
 }
-#else
+#elif !defined(UNIT_TEST)
 #include <iostream>
 #include <string>
 

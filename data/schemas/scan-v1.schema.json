@@ -5,6 +5,87 @@
   "description": "Version 1 schema for a stored scan and its provenance.",
   "type": "object",
   "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "schema_version": {
+            "const": "1.1.0"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "protocol_version",
+          "hardware_revision",
+          "step_size_deg",
+          "measurement_units",
+          "calibration_status",
+          "operator_notes"
+        ],
+        "properties": {
+          "samples": {
+            "items": {
+              "required": [
+                "sequence_number",
+                "measurement_source",
+                "position_kind",
+                "validity",
+                "warnings"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "calibration_status": {
+            "const": "calibrated"
+          }
+        },
+        "required": ["calibration_status"]
+      },
+      "then": {
+        "properties": {
+          "calibration_reference": {
+            "$ref": "#/$defs/namedMetadata"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "provenance": {
+            "properties": {
+              "data_kind": {
+                "const": "processed"
+              }
+            },
+            "required": ["data_kind"]
+          }
+        },
+        "required": ["provenance"]
+      },
+      "then": {
+        "properties": {
+          "provenance": {
+            "required": ["source_dataset_ids", "method"],
+            "properties": {
+              "source_dataset_ids": {
+                "minItems": 1
+              },
+              "method": {
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
   "required": [
     "schema_version",
     "scan_id",
@@ -26,7 +107,8 @@
   ],
   "properties": {
     "schema_version": {
-      "const": "1.0.0"
+      "enum": ["1.0.0", "1.1.0"],
+      "description": "1.0.0 remains readable; new datasets must use 1.1.0."
     },
     "scan_id": {
       "type": "string",
@@ -50,6 +132,15 @@
       "type": ["string", "null"],
       "description": "Null only when no physical or simulated motion firmware participated."
     },
+    "protocol_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "hardware_revision": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Use an explicit value such as 'simulator' or 'prototype-unassigned'; do not omit uncertainty."
+    },
     "hardware_configuration": {
       "$ref": "#/$defs/namedMetadata"
     },
@@ -65,6 +156,43 @@
     "frequency_hz": {
       "type": "number",
       "exclusiveMinimum": 0
+    },
+    "step_size_deg": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["azimuth", "elevation"],
+      "properties": {
+        "azimuth": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "elevation": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      },
+      "description": "Commanded scan increment, not a claim of mechanical resolution or accuracy."
+    },
+    "measurement_units": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "calibration_status": {
+      "enum": [
+        "uncalibrated",
+        "reference-measured",
+        "calibrated",
+        "not-applicable",
+        "unknown"
+      ]
+    },
+    "operator_notes": {
+      "type": "string"
     },
     "transmit_power": {
       "oneOf": [
@@ -205,6 +333,29 @@
           "type": "string",
           "minLength": 1,
           "description": "Receiver-native or processed unit; not restricted to RSSI."
+        },
+        "sequence_number": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "measurement_source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "position_kind": {
+          "enum": ["commanded", "observed"],
+          "description": "Version 1 is commanded/open-loop; observed is reserved for future feedback."
+        },
+        "validity": {
+          "enum": ["valid", "invalid", "timeout"]
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
         },
         "quality_flags": {
           "type": "array",
