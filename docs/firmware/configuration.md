@@ -1,16 +1,16 @@
 # Firmware configuration
 
 Version 1 separates board/pin configuration from driver-neutral motion behavior.
-The physical target and simulator use the same typed motion fields. The clearly
-provisional development record is
+The physical target and simulator use the same typed motion fields. The Version 1
+hardware profile is stored in
 [`firmware/config/provisional-esp32dev-v1.json`](../../firmware/config/provisional-esp32dev-v1.json);
-the compiled defaults live together in `hardware_config.cpp`.
+the compiled defaults live in `hardware_config.cpp`.
 
 ## Axis fields
 
 Each azimuth and elevation axis defines:
 
-- `motor_full_steps_per_revolution` (provisionally 200 for a typical 1.8° motor);
+- `motor_full_steps_per_revolution` (200 for the selected 1.8° motor);
 - `microsteps`;
 - configurable `motor_rms_current_ma`;
 - configurable maximum RMS-current ceiling and hold-current percentage;
@@ -35,8 +35,8 @@ version, serial rate, board name, and all GPIO assignments. Startup rejects dupl
 pins and input-only STEP/DIR/ENABLE/TX assignments and reports ESP32 bootstrapping-pin
 use as a warning.
 
-The example uses 400 mA RMS with an 800 mA software ceiling only as conservative
-development placeholders. Before energizing a motor, replace them using the selected
+The example uses 650 mA RMS as the initial commissioning current with a 1000 mA
+software ceiling. Before energizing a motor, verify this value against the selected
 motor rating, the carrier's actual sense resistor and schematic, cooling, load, and
 measured temperatures. ESP32 signals are 3.3 V and no attached module is assumed 5 V
 tolerant. The example is not a verified pinout or motor calibration.

@@ -19,6 +19,12 @@ repository begins with documented boundaries, a versioned scan format, validatio
 tools, and simulator-friendly firmware interfaces so physical claims can be added
 only after evidence exists.
 
+The current Version 1 baseline is an ESP32 development board with ESP-WROOM-32,
+USB serial, two BIGTREETECH TMC2209 V1.3 drivers, two YEJMKJ/LYLANMO NEMA 17
+bipolar motors, a standalone 12 V battery power system, and 5.0 V logic power from
+an LM2596 buck converter. The exact board revision, carrier pinout, UART wiring,
+R10 setting, sense resistor value, and mechanical validation remain pending.
+
 ## Why the project exists
 
 Full 3D antenna characterization is often inaccessible outside specialized labs.
@@ -74,7 +80,9 @@ target, two TMC2209 driver instances, non-blocking dual-axis stepping, two-pass 
 latched emergency stop, diagnostics, command correlation, a serial host adapter, and
 simulator parity. It is compiled and unit tested but has not yet been exercised on
 connected hardware. No physical scanner motion, receiver integration, measurement
-accuracy, calibrated antenna gain, or production-ready workflow is claimed.
+accuracy, calibrated antenna gain, or production-ready workflow is claimed. The
+hardware baseline is now documented as the confirmed Version 1 family and the pending
+validation items are explicit.
 
 ## Getting started
 

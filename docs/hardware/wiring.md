@@ -1,11 +1,13 @@
 # Wiring
 
-Verified final pin assignments do not exist. A provisional ESP32 development map is
-listed in the [TMC2209 commissioning guide](tmc2209-commissioning.md). The Version 1
-wiring record must identify the
-exact ESP32 board and every connector pin, signal reference, voltage domain, wire
-rating, shielding, grounding point, switch behavior, and emergency isolation before a
-physical build is called supported.
+The Version 1 wiring baseline uses an ESP32 development board, two BIGTREETECH TMC2209
+V1.3 carriers, 12 V motor power, a regulated 5.0 V logic rail, and configurable home
+switches. Final pin assignments remain to be confirmed against the exact ESP32 board
+revision and carrier labels. The current mapping is documented in the
+[TMC2209 commissioning guide](tmc2209-commissioning.md). The Version 1 wiring record
+must identify the exact board and every connector pin, signal reference, voltage
+domain, wire rating, shielding, grounding point, switch behavior, and emergency
+isolation before a physical build is called supported.
 
 ## Required electrical boundaries
 
@@ -25,6 +27,14 @@ feedlines. Cross sensitive and noisy runs at right angles where separation is li
 Provide strain relief and verify clearance through the entire configured azimuth and
 elevation envelope. Consistent coax routing is part of the RF experiment, not an
 afterthought.
+
+Recommended wire usage:
+
+- 18 AWG: battery, main power, and power distribution
+- 22 AWG: driver power, motor extensions, and buck output
+- 26 AWG: STEP, DIR, UART, ENABLE, DIAG, and switch signals
+
+Separate signal wiring from motor wiring and keep high-current loops short.
 
 Disconnect external and USB power before changing wiring. Because USB and a buck
 converter may energize the board simultaneously, explicitly document the chosen

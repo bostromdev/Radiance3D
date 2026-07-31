@@ -1,19 +1,63 @@
 {
-  "status": "provisional-development-only",
+  "status": "version-1-hardware-baseline-pending-validation",
   "controller": {
-    "board": "esp32dev",
+    "board": "ESP32 development board",
+    "module": "ESP-WROOM-32",
+    "logic_voltage_v": 3.3,
+    "transport": "USB serial",
+    "transport_note": "Wi-Fi and Bluetooth are available but intentionally unused in Version 1",
+    "gpio_mapping_status": "provisional-until-board-revision-confirmed",
     "protocol_version": 1,
     "usb_serial_baud": 115200,
     "emergency_stop_pin": 13,
     "emergency_stop_active_low": true
   },
   "power": {
-    "motor_supply_voltage": 12.0,
-    "esp32_supply": "regulated board-supported input from buck converter"
+    "motor_supply_voltage_v": 12.0,
+    "motor_supply_source": "standalone 12 V automotive battery, not connected to a running vehicle",
+    "motor_supply_fuse_a": 3.0,
+    "motor_supply_distribution": "12 V battery -> inline fuse -> master disconnect -> TMC2209 VM rails and LM2596 buck converter",
+    "esp32_supply_voltage_v": 5.0,
+    "esp32_supply_source": "LM2596 buck converter for logic electronics only",
+    "motors_powered_through_buck": false,
+    "buck_converters": [
+      "SELOKY LM2596",
+      "LYLANMO LM2596S"
+    ]
+  },
+  "drivers": {
+    "driver_family": "BIGTREETECH TMC2209 V1.3",
+    "driver_interface": "UART controlled STEP/DIR",
+    "driver_diagnostics_enabled": true,
+    "enable_active_low_configurable": true,
+    "current_configured_in_rms_ma": true,
+    "ifcnt_write_verification_required": true,
+    "verify": [
+      "R10 configuration",
+      "UART wiring",
+      "sense resistor value",
+      "board revision",
+      "carrier pinout"
+    ]
+  },
+  "motors": {
+    "manufacturer": "YEJMKJ / LYLANMO",
+    "type": "NEMA 17 bipolar 4-wire 1.8 degree full-step",
+    "full_steps_per_revolution": 200,
+    "rated_phase_current_a": 1.0,
+    "phase_resistance_ohm": 3.5,
+    "holding_torque_nm": 0.13,
+    "dimensions_mm": {
+      "width": 42,
+      "height": 42,
+      "depth": 21
+    },
+    "notes": "Selected hardware values from the Version 1 build, not generic placeholders"
   },
   "axes": {
     "azimuth": {
       "driver": "tmc2209",
+      "driver_profile": "BIGTREETECH TMC2209 V1.3",
       "uart_channel": 1,
       "uart_address": 0,
       "uart_tx_pin": 22,
@@ -32,8 +76,8 @@
       "minimum_angle_deg": 0.0,
       "maximum_angle_deg": 360.0,
       "home_offset_deg": 0.0,
-      "rms_current_ma": 400,
-      "maximum_rms_current_ma": 800,
+      "commissioning_current_ma": 650,
+      "maximum_rms_current_ma": 1000,
       "hold_current_percent": 30,
       "max_speed_deg_s": 10.0,
       "acceleration_deg_s2": 20.0,
@@ -46,6 +90,7 @@
     },
     "elevation": {
       "driver": "tmc2209",
+      "driver_profile": "BIGTREETECH TMC2209 V1.3",
       "uart_channel": 2,
       "uart_address": 0,
       "uart_tx_pin": 17,
@@ -64,8 +109,8 @@
       "minimum_angle_deg": -90.0,
       "maximum_angle_deg": 90.0,
       "home_offset_deg": 0.0,
-      "rms_current_ma": 400,
-      "maximum_rms_current_ma": 800,
+      "commissioning_current_ma": 650,
+      "maximum_rms_current_ma": 1000,
       "hold_current_percent": 30,
       "max_speed_deg_s": 8.0,
       "acceleration_deg_s2": 15.0,

@@ -16,5 +16,6 @@ interfaces unless a page explicitly marks behavior as implemented and tested.
 - [Roadmap](development/roadmap.md)
 - [Glossary](glossary.md)
 
-Hardware choices in this documentation are provisional. Experiment documents define
-the evidence required before measurement or accuracy claims can be made.
+Hardware choices in this documentation are now recorded as a Version 1 engineering
+baseline with explicit pending validation notes. Experiment documents define the
+evidence required before measurement or accuracy claims can be made.

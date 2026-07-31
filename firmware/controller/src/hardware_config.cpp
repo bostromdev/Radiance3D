@@ -18,7 +18,7 @@ AxisConfig azimuth_motion() {
   AxisConfig config;
   config.motor_full_steps_per_revolution = 200;
   config.microsteps = 16;
-  config.motor_rms_current_ma = 400;
+  config.motor_rms_current_ma = 650;
   config.hold_current_percent = 30;
   config.gear_ratio = 1.0;
   config.direction_inverted = false;
@@ -54,7 +54,7 @@ AxisConfig elevation_motion() {
 
 PhysicalControllerConfig provisional_esp32_dev_config() {
   PhysicalControllerConfig config;
-  config.board_name = "esp32dev-provisional";
+  config.board_name = "esp32dev-v1-baseline";
   config.protocol_version = 1;
 
   config.azimuth.axis.name = "azimuth";
@@ -62,6 +62,8 @@ PhysicalControllerConfig provisional_esp32_dev_config() {
   config.azimuth.axis.home_switch_pin = 32;
   config.azimuth.driver.uart_channel = 1;
   config.azimuth.driver.address = 0;
+  // GPIO assignments remain provisional until the exact ESP32 development-board
+  // revision and carrier pinout are confirmed.
   config.azimuth.driver.uart_tx_pin = 22;
   config.azimuth.driver.uart_rx_pin = 21;
   config.azimuth.driver.step_pin = 25;
@@ -69,7 +71,7 @@ PhysicalControllerConfig provisional_esp32_dev_config() {
   config.azimuth.driver.enable_pin = 27;
   config.azimuth.driver.direction_inverted =
       config.azimuth.axis.motion.direction_inverted;
-  config.azimuth.driver.maximum_rms_current_ma = 800;
+  config.azimuth.driver.maximum_rms_current_ma = 1000;
 
   config.elevation.axis.name = "elevation";
   config.elevation.axis.motion = elevation_motion();
@@ -83,7 +85,7 @@ PhysicalControllerConfig provisional_esp32_dev_config() {
   config.elevation.driver.enable_pin = 23;
   config.elevation.driver.direction_inverted =
       config.elevation.axis.motion.direction_inverted;
-  config.elevation.driver.maximum_rms_current_ma = 800;
+  config.elevation.driver.maximum_rms_current_ma = 1000;
 
   config.emergency_stop_pin = 13;
   config.emergency_stop_active_low = true;

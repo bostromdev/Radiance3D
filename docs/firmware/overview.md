@@ -9,6 +9,9 @@ The controller uses integer microsteps as authoritative position. It services ST
 edges, acceleration, switch debounce, homing, driver diagnostics, emergency stop, and
 serial input without long delay loops. A coordinated command completes only after
 both axes stop. Critical faults stop both axes when a coordinated move is active.
+The current profile reflects the Version 1 hardware baseline, but the exact GPIO map,
+carrier wiring, and initial current remain pending validation against the physical
+hardware.
 
 The TMC2209 implementation is a small, datasheet-based register driver rather than a
 third-party motion library. This keeps timer ownership, stop behavior, dual-axis
@@ -17,6 +20,6 @@ verification, RMS current and hold-current configuration, microsteps, interpolat
 stealthChop/spreadCycle selection, and diagnostic mapping.
 
 The simulator models the public state/fault contract, not electrical waveforms.
-The `esp32dev` environment compiles the physical implementation, but its board and
-pin map remain provisional until the exact board and carrier modules are inspected.
-See the [commissioning guide](../hardware/tmc2209-commissioning.md).
+The `esp32dev` environment compiles the physical implementation, but the board and
+carrier pin map remain pending validation until the exact board and modules are
+inspected. See the [commissioning guide](../hardware/tmc2209-commissioning.md).

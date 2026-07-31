@@ -2,7 +2,9 @@
 
 Version 1 is line-oriented ASCII at 115200 baud. Angles are decimal degrees, angular
 rates are degrees per second, current is RMS milliamps, and integer positions are
-microsteps at the configured motor/gear ratio.
+microsteps at the configured motor/gear ratio. The protocol remains transport-neutral;
+Version 1 uses USB serial, while future transports may add Wi-Fi, Ethernet, or
+Bluetooth without changing the motion API.
 
 ## Correlation and events
 

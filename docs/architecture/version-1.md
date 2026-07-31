@@ -47,21 +47,26 @@ Initial conceptual travel is azimuth `0°` through `360°` and elevation `-90°`
 `+90°`; actual configured limits govern every move. Azimuth is not continuous or
 unlimited in Version 1.
 
-## Version 1 hardware assumptions
+## Version 1 hardware baseline
 
-- One ESP32 development board using 3.3 V logic.
-- Two NEMA 17 bipolar steppers, provisionally assumed to be 1.8° full-step unless
-  configuration says otherwise.
-- One replaceable stepper-driver implementation per axis. TMC2209 with UART
-  configuration, ESP32-controlled STEP/DIR, and firmware-controlled enable is the
-  Version 1 target, but no public motion behavior depends on it.
+- One ESP32 development board with an ESP-WROOM-32 module using 3.3 V GPIO logic.
+- USB serial is the Version 1 transport. Wi-Fi, Ethernet, and Bluetooth remain future
+  transport options but are intentionally unused in Version 1.
+- Two YEJMKJ/LYLANMO NEMA 17 bipolar 4-wire steppers with 1.8° full-step geometry,
+  200 full steps/revolution, 1.0 A rated phase current, 3.5 Ω phase resistance,
+  approximately 0.13 N·m holding torque, and approximately 42 × 42 × 21 mm size.
+- Two BIGTREETECH TMC2209 V1.3 stepper-driver instances with UART configuration,
+  ESP32-controlled STEP/DIR, and firmware-controlled enable. The driver profile must
+  be validated against each carrier's actual R10, UART wiring, sense resistor, board
+  revision, and pinout.
 - One configurable home switch per axis and one emergency-stop input.
-- One 12 V DC input, with motor drivers on 12 V and an appropriate regulated buck
-  converter feeding the ESP32 by its board-supported input method.
+- One standalone 12 V automotive battery as the motor supply, with a 3–5 A inline
+  fuse, master disconnect, TMC2209 VM power, and a regulated 5.0 V buck converter
+  for the ESP32 only.
 
-Exact motor current, holding torque, winding resistance, pulley ratio, gear ratio,
-belt pitch, supply-current rating, board pinout, and printed dimensions are not yet
-selected. They must not be hardcoded or inferred from these assumptions.
+The initial motor current is 650 mA RMS, with a software ceiling of 1000 mA RMS.
+These values are the current baseline for commissioning and are not a substitute for
+measured torque, thermal, or long-duration testing.
 
 ## Motion configuration and position confidence
 

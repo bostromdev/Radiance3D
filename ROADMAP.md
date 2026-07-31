@@ -25,7 +25,9 @@ electrical safety checks, fault behavior, cable limits, and repeatable zeroing.
 **Implementation status:** firmware, host protocol, simulator parity, tests, and
 commissioning documentation are complete on the Stage 2 feature branch. Physical
 bring-up, thermal characterization, exact-board pin confirmation, repeatable homing,
-and cable-envelope evidence remain required before the stage exit is claimed.
+and cable-envelope evidence remain required before the stage exit is claimed. The
+hardware baseline now reflects the confirmed Version 1 components and the remaining
+validation work is documented explicitly.
 
 ## Stage 3 — RF acquisition
 

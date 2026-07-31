@@ -1,46 +1,61 @@
 # Power system
 
-Version 1 uses one 12 V DC input with this distribution:
+Version 1 uses a standalone 12 V automotive battery as the motor supply. It is not
+connected to a running vehicle. The architecture is:
 
 ```text
-12 V power supply
-├── fuse / overcurrent protection
-├── TMC2209 azimuth motor supply
-├── TMC2209 elevation motor supply
-└── regulated buck converter
-    └── ESP32 board-supported supply input
+12 V battery
+├── 3–5 A inline fuse
+├── master disconnect switch
+├── power distribution
+│   ├── TMC2209 VM
+│   ├── TMC2209 VM
+│   └── LM2596 buck converter
+│       └── 5.0 V logic rail
+│           └── ESP32
 ```
 
-Motor drivers remain on 12 V. Raw 12 V must never reach an ESP32 power or logic pin.
-The buck converter must provide the voltage, current, ripple, and transient behavior
-appropriate to the selected development board's documented input method. Do not
-assume every board should be fed through a nominal 5 V pin.
+Motors receive 12 V directly from the battery rail. The ESP32 receives a regulated
+5.0 V rail from the buck converter. The buck converter powers only logic electronics;
+it is not intended to power the stepper motors. This architecture is used because the
+motors need a robust 12 V supply and the ESP32 needs a clean, regulated logic supply
+that is isolated from the motor-current return path.
 
-The 12 V source, both drivers, buck converter, and ESP32 signal reference require a
-common ground. Motor-current return paths should not share long, high-impedance runs
-with logic or measurement returns. Place suitable bulk capacitance close to each
-driver's motor-supply input and local decoupling close to logic electronics, following
-the selected module and IC recommendations.
+The 12 V source, both drivers, the buck converter, and the ESP32 logic reference must
+share a common ground. Motor-current return paths should not share high-impedance
+runs with logic or measurement returns. Place a bulk capacitor near each TMC2209 VM
+input and local decoupling near the ESP32 and logic electronics.
+
+## Buck converter guidance
+
+The confirmed modules are the SELOKY LM2596 and the LYLANMO LM2596S. Both are
+adjustable DC-DC buck converters. Set the output with a multimeter before connecting
+an ESP32. The output must be set to exactly 5.0 V, and the onboard display should not
+be trusted as the only verification. Verify polarity and confirm that the buck output
+and the ESP32 logic reference share a common ground.
+
+## Capacitors and transients
+
+Use one bulk capacitor near each TMC2209 VM input. An initial recommendation is
+100–220 µF with a minimum 25 V rating. Add 0.1 µF ceramic decoupling where practical.
+Stepper motors regenerate current when they are switched or decelerated. Supply
+transients can therefore appear at the VM rail even when the command is static, so the
+bulk capacitance and layout matter for noise and driver stability.
 
 ## Protection and commissioning
 
-- Select fuse/overcurrent protection below the safe rating of the wiring, connectors,
-  and weakest protected component.
-- Add accessible power isolation for unexpected motion.
-- Treat reverse-polarity protection as a recommended improvement before a public
-  hardware revision.
+- Install an inline fuse sized for the wiring and the weakest protected component.
+- Use a master disconnect switch that is visible and accessible.
+- Use insulated terminals and avoid loose alligator clips.
 - Verify connector polarity and continuity before energizing.
-- Configure TMC2209 RMS motor current from the exact motor and module data; do not
+- Disconnect power before changing wiring.
+- Never connect or disconnect motors while the drivers are powered.
+- Configure TMC2209 RMS motor current from the exact motor and carrier data; do not
   copy a nominal value from an unrelated build.
-- Provide heatsinking and airflow based on driver temperature under the actual load.
-- Separate motor/power wiring from STEP/DIR, switch inputs, receiver wiring, and RF
-  feedlines where practical.
+- Separate motor/power wiring from STEP/DIR, switch inputs, and RF wiring where
+  practical.
 
-USB can energize an ESP32 while the external rail is present. The selected board and
-buck topology must be reviewed for USB/external-power backfeeding before both are
-connected. A jumper, ideal-diode/power-mux arrangement, or use of the board's protected
-input may be required; there is no universal safe 5 V-pin rule.
-
-The final power-supply current rating remains provisional until both motor ratings,
-driver RMS-current settings, acceleration/load profile, ESP32 board, and future logic
-loads are known. Include startup and stall margin without exceeding component ratings.
+USB can energize an ESP32 while the external rail is present. Review the selected
+board and buck topology for USB/external-power backfeeding before connecting both.
+The Version 1 design assumes a protected 5.0 V input path and does not depend on the
+buck converter to power the motors.
