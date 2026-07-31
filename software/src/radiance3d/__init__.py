@@ -10,13 +10,35 @@ from radiance3d.interfaces import (
     PositionReport,
 )
 from radiance3d.models import Angle, AngularStep, HardwareMetadata, RFMeasurement, Sample, Scan
+from radiance3d.motion_client import (
+    AxisConfiguration,
+    AxisState,
+    ControllerCommandError,
+    DriverCapabilities,
+    DriverDiagnostics,
+    PhysicalMotionController,
+)
 from radiance3d.scanning import AxisScan, RasterScanConfig, ScanCoordinator, raster_points
+from radiance3d.transport import (
+    DeviceIdentityError,
+    ProtocolTransport,
+    ResponseCorrelationError,
+    SerialTransport,
+    TransportError,
+    TransportTimeout,
+)
 from radiance3d.validation import ScanValidationError, load_scan
 
 __all__ = [
     "Angle",
     "AngularStep",
+    "AxisConfiguration",
     "AxisScan",
+    "AxisState",
+    "ControllerCommandError",
+    "DeviceIdentityError",
+    "DriverCapabilities",
+    "DriverDiagnostics",
     "HardwareMetadata",
     "MeasurementAdapter",
     "MeasurementReading",
@@ -25,12 +47,18 @@ __all__ = [
     "PositionConfidence",
     "PositionKind",
     "PositionReport",
+    "PhysicalMotionController",
+    "ProtocolTransport",
     "RFMeasurement",
     "RasterScanConfig",
     "Sample",
     "Scan",
     "ScanCoordinator",
     "ScanValidationError",
+    "SerialTransport",
+    "ResponseCorrelationError",
+    "TransportError",
+    "TransportTimeout",
     "load_scan",
     "raster_points",
 ]
