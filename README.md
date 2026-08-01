@@ -7,7 +7,7 @@ Radiance3D is an open-source platform for automated three-dimensional antenna ra
 The project separates host applications, reusable software packages, embedded firmware, simulation, hardware documentation, and measurement data behind versioned interfaces.
 
 > [!IMPORTANT]
-> Radiance3D is in active development. It has not been validated as laboratory-grade measurement equipment, and simulated or provisional results must not be represented as calibrated physical measurements(this is to avoid getting sued, wish I didn't have to put it in.)
+> Radiance3D is being built in my house right now lol, very easy to make. ANYONE CAN DO IT. Shows the simplicity of visualizing RF waves. It has not been validated as laboratory-grade measurement equipment, and simulated or provisional results must not be represented as calibrated physical measurements(this is to avoid getting sued, wish I didn't have to put it in.)
 
 ## Current status
 
