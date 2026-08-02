@@ -70,17 +70,22 @@ so the geometry is self-consistent.
 |---|---:|---|
 | Pilot boss height (route A) | 2.01 mm | `22.85 − 20.84` (boss+body, minus body) |
 | Pilot boss height (route B) | 1.95 mm | `45.18 − 22.39 − 20.84` (total, minus shaft, minus body) |
-| **Pilot boss height (adopted)** | **1.98 mm** | mean of the two routes, spread 0.06 mm |
-| Shaft length from the **face plate** | 24.37 mm | `22.39 + 1.98` (shaft above boss, plus boss height) |
+| **Pilot boss height (adopted)** | **2.00 mm ±0.06** | both routes bracket it; equals the NEMA 17 nominal |
+| Shaft length from the **face plate** | 24.39 mm | `22.39 + 2.00` (shaft above boss, plus boss height) |
 
-The 1.98 mm boss height sits on the NEMA 17 nominal of 2.0 mm, which is a good sign
-the two routes are measuring what they are believed to measure.
+Both routes bracket 2.00 mm, which is also the NEMA 17 nominal, so 2.00 mm is adopted
+with a ±0.06 mm measurement tolerance. That is well inside what a PETG print can hold —
+FFF dimensional variation is normally larger — so it is adequate for prototype CAD.
+
+**This value is frozen.** If a printed register comes out tight, change
+`PrintClearance`, never `MotorPilotHeight`. See the fit rule in
+[`fusion360-parameters.md`](fusion360-parameters.md).
 
 ### Shaft length datum
 
 The 22.39 mm reading is taken from the top of the pilot boss to the end of the shaft.
 It is **not** what a vendor listing means by "shaft length", which is measured from the
-motor face plate. That figure is now derivable at 24.37 mm, but it inherits the 0.06 mm
+motor face plate. That figure is now derivable at 24.39 mm, but it inherits the 0.06 mm
 uncertainty in the boss height, so prefer the 22.39 mm boss datum where a feature can
 be dimensioned from the boss.
 
@@ -96,7 +101,7 @@ directly rather than read from a caliper picture. A photo would close that gap.
   motor can face shaft-up.
 - **Axial envelope:** 45.18 mm shaft tip to rear face, plus the connector allowance
   behind it. Budget from this figure, not from the body length.
-- **Pilot register:** 21.97 mm diameter, 1.98 mm high. The counterbore in the printed
+- **Pilot register:** 21.97 mm diameter, 2.00 mm high. The counterbore in the printed
   mount is sized from these. This is the feature that centres the motor, so it is
   worth a fit-test coupon.
 - **Body length:** at 20.84 mm the motor is a short-body NEMA 17, matching the

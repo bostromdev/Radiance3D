@@ -21,6 +21,22 @@ numbers, so there is exactly one place to correct when a part changes.
 
 All dimensions are in millimetres.
 
+## Measured values are frozen
+
+Every critical dimension exists twice: the **measured value**, which never changes
+unless the part is re-measured or replaced, and the **CAD value**, which is an
+expression built from it.
+
+```text
+MotorPilotHeight       = 2.00 mm                            <- measured, frozen
+MotorPilotPocketDepth  = MotorPilotHeight + PrintClearance  <- CAD, tune here
+```
+
+When a printed part fits badly, the fix is a clearance parameter — never the measured
+number. Editing a measured value to chase a fit destroys the record of what the
+hardware actually is, and the error then propagates into every feature referencing it.
+See [`fusion360-parameters.md`](fusion360-parameters.md).
+
 ## Measured components
 
 | Component | Documentation | Source pictures |
@@ -28,6 +44,7 @@ All dimensions are in millimetres.
 | NEMA 17 stepper motor (×2), model 42HDB0014NC-24B | [`nema17.md`](nema17.md) | `Nema-17/` — IMG_5221.jpg, IMG_5223–IMG_5232.HEIC, IMG_5247–IMG_5250.HEIC |
 | BIGTREETECH TMC2209 V1.3 driver (×2) | [`tmc2209-v1.3.md`](tmc2209-v1.3.md) | `TMC2209 v1.3/` — IMG_5233–IMG_5240.HEIC |
 | ELEGOO ESP32 devkit (×1) | [`esp32-devkit.md`](esp32-devkit.md) | `ESP32-ELEGOO/` — IMG_5241–IMG_5246.HEIC |
+| AD8317 RF detector board | [`ad8317.md`](ad8317.md) | **none in this repository** — values reported only |
 
 ## CAD handoff
 

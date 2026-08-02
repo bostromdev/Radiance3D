@@ -72,15 +72,15 @@ NEMA 17 stepper motor, model 42HDB0014NC-24B, quantity 2 (one pan, one tilt):
   Output shaft length above the pilot boss    22.39 mm
 
   Derived, not separately measured:
-    Pilot boss height                          1.98 mm   (22.85 - 20.84 = 2.01;
+    Pilot boss height                          2.00 mm   +/- 0.06  (22.85 - 20.84 = 2.01;
                                                           45.18 - 22.39 - 20.84 = 1.95;
                                                           the two routes agree to 0.06 mm)
-    Shaft length from the face plate          24.37 mm   (22.39 + 1.98)
+    Shaft length from the face plate          24.39 mm   (22.39 + 2.00)
 
   DATUM WARNING on the 22.39 mm shaft length: it is measured from the top face of the
   raised circular boss the shaft emerges from, NOT from the motor face plate. It is
   therefore not the number a vendor listing means by "shaft length". The face-plate
-  figure is 24.37 mm. Prefer the 22.39 mm boss datum where a feature can be dimensioned
+  figure is 24.39 mm. Prefer the 22.39 mm boss datum where a feature can be dimensioned
   from the boss. Do not silently treat 22.39 mm as a face-plate dimension.
 
 BIGTREETECH TMC2209 V1.3 driver, quantity 2, measured WITH heatsink installed:
@@ -200,7 +200,7 @@ Before you create any geometry, do all seven of these and stop for my approval:
      heat-set insert boss. These are small printable test pieces, not full parts. Tell
      me what to print and what to measure on each one.
      The pilot boss register coupon is the cheapest useful one, because both of its
-     inputs are already measured (21.97 mm diameter, 1.98 mm deep). It tests only my
+     inputs are already measured (21.97 mm diameter, 2.00 mm deep). It tests only my
      printer's clearance, so start there.
      A coupon measures how MY PRINTER deviates from a known number. It cannot discover
      the dimension of a metal part. Do not propose a coupon to find a bearing's outer

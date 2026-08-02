@@ -19,6 +19,29 @@ All values are millimetres unless the parameter is an angle.
 > the real measurement. Do not treat a provisional value as verified because it looks
 > plausible.
 
+## The one rule: never edit a measured value to fix a fit
+
+Every critical dimension exists twice:
+
+| | Parameter | Changes when |
+|---|---|---|
+| **Measured value** | e.g. `MotorPilotHeight` | Never — only if the part is re-measured or replaced |
+| **CAD value** | e.g. `MotorPilotPocketDepth` | Freely — it is an expression, and fit is tuned through the clearance term |
+
+```text
+MotorPilotHeight        = 2.00 mm                              <- measured, frozen
+MotorPilotPocketDepth   = MotorPilotHeight + PrintClearance    <- CAD, tune via clearance
+```
+
+When a printed part comes out too tight, the fix is `PrintClearance` or
+`BearingFitAllowance` — **never** the measured number. Editing a measured value to fix
+a fit destroys the record of what the hardware actually is, and the error then
+propagates silently into every other feature that references it.
+
+This is why the fit parameters are separate, single-purpose, and few: `PrintClearance`,
+`BearingFitAllowance`, `MountingClearance`, `HeatsinkAirGap`, `CableBendClearance`. All
+tuning happens in those.
+
 ---
 
 ## Measured
@@ -32,6 +55,9 @@ Traceable to a caliper reading and a photograph.
 | `MotorLengthWithBoss` | 22.85 mm | nema17.md — IMG_5248 | Measured | Pilot boss face to rear face |
 | `MotorOverallLength` | 45.18 mm | nema17.md — IMG_5250 | Measured | Shaft tip to rear face — the full axial envelope |
 | `MotorPilotDiameter` | 21.97 mm | nema17.md — IMG_5247 | Measured | Register that centres the motor. Was provisional at 22.00 mm |
+| `MotorPilotHeight` | 2.00 mm | nema17.md — derived, ±0.06 mm | Measured | Derivation gives 1.95 and 2.01 by two routes; 2.00 adopted. **Frozen — tune fit via `PrintClearance`** |
+| `Ad8317OverallWidth` | 55.84 mm | ad8317.md — **no photograph** | Measured | Mean of 55.88 / 55.79, SMA tip to tip |
+| `Ad8317ShieldCanLength` | 17.34 mm | ad8317.md — **no photograph** | Measured | RF shield can only |
 | `MotorConnectorProtrusion` | 9.38 mm | nema17.md — IMG_5226, IMG_5227 | Measured | Height of rear connector above end-cap face; two independent readings agreed |
 | `MotorConnectorLength` | 16.43 mm | nema17.md — IMG_5228 | Measured | 6-position housing on the rear end cap |
 | `MotorShaftLengthFromBoss` | 22.39 mm | nema17.md — operator measurement | Measured | **Datum is the pilot boss face, not the motor face plate.** No source photograph |
@@ -62,7 +88,11 @@ Derived by expression. Fusion will keep these correct when their inputs change.
 | `Esp32PocketLength` | `Esp32PcbLength + 2 * PrintClearance` | Calculated | Calculated | Tray pocket, removable fit |
 | `Esp32PocketWidth` | `Esp32PcbWidth + 2 * PrintClearance` | Calculated | Calculated | Tray pocket, removable fit |
 | `MotorFaceHalf` | `MotorFaceWidth / 2` | Calculated | Calculated | Used to centre the motor on its mount |
-| `MotorPilotHeight` | `MotorLengthWithBoss - MotorBodyLength` | Calculated | Calculated | 2.01 mm. Cross-check `MotorOverallLength - MotorShaftLengthFromBoss - MotorBodyLength` gives 1.95 mm; the two routes agree to 0.06 mm |
+| `MotorPilotPocketDepth` | `MotorPilotHeight + PrintClearance` | Calculated | Calculated | The counterbore in the printed mount. Tune fit here, never in `MotorPilotHeight` |
+| `MotorPilotSeatDiameter` | `MotorPilotDiameter + PrintClearance` | Calculated | Calculated | The register bore in the printed mount |
+| `DriverBayLength` | `DriverPcbLength + 2 * PrintClearance` | Calculated | Calculated | Driver bay footprint, removable fit |
+| `DriverBayWidth` | `DriverPcbWidth + 2 * PrintClearance` | Calculated | Calculated | Driver bay footprint, removable fit |
+| `Esp32SlotThickness` | `Esp32PcbThickness + PrintClearance` | Calculated | Calculated | Card-slot width. The board is 1.33 mm, not 1.6 mm |
 | `MotorShaftLengthFromFace` | `MotorShaftLengthFromBoss + MotorPilotHeight` | Calculated | Calculated | 24.40 mm — the vendor-style figure. Now fully derived from measured values |
 | `CouplerShaftEngagement` | `CouplerLength / 2` | Calculated | Calculated | Motor-side engagement. Must stay below `MotorShaftLengthFromBoss` (22.39 mm) |
 | `BearingSeatBore` | `BearingOuterDiameter - BearingFitAllowance` | Calculated | Calculated | Press-fit seat; validate with a coupon first |

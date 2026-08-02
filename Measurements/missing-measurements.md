@@ -79,7 +79,7 @@ Two categories:
 ### NEMA 17 — shaft flat
 
 - **Resolved:** shaft length is measured at 22.39 mm from the pilot boss face, and the
-  face-plate figure derives to 24.37 mm — see [`nema17.md`](nema17.md).
+  face-plate figure derives to 24.39 mm — see [`nema17.md`](nema17.md).
 - **Still missing:** flat length and flat depth on the output shaft.
 - **Why it matters:** determines whether a coupler grub screw seats on the flat or
   mars the round shaft, and how much the coupler can be slid along the shaft.
@@ -176,11 +176,22 @@ Two categories:
   LM2596S) and they may not share an outline — measure both.
 - **How to measure:** caliper on the PCB outline and across the tallest component.
 
-### AD8317 / AD8318 RF detector — nothing measured
+### AD8317 RF detector — partly measured, two values conflict
 
-- **Missing dimensions:** PCB outline, thickness, mounting holes, RF connector type
-  and position, total height
-- **Why it matters:** needed only once an RF detector is actually selected. No
-  detector is committed to in Version 1 — see
-  [`../docs/hardware/rf-measurement.md`](../docs/hardware/rf-measurement.md).
-- **How to measure:** as for the other PCBs, once a board is in hand.
+Overall width (55.84 mm) and shield-can length (17.34 mm) are recorded in
+[`ad8317.md`](ad8317.md). Two problems remain.
+
+- **Blocking conflict:** the reported "PCB height, board only" (36.27 mm) is *larger*
+  than the reported "overall height including SMA connectors" (35.75 mm). A board
+  cannot be taller without its connectors than with them, so one label is wrong. The
+  likely explanation is that 36.27 mm is the PCB **width**, but that is an inference
+  and is not recorded as fact.
+- **How to resolve:** one caliper reading of the bare PCB across each axis, connectors
+  excluded, plus a photograph of each. Two readings close it.
+- **Provenance gap:** no AD8317 photographs exist in this repository. Add them to
+  `Measurements/AD8317/` so the values become traceable like everything else.
+- **Still missing:** PCB thickness, mounting-hole diameter and spacing, total height
+  including components, SMA connector centre positions.
+- **Note:** no RF detector is committed to in Version 1 — see
+  [`../docs/hardware/rf-measurement.md`](../docs/hardware/rf-measurement.md). This
+  board is documented because it was measured, not because it is selected.
