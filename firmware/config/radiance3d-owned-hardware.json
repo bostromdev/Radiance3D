@@ -1,0 +1,107 @@
+{
+  "profile_id": "radiance3d-owned-hardware-v1",
+  "status": "bench-confirmation-required",
+  "visual_reference_root": "Part Numbers:Views",
+  "controller": {
+    "manufacturer": "ELEGOO",
+    "board": "ESP32 DevKit-style USB-C board with rear OLED",
+    "module": "ESP-WROOM-32",
+    "photo": "ESP-32-elegoo top view(part #EL-SM-012).jpeg",
+    "logic_voltage_v": 3.3,
+    "input_voltage_v": 5.0,
+    "reserved_oled_pins": [21, 22],
+    "protocol_version": 1,
+    "usb_serial_baud": 115200,
+    "emergency_stop_pin": 13,
+    "emergency_stop_active_low": true,
+    "emergency_stop_pullup": true,
+    "emergency_stop_pulldown": false,
+    "emergency_stop_debounce_ms": 10
+  },
+  "power": {
+    "external_input": {
+      "location": "permanent bench power source beneath workbench",
+      "conductors": ["+12V IN", "GND IN"],
+      "assembly_entry_requirement": "accessible strain-relieved external 12V power entry"
+    },
+    "motor_supply_voltage_v": 12.0,
+    "digital_control_voltage_v": 5.0,
+    "rf_analog_voltage_v": 5.0,
+    "buck_converters": [
+      {"model": "ZX-052 V2.0", "branch": "digital-control", "input": "internal-12V-distribution", "output": "ESP32-VIN"},
+      {"model": "ZX-052 V2.0", "branch": "rf-analog", "input": "internal-12V-distribution", "output": "AD8317-5V"}
+    ],
+    "outputs_paralleled": false,
+    "common_ground_required": true
+  },
+  "mechanical_architecture": {
+    "status": "conceptual-for-Autodesk-Fusion-design; not dimensioned",
+    "enclosure_designed": false,
+    "stationary_base": ["ESP32 DevKit", "two BIGTREETECH TMC2209 V1.3 drivers", "ZX-052 Buck Converter A", "ZX-052 Buck Converter B", "external +12V/GND input", "internal power distribution"],
+    "rotating_platform": ["tilt motor", "AD8317 detector", "antenna mount"],
+    "pan_rotation": "one controlled 360 degree rotation; not unlimited continuous rotation",
+    "moving_harness": "tilt motor and AD8317 wiring only; lengths TBD AFTER CAD",
+    "rf_measurement": "external stationary 5.8GHz VTX; AUT directly threads onto vertically mounted AD8317 SMA; no RG316 jumper"
+  },
+  "drivers": {
+    "driver_family": "BIGTREETECH TMC2209 V1.3",
+    "quantity": 2,
+    "photo": "TMC2209 v1.3 top view with heatsink.jpeg",
+    "driver_interface": "STEP/DIR with PDN_UART diagnostics",
+    "uart_baud": 115200,
+    "uart_timeout_ms": 20,
+    "sense_resistor_milliohms": 110,
+    "single_wire_pdn_uart": false,
+    "write_echo_expected": false,
+    "enable_active_low": true,
+    "interpolation": true,
+    "microsteps": 16,
+    "cooling": "install supplied heatsink after electrical inspection and before powered motion testing"
+  },
+  "motors": {
+    "manufacturer": "YEJMKJ",
+    "model": "42HDB0014NC",
+    "quantity": 2,
+    "photo": "NEMA-17(part #YEJMKJ).jpeg",
+    "full_steps_per_revolution": 200,
+    "rated_phase_current_a": 1.0,
+    "phase_resistance_ohm": 3.5,
+    "holding_torque_nm": 0.13,
+    "dimensions_mm": [42, 42, 21],
+    "phase_wiring": {"A+": "Black", "A-": "Green", "B+": "Red", "B-": "Blue"}
+  },
+  "detector": {
+    "model": "AD8317 EVB / module V1.0",
+    "quantity": 1,
+    "photo": null,
+    "supply_voltage_v": 5.0,
+    "adc_pin": 36,
+    "adc_unit": "ADC1",
+    "filter": {"kind": "median_then_mean", "median_samples": 5, "mean_samples": 8},
+    "calibration": {"enabled": false, "volts_per_db": null, "intercept_dbm": null, "note": "Raw ADC and volts are valid; inferred dBm requires bench calibration."}
+  },
+  "axes": {
+    "azimuth": {
+      "driver": "BIGTREETECH TMC2209 V1.3", "driver_profile": "BIGTREETECH TMC2209 V1.3", "uart_channel": 2, "uart_address": 0,
+      "uart_tx_pin": 17, "uart_rx_pin": 16, "step_pin": 25, "direction_pin": 26, "enable_pin": 27,
+      "home_switch_pin": -1, "home_switch_normally_closed": false, "home_switch_pullup": false, "home_switch_pulldown": false,
+      "homing_direction_negative": true, "home_switch_debounce_ms": 10,
+      "motor_full_steps_per_revolution": 200, "microsteps": 16, "gear_ratio": 1.0, "direction_inverted": false,
+      "minimum_angle_deg": -90.0, "maximum_angle_deg": 90.0, "home_offset_deg": 0.0,
+      "commissioning_current_ma": 650, "maximum_rms_current_ma": 800, "hold_current_percent": 30,
+      "max_speed_deg_s": 10.0, "acceleration_deg_s2": 20.0, "home_speed_deg_s": 5.0, "slow_home_speed_deg_s": 1.0,
+      "homing_backoff_deg": 3.0, "settling_time_ms": 250, "maximum_bench_test_steps": 3200, "motion_timeout_ms": 60000
+    },
+    "elevation": {
+      "driver": "BIGTREETECH TMC2209 V1.3", "driver_profile": "BIGTREETECH TMC2209 V1.3", "uart_channel": 1, "uart_address": 1,
+      "uart_tx_pin": 14, "uart_rx_pin": 39, "step_pin": 18, "direction_pin": 19, "enable_pin": 23,
+      "home_switch_pin": -1, "home_switch_normally_closed": false, "home_switch_pullup": false, "home_switch_pulldown": false,
+      "homing_direction_negative": true, "home_switch_debounce_ms": 10,
+      "motor_full_steps_per_revolution": 200, "microsteps": 16, "gear_ratio": 1.0, "direction_inverted": false,
+      "minimum_angle_deg": -45.0, "maximum_angle_deg": 45.0, "home_offset_deg": 0.0,
+      "commissioning_current_ma": 650, "maximum_rms_current_ma": 800, "hold_current_percent": 30,
+      "max_speed_deg_s": 8.0, "acceleration_deg_s2": 15.0, "home_speed_deg_s": 4.0, "slow_home_speed_deg_s": 1.0,
+      "homing_backoff_deg": 3.0, "settling_time_ms": 250, "maximum_bench_test_steps": 3200, "motion_timeout_ms": 60000
+    }
+  }
+}

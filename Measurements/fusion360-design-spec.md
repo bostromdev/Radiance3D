@@ -1,12 +1,17 @@
 # Fusion 360 design spec — precision pass
 
+The enclosure has not yet been designed. All component locations are conceptual only;
+the [reference architecture](../docs/hardware/reference-architecture.md) is the official
+non-dimensioned placement baseline for Fusion work.
+
 This document is a tighter handoff for the first Radiance3D pan-and-tilt prototype. It turns the broad CAD brief into a concrete implementation plan that is easier to execute in Fusion 360 and easier to review.
 
 ## 1. Target architecture
 
 The first prototype should use a two-axis, two-bearing mechanism with the motor shafts protected from side load:
 
-- Pan axis: a rotating platform carried on bearings in the base, driven by the pan motor through a coupler.
+- Pan axis: a rotating platform carried on bearings in the base, driven by the fixed
+  stationary-base pan motor through a coupler; target capability is one controlled 360° turn.
 - Tilt axis: a tilt support frame carried on bearings and driven by the tilt motor through a coupler.
 - The motor shaft should never be the primary radial support for the axis. The bearings carry the load; the motor supplies torque only.
 - The antenna active centre should be placed as close as practical to the pan/tilt axis intersection. The target is $0\,\text{mm}$ offset. Any remaining offset must be recorded as a design parameter rather than hidden.
@@ -67,8 +72,12 @@ The antenna active centre should be brought as close as practical to the pan/til
 
 ### 4.4 Cable path
 
-The cable route should be planned before the frame is finalized. Cable routing must account for:
-- coax bend radius
+The cable route should be planned before the frame is finalized. RF and electrical
+cabling must be modelled as separate routes: RG316 50 Ω coax is represented with centre
+conductor and shield for RF-### paths, while PWR-###, SIG-###, and MTR-### are silicone
+wire harnesses. Cable routing must account for:
+- bend radius of the moving silicone harness; the external VTX RG316 path is not a
+  scanner-mounted antenna-to-detector jumper
 - connector reach
 - axis travel
 - strain relief

@@ -11,13 +11,13 @@ file(MAKE_DIRECTORY "${RADIANCE3D_GENERATED_INCLUDE_DIR}")
 set(RADIANCE3D_GENERATED_PROFILE_HEADER
     "${RADIANCE3D_GENERATED_INCLUDE_DIR}/hardware_profile_generated.hpp")
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
-  "${RADIANCE3D_CONTROLLER_DIR}/../config/provisional-esp32dev-v1.json"
+  "${RADIANCE3D_CONTROLLER_DIR}/../config/radiance3d-owned-hardware.json"
   "${RADIANCE3D_REPOSITORY_DIR}/scripts/generate_hardware_profile_header.py")
 
 execute_process(
   COMMAND "${Python3_EXECUTABLE}"
           "${RADIANCE3D_REPOSITORY_DIR}/scripts/generate_hardware_profile_header.py"
-          --profile "${RADIANCE3D_CONTROLLER_DIR}/../config/provisional-esp32dev-v1.json"
+          --profile "${RADIANCE3D_CONTROLLER_DIR}/../config/radiance3d-owned-hardware.json"
           --output "${RADIANCE3D_GENERATED_PROFILE_HEADER}"
   RESULT_VARIABLE RADIANCE3D_PROFILE_RESULT
   ERROR_VARIABLE RADIANCE3D_PROFILE_ERROR

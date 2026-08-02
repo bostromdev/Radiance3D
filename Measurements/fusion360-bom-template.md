@@ -1,5 +1,9 @@
 # Fusion 360 BOM template
 
+The enclosure has not yet been designed. All placements are conceptual only; use
+[`../docs/hardware/reference-architecture.md`](../docs/hardware/reference-architecture.md)
+as the official non-dimensioned baseline.
+
 Use this as the starting BOM for the first prototype. Because the relevant hardware is already in the project, this can stay as a simple mechanical checklist first; fill in part numbers and suppliers only if you want a formal procurement list.
 
 ## Mechanical
@@ -21,15 +25,17 @@ Use this as the starting BOM for the first prototype. Because the relevant hardw
 |---|---:|---|---|---|
 | ESP32 board | 1 | ELEGOO ESP32 devkit | TBD | Existing hardware |
 | TMC2209 driver | 2 | Stepper driver module | TBD | Existing hardware |
-| Buck converter | 1 | LM2596 module | TBD | Measure before tray finalization |
+| Buck converter A | 1 | ZX-052 V2.0, ESP32 5 V branch | TBD | Existing hardware; stationary base |
+| Buck converter B | 1 | ZX-052 V2.0, AD8317 5 V branch | TBD | Existing hardware; stationary base |
 
 ## RF and antenna
 
 | Item | Qty | Description | Part number | Notes |
 |---|---:|---|---|---|
-| Antenna under test | 1 | Antenna to be mounted | TBD | Measure before cradle finalization |
-| Coax | 1 | RF cable to antenna | TBD | Check bend radius |
-| RF detector | 1 | AD8317 evaluation board | TBD | Existing hardware |
+| Antenna under test | 1 | Threads directly onto AD8317 SMA | TBD | Measure before direct-SMA mount finalization |
+| RF detector | 1 | AD8317 evaluation board, vertically mounted | TBD | Existing hardware; rotating platform |
+| External VTX | 1 | Stationary external 5.8 GHz source | TBD | Off-scanner; not an enclosure component |
+| RG316 jumper, antenna to detector | 0 | Not used | — | Direct SMA connection only |
 
 ## Miscellaneous
 

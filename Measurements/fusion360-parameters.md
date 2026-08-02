@@ -1,5 +1,8 @@
 # Fusion 360 parameters
 
+The enclosure has not yet been designed. These parameters support conceptual Fusion
+work only; they do not establish final component locations or enclosure dimensions.
+
 Proposed Fusion 360 user parameters for the Radiance3D pan-and-tilt prototype.
 
 Every parameter is tagged with its **type**, and the types are never mixed silently:

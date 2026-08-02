@@ -1,5 +1,9 @@
 # Fusion 360 Assistant prompt
 
+The enclosure has not yet been designed. Treat all listed component locations as
+conceptual only and follow [`../docs/hardware/reference-architecture.md`](../docs/hardware/reference-architecture.md)
+for the official non-dimensioned placement baseline.
+
 Paste everything inside the code block below into Fusion 360 Assistant. It is written
 to be self-contained — it carries the measured dimensions with it, so the assistant
 does not need access to this repository.
@@ -18,9 +22,11 @@ Source of the numbers: [`nema17.md`](nema17.md), [`tmc2209-v1.3.md`](tmc2209-v1.
 You are helping me design the first Radiance3D pan-and-tilt prototype in Fusion 360.
 
 Radiance3D is an antenna radiation-pattern measurement platform. The mechanism rotates
-an antenna under test (AUT) in azimuth (pan) and elevation (tilt) while a stationary
-receiver measures it. Positioning repeatability matters more than speed, and the
-structure must not distort the radiation pattern more than necessary.
+the AD8317-mounted antenna under test (AUT) in azimuth (pan) and elevation (tilt) while
+an external stationary 5.8 GHz VTX transmits. The AUT threads directly onto the
+vertically mounted AD8317 SMA; no RG316 jumper connects the AUT and detector.
+Positioning repeatability matters more than speed, and the structure must not distort
+the radiation pattern more than necessary.
 
 =====================================================================
 NON-NEGOTIABLE RULES
@@ -38,21 +44,26 @@ NON-NEGOTIABLE RULES
    If a print comes out tight, the fix is dPrintClearance or dBearingFitAllowance, and
    nothing else. Overwriting a measurement with a print allowance destroys the record
    of what the hardware actually is.
-3. Each major part is a separate Fusion component, named as listed below.
-4. The MEASURED dimensions below are the source of truth. They were taken with
+3. The enclosure is not designed yet: all locations are conceptual, not dimensioned.
+   Place ESP32 and both drivers/bucks in the stationary base; place only the tilt motor,
+   vertically mounted AD8317, and antenna mount on the rotating platform. The pan motor
+   is fixed in the base and the target motion is one controlled 360° turn, not unlimited
+   continuous rotation. Model a managed moving harness, with lengths TBD AFTER CAD.
+4. Each major part is a separate Fusion component, named as listed below.
+5. The MEASURED dimensions below are the source of truth. They were taken with
    calipers on the actual parts. Do not replace them with datasheet or "standard"
    values, even where a standard value looks rounder or more familiar.
-5. Never guess a critical fit dimension. Anything marked PROVISIONAL is a placeholder
+6. Never guess a critical fit dimension. Anything marked PROVISIONAL is a placeholder
    for a measurement I have not taken yet. If a feature's fit depends on a PROVISIONAL
    value, say so out loud before modelling it, and design that feature so the
    parameter can change without rebuilding the part.
-6. Design for PETG on a fused-filament printer:
+7. Design for PETG on a fused-filament printer:
    - avoid overhangs steeper than 45 degrees where a design change can prevent them
    - minimise support material; state the intended print orientation for each part
    - use structural fillets at load-bearing intersections and ribs instead of thick
      solid walls
    - use heat-set threaded inserts wherever a fastener will be removed more than once
-7. Protect the motor shafts. A motor shaft must not carry a side load or a cantilevered
+8. Protect the motor shafts. A motor shaft must not carry a side load or a cantilevered
    mass. Every rotating axis is carried on its own bearings; the motor supplies torque
    through a coupler only.
 7a. Both motors have a connector on the rear end cap that stands 9.38 mm proud, with a
@@ -61,13 +72,14 @@ NON-NEGOTIABLE RULES
    connector must stay reachable for wiring. When you recommend a motor orientation,
    state where that 21.4 mm goes and what it costs in stack height. Do not recommend an
    orientation without pricing it.
-8. Place the pan and tilt axes as close together as practical, and put the antenna's
+9. Place the pan and tilt axes as close together as practical, and put the antenna's
    active centre as close as practical to the point where the two axes intersect.
    Offset between the antenna phase centre and the axis intersection is a measurement
    error, not just an aesthetic issue. Report any offset you cannot eliminate.
-9. Route cables so they never bind, stretch or wrap as the axes move. Coax bend radius
-   is a hard constraint, not a guideline.
-10. Work on ONE major component at a time. Do not start the next component until I
+10. Route the moving silicone harness so it never binds, stretches, or wraps through
+    one controlled 360° pan turn; its bend radius is a hard constraint, not a guideline.
+    The external VTX coax is off-scanner and there is no AUT-to-detector coax jumper.
+11. Work on ONE major component at a time. Do not start the next component until I
     have reviewed and approved the current one.
 
 =====================================================================

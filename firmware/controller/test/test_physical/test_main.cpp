@@ -193,7 +193,7 @@ void test_compiled_defaults_are_generated_from_the_hardware_profile() {
       radiance3d::generated_profile::kElevation.commissioning_current_ma,
       config.elevation.axis.motion.motor_rms_current_ma);
   TEST_ASSERT_EQUAL_UINT8(30, config.azimuth.axis.motion.hold_current_percent);
-  TEST_ASSERT_EQUAL_UINT8(40, config.elevation.axis.motion.hold_current_percent);
+  TEST_ASSERT_EQUAL_UINT8(30, config.elevation.axis.motion.hold_current_percent);
   TEST_ASSERT_EQUAL_UINT16(
       radiance3d::generated_profile::kAzimuth.maximum_rms_current_ma,
       config.azimuth.driver.maximum_rms_current_ma);
@@ -201,8 +201,8 @@ void test_compiled_defaults_are_generated_from_the_hardware_profile() {
                            config.azimuth.driver.uart_baud);
   TEST_ASSERT_EQUAL_UINT32(radiance3d::generated_profile::kTmcUartTimeoutMs,
                            config.elevation.driver.uart_timeout_ms);
-  TEST_ASSERT_TRUE(config.azimuth.driver.uart_single_wire);
-  TEST_ASSERT_TRUE(config.azimuth.driver.write_echo_expected);
+  TEST_ASSERT_FALSE(config.azimuth.driver.uart_single_wire);
+  TEST_ASSERT_FALSE(config.azimuth.driver.write_echo_expected);
   TEST_ASSERT_EQUAL_INT(1, config.azimuth.axis.motion.gear_ratio.numerator);
   TEST_ASSERT_EQUAL_INT(1, config.azimuth.axis.motion.gear_ratio.denominator);
 }
