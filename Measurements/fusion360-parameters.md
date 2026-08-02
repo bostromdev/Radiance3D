@@ -56,8 +56,10 @@ Traceable to a caliper reading and a photograph.
 | `MotorOverallLength` | 45.18 mm | nema17.md — IMG_5250 | Measured | Shaft tip to rear face — the full axial envelope |
 | `MotorPilotDiameter` | 21.97 mm | nema17.md — IMG_5247 | Measured | Register that centres the motor. Was provisional at 22.00 mm |
 | `MotorPilotHeight` | 2.00 mm | nema17.md — derived, ±0.06 mm | Measured | Derivation gives 1.95 and 2.01 by two routes; 2.00 adopted. **Frozen — tune fit via `PrintClearance`** |
-| `Ad8317OverallWidth` | 55.84 mm | ad8317.md — **no photograph** | Measured | Mean of 55.88 / 55.79, SMA tip to tip |
-| `Ad8317ShieldCanLength` | 17.34 mm | ad8317.md — **no photograph** | Measured | RF shield can only |
+| `Ad8317OverallWidth` | 55.84 mm | ad8317.md — IMG_5257, IMG_5258 | Measured | SMA tip to tip, along the SMA axis |
+| `Ad8317PcbLength` | 36.27 mm | ad8317.md — IMG_5261 | Measured | Bare PCB, along the SMA axis |
+| `Ad8317PcbWidth` | 35.72 mm | ad8317.md — IMG_5262 | Measured | Bare PCB, perpendicular. **Board is not square** |
+| `Ad8317ShieldCanLength` | 17.36 mm | ad8317.md — IMG_5259, IMG_5260 | Measured | RF shield can only; mean of 17.34 / 17.38 |
 | `MotorConnectorProtrusion` | 9.38 mm | nema17.md — IMG_5226, IMG_5227 | Measured | Height of rear connector above end-cap face; two independent readings agreed |
 | `MotorConnectorLength` | 16.43 mm | nema17.md — IMG_5228 | Measured | 6-position housing on the rear end cap |
 | `MotorShaftLengthFromBoss` | 22.39 mm | nema17.md — operator measurement | Measured | **Datum is the pilot boss face, not the motor face plate.** No source photograph |
@@ -93,6 +95,9 @@ Derived by expression. Fusion will keep these correct when their inputs change.
 | `DriverBayLength` | `DriverPcbLength + 2 * PrintClearance` | Calculated | Calculated | Driver bay footprint, removable fit |
 | `DriverBayWidth` | `DriverPcbWidth + 2 * PrintClearance` | Calculated | Calculated | Driver bay footprint, removable fit |
 | `Esp32SlotThickness` | `Esp32PcbThickness + PrintClearance` | Calculated | Calculated | Card-slot width. The board is 1.33 mm, not 1.6 mm |
+| `Ad8317SmaProtrusion` | `(Ad8317OverallWidth - Ad8317PcbLength) / 2` | Calculated | Calculated | 9.78 mm per side. Normal for an edge-launch SMA, which corroborates the two readings |
+| `Ad8317PocketLength` | `Ad8317PcbLength + 2 * PrintClearance` | Calculated | Calculated | Removable holder, not an interference fit — this board carries RF |
+| `Ad8317PocketWidth` | `Ad8317PcbWidth + 2 * PrintClearance` | Calculated | Calculated | Removable holder |
 | `MotorShaftLengthFromFace` | `MotorShaftLengthFromBoss + MotorPilotHeight` | Calculated | Calculated | 24.40 mm — the vendor-style figure. Now fully derived from measured values |
 | `CouplerShaftEngagement` | `CouplerLength / 2` | Calculated | Calculated | Motor-side engagement. Must stay below `MotorShaftLengthFromBoss` (22.39 mm) |
 | `BearingSeatBore` | `BearingOuterDiameter - BearingFitAllowance` | Calculated | Calculated | Press-fit seat; validate with a coupon first |

@@ -44,7 +44,7 @@ See [`fusion360-parameters.md`](fusion360-parameters.md).
 | NEMA 17 stepper motor (×2), model 42HDB0014NC-24B | [`nema17.md`](nema17.md) | `Nema-17/` — IMG_5221.jpg, IMG_5223–IMG_5232.HEIC, IMG_5247–IMG_5250.HEIC |
 | BIGTREETECH TMC2209 V1.3 driver (×2) | [`tmc2209-v1.3.md`](tmc2209-v1.3.md) | `TMC2209 v1.3/` — IMG_5233–IMG_5240.HEIC |
 | ELEGOO ESP32 devkit (×1) | [`esp32-devkit.md`](esp32-devkit.md) | `ESP32-ELEGOO/` — IMG_5241–IMG_5246.HEIC |
-| AD8317 RF detector board | [`ad8317.md`](ad8317.md) | **none in this repository** — values reported only |
+| AD8317 EVAL BD (NWDZ V1.0) RF detector | [`ad8317.md`](ad8317.md) | `AD8317/` — IMG_5257–IMG_5262.HEIC |
 
 ## CAD handoff
 
@@ -79,7 +79,8 @@ Full detail, including how to take each one, is in
 - Antenna mount — connector, antenna body, coax diameter and bend radius
 - Limit switches — body, mounting holes, lever, actuation travel
 - LM2596 buck converter — outline, mounting holes, total height
-- AD8317 / AD8318 RF detector — no board selected or measured
+- AD8317 detector — PCB thickness, mounting holes, shield-can height (outline is
+  measured)
 
 Bearings, couplers, fasteners, the antenna mount and the limit switches have no
 measurements at all yet, so no component file has been created for them. Files will be

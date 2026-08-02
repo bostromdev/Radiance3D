@@ -176,22 +176,22 @@ Two categories:
   LM2596S) and they may not share an outline — measure both.
 - **How to measure:** caliper on the PCB outline and across the tallest component.
 
-### AD8317 RF detector — partly measured, two values conflict
+### AD8317 RF detector — outline resolved, some features remain
 
-Overall width (55.84 mm) and shield-can length (17.34 mm) are recorded in
-[`ad8317.md`](ad8317.md). Two problems remain.
+The board outline is now fully measured and photographed — 36.27 × 35.72 mm bare,
+55.84 mm including both SMA connectors. The earlier axis-label conflict is resolved;
+see [`ad8317.md`](ad8317.md).
 
-- **Blocking conflict:** the reported "PCB height, board only" (36.27 mm) is *larger*
-  than the reported "overall height including SMA connectors" (35.75 mm). A board
-  cannot be taller without its connectors than with them, so one label is wrong. The
-  likely explanation is that 36.27 mm is the PCB **width**, but that is an inference
-  and is not recorded as fact.
-- **How to resolve:** one caliper reading of the bare PCB across each axis, connectors
-  excluded, plus a photograph of each. Two readings close it.
-- **Provenance gap:** no AD8317 photographs exist in this repository. Add them to
-  `Measurements/AD8317/` so the values become traceable like everything else.
-- **Still missing:** PCB thickness, mounting-hole diameter and spacing, total height
-  including components, SMA connector centre positions.
-- **Note:** no RF detector is committed to in Version 1 — see
-  [`../docs/hardware/rf-measurement.md`](../docs/hardware/rf-measurement.md). This
-  board is documented because it was measured, not because it is selected.
+- **Still missing:** PCB thickness, mounting-hole diameter and spacing (four plated
+  corner holes are visible in `AD8317/IMG_5261.HEIC`), shield-can height above the PCB,
+  total board height including components, SMA connector centre positions relative to
+  the board edges.
+- **Why it matters:** only needed once an RF detector is actually selected. No detector
+  is committed to in Version 1 — see
+  [`../docs/hardware/rf-measurement.md`](../docs/hardware/rf-measurement.md).
+- **How to measure:** caliper on a clear PCB edge for thickness; internal jaws for hole
+  diameter; between two hole outer edges minus one diameter for spacing; caliper depth
+  rod from the PCB surface to the can top for can height.
+- **Note on IMG_5258:** the decimals are obscured by glare. The reading was reported as
+  55.79 mm but only `55.` is independently legible. `IMG_5257.HEIC` (55.88 mm) is the
+  clear one and the adopted 55.84 mm is the mean of the two.
