@@ -62,6 +62,12 @@ Two categories:
 
 ## 2. Not measured — no photo exists
 
+> [!NOTE]
+> **This is not a shopping list.** The parts below are owned or on order. What is
+> missing is *caliper readings*, not the hardware. A part cannot be modelled from the
+> fact that it exists — the CAD needs its dimensions. Anything listed here needs five
+> minutes with calipers, not a purchase.
+
 ### NEMA 17 — mounting-hole pattern
 
 > This is now the largest remaining unknown on the motor itself. Everything else on
