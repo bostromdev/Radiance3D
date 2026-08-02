@@ -10,7 +10,7 @@ override any generic NEMA 17 dimensions found online.
 - **Model: `42HDB0014NC-24B`** — read from the motor nameplate in `IMG_5249.HEIC` and
   `IMG_5250.HEIC`
 - Quantity: 2 (azimuth / pan and elevation / tilt)
-- Measurement source: `Measurements/Nema-17/`
+- Measurement source: photographs IMG_5221, IMG_5223–5232, IMG_5247–5250
 - Measured with: digital caliper, IP54, mm mode
 - Units: mm
 

@@ -39,5 +39,5 @@ ctest --test-dir build-host --output-on-failure
 ```
 
 The simulator reads one command per line from standard input and writes responses and
-events to standard output. See [the protocol specification](../../docs/firmware/protocol.md)
-and [native architecture](../../docs/firmware/esp-idf-architecture.md).
+events to standard output. See the protocol specification
+and native architecture.

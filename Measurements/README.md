@@ -39,12 +39,12 @@ See [`fusion360-parameters.md`](fusion360-parameters.md).
 
 ## Measured components
 
-| Component | Documentation | Source pictures |
+| Component | Documentation | Source photos |
 |---|---|---|
-| NEMA 17 stepper motor (×2), model 42HDB0014NC-24B | [`nema17.md`](nema17.md) | `Nema-17/` — IMG_5221.jpg, IMG_5223–IMG_5232.HEIC, IMG_5247–IMG_5250.HEIC |
-| BIGTREETECH TMC2209 V1.3 driver (×2) | [`tmc2209-v1.3.md`](tmc2209-v1.3.md) | `TMC2209 v1.3/` — IMG_5233–IMG_5240.HEIC |
-| ELEGOO ESP32 devkit (×1) | [`esp32-devkit.md`](esp32-devkit.md) | `ESP32-ELEGOO/` — IMG_5241–IMG_5246.HEIC |
-| AD8317 EVAL BD (NWDZ V1.0) RF detector | [`ad8317.md`](ad8317.md) | `AD8317/` — IMG_5257–IMG_5262.HEIC |
+| NEMA 17 stepper motor (×2), model 42HDB0014NC-24B | [`nema17.md`](nema17.md) | IMG_5221, IMG_5223–5232, IMG_5247–5250 |
+| BIGTREETECH TMC2209 V1.3 driver (×2) | [`tmc2209-v1.3.md`](tmc2209-v1.3.md) | IMG_5233–5240 |
+| ELEGOO ESP32 devkit (×1) | [`esp32-devkit.md`](esp32-devkit.md) | IMG_5241–5246 |
+| AD8317 EVAL BD (NWDZ V1.0) RF detector | [`ad8317.md`](ad8317.md) | IMG_5257–5262 |
 
 ## CAD handoff
 
@@ -87,11 +87,14 @@ measurements at all yet, so no component file has been created for them. Files w
 added when the parts are measured — empty placeholder files are deliberately not
 created.
 
-## Photograph handling
+## Source photographs
 
-Source pictures are never modified, renamed or deleted. The original filename is
-recorded as the measurement source for every value, so any number in this repository
-can be traced back to the photograph it came from.
+Every value cites the photograph it was read from, by filename.
 
-Most pictures are Apple HEIC. If a viewer cannot open them, convert a copy — do not
-convert in place.
+**The photographs are not stored in this repository.** They were removed to keep the
+working tree small. They live in `Desktop/fine tune measurements/Radiance3D-measurement-photos/`,
+and remain in this repository's git history — `git log --all -- Measurements` will find
+them if the working copy is ever lost.
+
+The filename citations are kept regardless. A number that names its source is auditable
+against the original photo; a number that doesn't is just an assertion.

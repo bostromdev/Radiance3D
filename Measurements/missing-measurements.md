@@ -22,7 +22,7 @@ Two categories:
   binding motor.
 - **How to measure:** caliper across two opposite flats of the face plate, not the
   chamfered corners. Take it twice, rotated 90°, and record both.
-- **Related picture:** `Nema-17/IMG_5221.jpg` — reads `42` but the photo is too low
+- **Related picture:** `IMG_5221.jpg` — reads `42` but the photo is too low
   resolution to resolve the decimals.
 
 ### NEMA 17 — unreadable display
@@ -32,7 +32,7 @@ Two categories:
 - **Why it matters:** an entire measurement is lost.
 - **How to measure:** repeat the shot with the LCD out of direct light. Tilt the
   caliper so the light source is behind the camera, not reflecting off the screen.
-- **Related picture:** `Nema-17/IMG_5224.HEIC` — LCD blown out by glare; reads `4?.??`.
+- **Related picture:** `IMG_5224.HEIC` — LCD blown out by glare; reads `4?.??`.
 
 ### NEMA 17 — shaft diameter
 
@@ -43,7 +43,7 @@ Two categories:
 - **How to measure:** caliper across the round part of the shaft, clear of any flat.
   Take three readings at 60° apart and record all three — a stepper shaft is not
   perfectly round.
-- **Related picture:** `Nema-17/IMG_5225.HEIC` — reads `4.9?`.
+- **Related picture:** `IMG_5225.HEIC` — reads `4.9?`.
 
 ### NEMA 17 — two unidentified features
 
@@ -56,7 +56,7 @@ Two categories:
 - **How to measure:** re-take each shot from further back so both the jaws and the
   display are in the same frame, then note in the filename or a text file what was
   measured.
-- **Related pictures:** `Nema-17/IMG_5229.HEIC`, `Nema-17/IMG_5230.HEIC`.
+- **Related pictures:** `IMG_5229.HEIC`, `IMG_5230.HEIC`.
 
 ---
 
@@ -106,7 +106,7 @@ Two categories:
 - **How to measure:** exactly as IMG_5237 was taken, but with the jaws referenced from
   the opposite pair of edges. The two readings should sum to more than the 20.14 mm
   PCB length; the excess is the heatsink length.
-- **Related picture:** `TMC2209 v1.3/IMG_5237.HEIC` gives the first half of the pair.
+- **Related picture:** `IMG_5237.HEIC` gives the first half of the pair.
 
 ### TMC2209 V1.3 — remaining features
 
@@ -189,12 +189,10 @@ The board outline is now fully measured and photographed — 36.27 × 35.72 mm b
 see [`ad8317.md`](ad8317.md).
 
 - **Still missing:** PCB thickness, mounting-hole diameter and spacing (four plated
-  corner holes are visible in `AD8317/IMG_5261.HEIC`), shield-can height above the PCB,
+  corner holes are visible in `IMG_5261.HEIC`), shield-can height above the PCB,
   total board height including components, SMA connector centre positions relative to
   the board edges.
-- **Why it matters:** only needed once an RF detector is actually selected. No detector
-  is committed to in Version 1 — see
-  [`../docs/hardware/rf-measurement.md`](../docs/hardware/rf-measurement.md).
+- **Why it matters:** only needed once an RF detector is actually selected.
 - **How to measure:** caliper on a clear PCB edge for thickness; internal jaws for hole
   diameter; between two hole outer edges minus one diameter for spacing; caliper depth
   rod from the PCB surface to the can top for can height.

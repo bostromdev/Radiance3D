@@ -11,7 +11,7 @@ vary widely between vendors.
 - Model or revision: 30-pin ESP32 devkit, USB-C connector, `WIFI+BT SoC Inside`
   `ISM 2.4G 802.11b/g/n` module marking (visible in `IMG_5242.HEIC`)
 - Quantity: 1
-- Measurement source: `Measurements/ESP32-ELEGOO/`
+- Measurement source: photographs IMG_5241–5246
 - Measured with: digital caliper, IP54, mm mode
 - Units: mm
 
