@@ -5,7 +5,7 @@
 A 3D antenna radiation-pattern measurement rig. An ESP32 drives two NEMA 17 axes
 through TMC2209 drivers to point an antenna, while a stationary receiver measures it.
 
-Built in my house. It is genuinely easy to make — anyone can do it. Built on
+Built in my house. It is genuinely easy to make/although takes a little bit of tinkering, with enough grit — anyone can do it. Built on
 first-principles physics, with laboratory-grade accuracy as the goal. That has to be
 earned: it needs calibration and repeatability testing that hasn't happened yet. Until
 then, nothing here is a calibrated measurement.
