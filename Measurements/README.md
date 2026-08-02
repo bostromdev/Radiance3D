@@ -53,6 +53,7 @@ See [`fusion360-parameters.md`](fusion360-parameters.md).
 | [`fusion360-parameters.md`](fusion360-parameters.md) | Proposed Fusion 360 user parameters, separated into measured, design-choice, provisional and calculated |
 | [`fusion360-assistant-prompt.md`](fusion360-assistant-prompt.md) | Complete prompt to paste into Fusion 360 Assistant to begin the pan-and-tilt prototype |
 | [`fusion360-design-spec.md`](fusion360-design-spec.md) | A tighter, more precise Fusion 360 implementation spec for the first prototype |
+| [`fusion360-build-order.md`](fusion360-build-order.md) | A step-by-step build order for modeling the pan/tilt prototype in Fusion 360 |
 | [`fusion360-bom-template.md`](fusion360-bom-template.md) | A starter BOM template for the mechanical, electronics, RF, and fastener parts |
 
 ## Measurements still needed
