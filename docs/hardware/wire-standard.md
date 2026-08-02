@@ -26,7 +26,7 @@ signal name, from/to endpoint, and labels at both ends.
 
 | Harness | Endpoints and signals | Gauge / color | Required labels |
 |---|---|---|---|
-| PWR-000 | off-board bench source → enclosure `+12V IN` / `GND IN` entry | 18 AWG Red/Black | `+12V IN`, `GND IN`, source/enclosure |
+| PWR-000 | off-board bench source → open-base `+12V IN` / `GND IN` entry | 18 AWG Red/Black | `+12V IN`, `GND IN`, source/base |
 | PWR-001 | distribution → pan driver VM/GND | 18 AWG Red/Black | `PWR-001 +12V`, `PWR-001 GND` |
 | PWR-002 | distribution → tilt driver VM/GND | 18 AWG Red/Black | `PWR-002 +12V`, `PWR-002 GND` |
 | PWR-003 | distribution → Buck A VIN+/VIN− | 18 AWG Red/Black | endpoint labels |

@@ -51,14 +51,20 @@ open circuit between pairs.
 |---|---:|---|---|
 | Motor body diagonal (corner to corner) | 54.30 mm | IMG_5223.HEIC | Across two opposite chamfered corners of the face plate |
 | Motor body length (front face plate to rear face plate) | 20.84 mm | IMG_5249.HEIC | Excludes the front pilot boss. Earlier reading IMG_5231.HEIC gave 20.76 mm; the 0.08 mm spread is caliper repeatability |
+| Motor body/rear-envelope repeat | 20.72 mm | supplemental photograph | Appears to use the same faces as 20.84 mm but the datum is not conclusive; retain both and use 20.84 mm for clearance |
 | Overall length including pilot boss, excluding shaft | 22.85 mm | IMG_5248.HEIC | Boss face to rear face. **Supersedes IMG_5232**, whose decimals were unreadable |
 | Overall length, shaft tip to rear face | 45.18 mm | IMG_5250.HEIC | The full envelope the motor occupies along its axis |
 | Pilot boss diameter | 21.97 mm | IMG_5247.HEIC | The raised circular register that centres the motor in its mount |
 | Output shaft length, from pilot boss face to shaft end | 22.39 mm | operator measurement — no photograph | Datum is the boss face, not the face plate. See below |
-| Connector protrusion above end-cap face | 9.38 mm | IMG_5226.HEIC | Confirmed by a second shot at a different angle |
-| Connector protrusion above end-cap face (repeat) | 9.38 mm | IMG_5227.HEIC | Independent repeat of IMG_5226; same value |
-| Motor connector housing length | 16.43 mm | IMG_5228.HEIC | White 6-position polarised housing on the rear end cap |
-| Motor face width (across flats) | ≈42 mm | IMG_5221.jpg | **Integer only.** Photo resolution does not resolve the decimals — see `missing-measurements.md` |
+| Connector protrusion above end-cap face | 9.38 mm | IMG_5226/5227.HEIC | Earlier repeat measurements |
+| Connector protrusion above end-cap face, latest | 9.53 mm | supplemental photograph | Use this larger measured envelope for CAD clearance |
+| Motor connector housing envelope | 16.43 mm | IMG_5228.HEIC | Earlier measurement |
+| Motor connector housing envelope, latest | 16.44 mm | supplemental photograph | Use latest value; 0.01 mm agreement is repeatability evidence |
+| Motor front-face outside dimension, axis A | 43.46 mm | supplemental photograph | Use as the maximum body-clearance envelope, not a precision locator |
+| Motor front-face outside dimension, other orientation | 42.43 mm | supplemental photograph | Do not average with 43.46 mm; pilot and holes provide precision location |
+| Front-face mounting-hole centre spacing | 31.00 mm | supplemental photograph | Measured across one axis; use a nominally square 31.00 × 31.00 mm pattern unless later evidence differs |
+| Output shaft major diameter | 5.00 mm | supplemental photograph | Measured on the owned motor |
+| D-flat to opposite round surface | 4.60 mm | supplemental photograph | D-profile thickness, not flat depth |
 
 ## Derived from the measurements above
 
@@ -72,6 +78,7 @@ so the geometry is self-consistent.
 | Pilot boss height (route B) | 1.95 mm | `45.18 − 22.39 − 20.84` (total, minus shaft, minus body) |
 | **Pilot boss height (adopted)** | **2.00 mm ±0.06** | both routes bracket it; equals the NEMA 17 nominal |
 | Shaft length from the **face plate** | 24.39 mm | `22.39 + 2.00` (shaft above boss, plus boss height) |
+| D-flat radial depth | 0.20 mm | `(5.00 − 4.60) / 2`; derived, not separately measured |
 
 Both routes bracket 2.00 mm, which is also the NEMA 17 nominal, so 2.00 mm is adopted
 with a ±0.06 mm measurement tolerance. That is well inside what a PETG print can hold —
@@ -94,10 +101,10 @@ directly rather than read from a caliper picture. A photo would close that gap.
 
 ## CAD notes
 
-- **Important protrusions:** the rear connector is the dominant obstruction. It stands
-  9.38 mm proud of the end-cap face and its housing is 16.43 mm long. Any pan or tilt
+- **Important protrusions:** the rear connector is the dominant obstruction. Use the
+  larger 9.53 mm protrusion and 16.44 mm housing envelope. Any pan or tilt
   motor pocket must clear both, plus the mating plug and wire bend radius. With bend
-  clearance that is roughly 21.4 mm behind any motor, which is what decides whether a
+  12.00 mm bend clearance gives 21.53 mm behind any motor, which helps decide whether a
   motor can face shaft-up.
 - **Axial envelope:** 45.18 mm shaft tip to rear face, plus the connector allowance
   behind it. Budget from this figure, not from the body length.
@@ -106,13 +113,13 @@ directly rather than read from a caliper picture. A photo would close that gap.
   worth a fit-test coupon.
 - **Body length:** at 20.84 mm the motor is a short-body NEMA 17, matching the
   nameplate's 42 × 42 × 21 mm. Do not design around a 34 mm or 48 mm body.
-- **Mounting-hole layout:** still not measured. The standard NEMA 17 pattern is 31.0 mm
-  square with M3 holes, but this has not been verified on these motors. This is now the
-  largest remaining unknown on the motor. See `missing-measurements.md`.
-- **Shaft:** 22.39 mm stands proud of the pilot boss — ample for a standard 25 mm
-  coupler, which engages roughly half its length (~12.5 mm) on the motor side.
-  Diameter reads 4.9 mm to one decimal (nominal 5 mm); flat depth and flat length are
-  not measured.
+- **Mounting-hole layout:** 31.00 mm centre spacing is measured on one axis. Treat the
+  pattern as nominally square for Revision 1; hole diameter remains provisional M3-compatible.
+- **Body envelope:** use 43.46 mm plus clearance for a loose body pocket. Do not make
+  the outer body a locating fit; the 21.97 mm pilot and hole pattern locate the motor.
+- **Shaft:** the 5.00 mm major diameter and 4.60 mm D thickness are verified. Revision 1
+  uses a removable clamp-style direct-drive hub, not a coupler. The exact flat axial
+  length/start remains adjustable in the hub model.
 - **Required print clearance:** use a fit-test coupon before committing a bore or
   pocket. See [`fusion360-parameters.md`](fusion360-parameters.md).
 - **Unclear or missing dimensions:** see [`missing-measurements.md`](missing-measurements.md).

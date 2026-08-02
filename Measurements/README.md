@@ -2,9 +2,10 @@
 
 This folder is the **canonical source for every physical dimension in Radiance3D**.
 
-The enclosure has not yet been designed. Measurements support conceptual Fusion work;
-the [reference architecture](../docs/hardware/reference-architecture.md) defines the
-official non-dimensioned placement baseline.
+Revision 1 is an open direct-drive desktop prototype within a 220 × 220 mm maximum
+base. Measurements support its Fusion layout; the
+[reference architecture](../docs/hardware/reference-architecture.md) defines the fixed
+subsystem architecture while Fusion determines placement.
 
 Every number here was measured with a digital caliper on the actual parts in hand and
 is traceable to a photograph in this folder. Hardware, mechanical, assembly, BOM and
@@ -49,6 +50,7 @@ See [`fusion360-parameters.md`](fusion360-parameters.md).
 | BIGTREETECH TMC2209 V1.3 driver (×2) | [`tmc2209-v1.3.md`](tmc2209-v1.3.md) | IMG_5233–5240 |
 | ELEGOO ESP32 devkit (×1) | [`esp32-devkit.md`](esp32-devkit.md) | IMG_5241–5246 |
 | AD8317 EVAL BD (NWDZ V1.0) RF detector | [`ad8317.md`](ad8317.md) | IMG_5257–5262 |
+| ZX-052 V2.0 buck converter (×2) | [`zx052-v2.0.md`](zx052-v2.0.md) | supplemental supplied photographs |
 
 ## CAD handoff
 
@@ -60,39 +62,26 @@ See [`fusion360-parameters.md`](fusion360-parameters.md).
 | [`fusion360-build-order.md`](fusion360-build-order.md) | A step-by-step build order for modeling the pan/tilt prototype in Fusion 360 |
 | [`fusion360-bom-template.md`](fusion360-bom-template.md) | A starter BOM template for the mechanical, electronics, RF, and fastener parts |
 
-## Measurements still needed
+## Remaining provisional interfaces
 
 Full detail, including how to take each one, is in
 [`missing-measurements.md`](missing-measurements.md). Summary:
 
-**Unclear — re-shoot:**
+These do not block the component-envelope layout. Use reversible retention and named
+provisional parameters where a printed feature actually depends on them:
 
-- NEMA 17 face width across flats (decimals unreadable)
-- NEMA 17 shaft diameter (second decimal unreadable)
-- NEMA 17 — one completely unreadable display, and two legible values whose measured
-  feature cannot be identified
-
-**Not measured at all:**
-
-- NEMA 17 mounting-hole spacing and diameter — the largest remaining unknown on the
-  motor; every other motor-mount dimension is now measured
-- NEMA 17 shaft flat length and flat depth
+- NEMA 17 mounting-hole diameter/screw specification and shaft-flat axial length/start
 - TMC2209 heatsink length along the PCB long axis (one reading closes it)
 - TMC2209 PCB thickness, header pitch, header row spacing
 - ESP32 mounting holes and header pin length
-- Bearings — inner diameter, outer diameter, width
-- Shaft couplers — bores, outer diameter, length
 - Fasteners and heat-set inserts — sizes and pilot holes
-- Antenna mount — connector, antenna body, coax diameter and bend radius
-- Limit switches — body, mounting holes, lever, actuation travel
-- LM2596 buck converter — outline, mounting holes, total height
+- Representative interchangeable AUT clearance envelopes
+- ZX-052 total installed height and mounting-hole pattern; use open edge retention
 - AD8317 detector — PCB thickness, mounting holes, shield-can height (outline is
   measured)
 
-Bearings, couplers, fasteners, the antenna mount and the limit switches have no
-measurements at all yet, so no component file has been created for them. Files will be
-added when the parts are measured — empty placeholder files are deliberately not
-created.
+External bearings, separate shafts, couplers, and mandatory limit switches are not
+Revision-1 parts. They do not block CAD and may be considered only as future upgrades.
 
 ## Source photographs
 

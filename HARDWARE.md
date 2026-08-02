@@ -6,9 +6,13 @@ The hardware photographs in [`Part Numbers:Views/`](<Part Numbers:Views/>) are t
 visual authority; this file is an index, not a substitute for inspection.
 
 **Verified Hardware** is owned, photographed, measured, or electrically confirmed.
-**Design Intent** is conceptual Fusion guidance only; final placement is determined
-during CAD. The [reference architecture](docs/hardware/reference-architecture.md)
-keeps those categories separate.
+**Design Intent** fixes the Revision-1 subsystem architecture while leaving the exact
+layout to Fusion. Revision 1 is an open desktop prototype: a centred stationary pan
+motor directly drives a lightweight platform, and the rotating tilt motor directly
+drives the AD8317/AUT carriage. It has no external bearings, separate shafts, couplers,
+slip ring, sealed enclosure, or battery compartment. The
+[reference architecture](docs/hardware/reference-architecture.md) keeps verified facts
+and CAD choices separate.
 
 Read the hardware documentation in this order:
 

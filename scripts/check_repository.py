@@ -36,6 +36,14 @@ REQUIRED_PATHS = (
 LINK_PATTERN = re.compile(r"(?<!!)\[[^\]]+\]\(([^)]+)\)")
 
 
+def tracked_files() -> list[Path]:
+    """Return repository artifacts, excluding local venvs and untracked work."""
+    result = subprocess.run(
+        ["git", "ls-files", "-z"], cwd=ROOT, check=True, capture_output=True
+    )
+    return [ROOT / item.decode() for item in result.stdout.split(b"\0") if item]
+
+
 def check_required_paths() -> list[str]:
     return [
         f"missing required path: {path}"
@@ -46,7 +54,7 @@ def check_required_paths() -> list[str]:
 
 def check_json() -> list[str]:
     errors: list[str] = []
-    for path in ROOT.rglob("*.json"):
+    for path in (item for item in tracked_files() if item.suffix == ".json"):
         try:
             json.loads(path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError) as exc:
@@ -121,7 +129,7 @@ def check_physical_firmware_has_no_arduino_dependency() -> list[str]:
 
 def check_internal_links() -> list[str]:
     errors: list[str] = []
-    for markdown in ROOT.rglob("*.md"):
+    for markdown in (item for item in tracked_files() if item.suffix == ".md"):
         text = markdown.read_text(encoding="utf-8")
         for target in LINK_PATTERN.findall(text):
             target = target.strip().strip("<>")
@@ -141,11 +149,7 @@ def check_internal_links() -> list[str]:
 def check_empty_files() -> list[str]:
     allowed = {ROOT / "software" / "src" / "radiance3d" / "py.typed"}
     errors: list[str] = []
-    for path in ROOT.rglob("*"):
-        # ESP-IDF creates empty generated stamp/source placeholders under its
-        # ignored build directory. They are not repository artifacts.
-        if "build" in path.relative_to(ROOT).parts:
-            continue
+    for path in tracked_files():
         if path.is_file() and path.stat().st_size == 0 and path not in allowed:
             errors.append(f"{path.relative_to(ROOT)}: empty file")
     return errors
@@ -154,8 +158,8 @@ def check_empty_files() -> list[str]:
 def check_owned_hardware_contract() -> list[str]:
     """Reject production documentation/configuration that drifts from owned parts."""
     errors: list[str] = []
-    forbidden = re.compile(r"\b(A4988|DRV8825|TMC2208|AD8318|RX5808|Raspberry\s*Pi|Arduino|slip\s*ring)\b", re.I)
-    for path in ROOT.rglob("*"):
+    forbidden = re.compile(r"\b(A4988|DRV8825|TMC2208|AD8318|RX5808|Raspberry\s*Pi|Arduino)\b", re.I)
+    for path in tracked_files():
         if not path.is_file() or path.suffix not in {".md", ".json", ".cpp", ".hpp", ".py"}:
             continue
         if "Measurements" in path.parts or path == Path(__file__):
@@ -186,9 +190,18 @@ def check_owned_hardware_contract() -> list[str]:
     architecture = profile.get("mechanical_architecture", {})
     if architecture.get("enclosure_designed") is not False:
         errors.append("owned hardware profile: enclosure must remain undesigned")
-    if "one controlled 360 degree rotation" not in architecture.get("pan_rotation", ""):
-        errors.append("owned hardware profile: pan must specify one controlled 360 degree rotation")
-    if "tilt motor" not in architecture.get("rotating_platform", []) or "AD8317 detector" not in architecture.get("rotating_platform", []):
+    if architecture.get("base_maximum_mm") != [220.0, 220.0]:
+        errors.append("owned hardware profile: base maximum must be 220 × 220 mm")
+    if "open stationary base" not in architecture.get("electronics_mounting", ""):
+        errors.append("owned hardware profile: Revision 1 electronics must remain open")
+    drive = architecture.get("drive_architecture", "")
+    for required in ("5 mm D-shafts", "clamp-style hubs", "no external bearings", "separate shafts", "shaft couplers"):
+        if required not in drive:
+            errors.append(f"owned hardware profile: direct-drive contract missing {required!r}")
+    if "one managed 360 degree rotation" not in architecture.get("pan_rotation", ""):
+        errors.append("owned hardware profile: pan must specify one managed 360 degree rotation")
+    rotating = architecture.get("rotating_platform", [])
+    if not any("tilt motor" in item for item in rotating) or not any("AD8317 detector" in item for item in rotating):
         errors.append("owned hardware profile: rotating platform must contain tilt motor and AD8317")
     if "no RG316 jumper" not in architecture.get("rf_measurement", ""):
         errors.append("owned hardware profile: direct-SMA detector mounting is required")
@@ -220,17 +233,18 @@ def check_owned_hardware_contract() -> list[str]:
     routing = (ROOT / "docs/hardware/assembly-order.md").read_text(encoding="utf-8")
     if "Unlimited continuous pan rotation is not allowed." not in routing:
         errors.append("cable-routing contract permits unlimited pan rotation")
-    if "one controlled 360° turn" not in routing:
-        errors.append("cable-routing contract lacks controlled 360 degree pan rotation")
+    if "one managed 360° turn" not in routing:
+        errors.append("cable-routing contract lacks managed 360 degree pan rotation")
     power_tree = (ROOT / "docs/hardware/power-tree.md").read_text(encoding="utf-8")
     for required in ("Off-board 12 V bench power source", "+12V IN", "GND IN", "no battery compartment"):
         if required not in power_tree:
             errors.append(f"external-power contract missing {required!r}")
     reference = (ROOT / "docs/hardware/reference-architecture.md").read_text(encoding="utf-8")
     for required in ("DESIGN INTENT: STATIONARY BASE", "DESIGN INTENT: ROTATING PLATFORM",
-                     "external stationary 5.8 GHz VTX", "AUT directly threads onto the AD8317 SMA",
+                     "external stationary 5.8 GHz VTX", "AUT directly threads onto",
                      "no detector-to-antenna RG316 jumper", "Conceptual architecture only.",
-                     "Final placement determined during CAD.",
+                     "Final placement determined during CAD.", "220 × 220 mm",
+                     "no external bearings, separate shafts, or shaft couplers",
                      "Firmware-defined return-to-home strategy to prevent cumulative cable twist"):
         if required not in reference:
             errors.append(f"reference architecture missing {required!r}")

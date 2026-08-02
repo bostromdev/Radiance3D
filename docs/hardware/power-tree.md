@@ -5,7 +5,7 @@
 ```text
 Off-board 12 V bench power source (beneath workbench)
   └─ PWR-000 external two-conductor entry: +12V IN / GND IN
-      └─ accessible, strain-relieved enclosure entry point
+      └─ accessible, strain-relieved side/rear base entry point
           └─ 18 AWG internal distribution point (Red +12 V / Black ground)
               ├─ PWR-001 → TMC2209 pan VM and GND
               ├─ PWR-002 → TMC2209 tilt VM and GND
@@ -19,7 +19,7 @@ between the two ZX-052 converters.
 ```
 
 The 12 V battery is a permanent off-board laboratory source, not a Radiance3D part.
-The enclosure provides no battery compartment, battery retention, or battery-weight
+The open base provides no battery compartment, battery retention, or battery-weight
 allowance. It exposes only the accessible `+12V IN` / `GND IN` entry with appropriate
 strain relief before the internal distribution point.
 
