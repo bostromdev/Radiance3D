@@ -1,0 +1,36 @@
+name: Feature proposal
+description: Propose a scoped capability or design change.
+title: "[Proposal]: "
+labels: ["enhancement", "needs-design"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What engineering or user need is not met?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed approach
+      description: Include interfaces, units, and expected limitations.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Architecture
+        - Firmware
+        - Software
+        - Hardware
+        - Data format
+        - Documentation
+    validations:
+      required: true
