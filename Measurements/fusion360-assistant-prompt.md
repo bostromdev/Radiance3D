@@ -61,12 +61,21 @@ NON-NEGOTIABLE RULES
 MEASURED DIMENSIONS - SOURCE OF TRUTH
 =====================================================================
 
-NEMA 17 stepper motor, YEJMKJ / LYLANMO, quantity 2 (one pan, one tilt):
+NEMA 17 stepper motor, model 42HDB0014NC-24B, quantity 2 (one pan, one tilt):
   Motor body diagonal, corner to corner       54.30 mm
-  Motor body length, face plate to rear face  20.76 mm   (short-body / "pancake")
+  Motor body length, face plate to rear face  20.84 mm   (short-body / "pancake")
+  Overall length, boss face to rear face      22.85 mm
+  Overall length, shaft tip to rear face      45.18 mm   (full axial envelope)
+  Pilot boss diameter                         21.97 mm   (the centring register)
   Rear connector protrusion above end cap      9.38 mm
   Rear connector housing length               16.43 mm   (6-position housing)
   Output shaft length above the pilot boss    22.39 mm
+
+  Derived, not separately measured:
+    Pilot boss height                          1.98 mm   (22.85 - 20.84 = 2.01;
+                                                          45.18 - 22.39 - 20.84 = 1.95;
+                                                          the two routes agree to 0.06 mm)
+    Shaft length from the face plate          24.37 mm   (22.39 + 1.98)
 
   DATUM WARNING on the 22.39 mm shaft length: it is measured from the top face of the
   raised circular boss the shaft emerges from, NOT from the motor face plate. It is
@@ -113,8 +122,6 @@ built and updated later. Flag every feature that depends on one.
   Motor face width across flats               42.30 mm   (photo shows "42", decimals unreadable)
   Motor mounting-hole spacing                 31.00 mm
   Motor mounting-hole diameter                 3.40 mm
-  Motor pilot boss diameter                   22.00 mm
-  Motor pilot boss height                      2.00 mm
   Motor shaft diameter                         5.00 mm   (photo reads "4.9?")
   Bearing inner diameter                       8.00 mm
   Bearing outer diameter                      22.00 mm
@@ -193,6 +200,9 @@ Before you create any geometry, do all seven of these and stop for my approval:
      seat bore, the motor pilot boss register, the motor mounting-hole pattern and the
      heat-set insert boss. These are small printable test pieces, not full parts. Tell
      me what to print and what to measure on each one.
+     The pilot boss register coupon is the cheapest useful one, because both of its
+     inputs are already measured (21.97 mm diameter, 1.98 mm deep). It tests only my
+     printer's clearance, so start there.
      A coupon measures how MY PRINTER deviates from a known number. It cannot discover
      the dimension of a metal part. Do not propose a coupon to find a bearing's outer
      diameter or a motor shaft's diameter — those are caliper measurements I must take

@@ -28,7 +28,10 @@ Traceable to a caliper reading and a photograph.
 | Parameter | Expression | Source | Type | Notes |
 |---|---:|---|---|---|
 | `MotorBodyDiagonal` | 54.30 mm | nema17.md — IMG_5223 | Measured | Corner to corner across chamfered corners |
-| `MotorBodyLength` | 20.76 mm | nema17.md — IMG_5231 | Measured | Front face plate to rear face plate, excludes pilot boss |
+| `MotorBodyLength` | 20.84 mm | nema17.md — IMG_5249 | Measured | Front face plate to rear face plate, excludes pilot boss. IMG_5231 gave 20.76 mm |
+| `MotorLengthWithBoss` | 22.85 mm | nema17.md — IMG_5248 | Measured | Pilot boss face to rear face |
+| `MotorOverallLength` | 45.18 mm | nema17.md — IMG_5250 | Measured | Shaft tip to rear face — the full axial envelope |
+| `MotorPilotDiameter` | 21.97 mm | nema17.md — IMG_5247 | Measured | Register that centres the motor. Was provisional at 22.00 mm |
 | `MotorConnectorProtrusion` | 9.38 mm | nema17.md — IMG_5226, IMG_5227 | Measured | Height of rear connector above end-cap face; two independent readings agreed |
 | `MotorConnectorLength` | 16.43 mm | nema17.md — IMG_5228 | Measured | 6-position housing on the rear end cap |
 | `MotorShaftLengthFromBoss` | 22.39 mm | nema17.md — operator measurement | Measured | **Datum is the pilot boss face, not the motor face plate.** No source photograph |
@@ -59,7 +62,8 @@ Derived by expression. Fusion will keep these correct when their inputs change.
 | `Esp32PocketLength` | `Esp32PcbLength + 2 * PrintClearance` | Calculated | Calculated | Tray pocket, removable fit |
 | `Esp32PocketWidth` | `Esp32PcbWidth + 2 * PrintClearance` | Calculated | Calculated | Tray pocket, removable fit |
 | `MotorFaceHalf` | `MotorFaceWidth / 2` | Calculated | Calculated | Used to centre the motor on its mount |
-| `MotorShaftLengthFromFace` | `MotorShaftLengthFromBoss + MotorPilotHeight` | Calculated | Calculated | The vendor-style figure. **Depends on the provisional `MotorPilotHeight`** — prefer the boss datum, which is measured |
+| `MotorPilotHeight` | `MotorLengthWithBoss - MotorBodyLength` | Calculated | Calculated | 2.01 mm. Cross-check `MotorOverallLength - MotorShaftLengthFromBoss - MotorBodyLength` gives 1.95 mm; the two routes agree to 0.06 mm |
+| `MotorShaftLengthFromFace` | `MotorShaftLengthFromBoss + MotorPilotHeight` | Calculated | Calculated | 24.40 mm — the vendor-style figure. Now fully derived from measured values |
 | `CouplerShaftEngagement` | `CouplerLength / 2` | Calculated | Calculated | Motor-side engagement. Must stay below `MotorShaftLengthFromBoss` (22.39 mm) |
 | `BearingSeatBore` | `BearingOuterDiameter - BearingFitAllowance` | Calculated | Calculated | Press-fit seat; validate with a coupon first |
 
@@ -73,8 +77,6 @@ These are placeholders. Each one has an entry in
 | `MotorFaceWidth` | 42.30 mm | **Provisional** | Provisional | IMG_5221 reads `42` but decimals are unreadable. 42.30 is the NEMA 17 nominal, not a measurement |
 | `MotorHoleSpacing` | 31.00 mm | **Provisional** | Provisional | NEMA 17 nominal square pattern. Not verified on these motors |
 | `MotorHoleDiameter` | 3.40 mm | **Provisional** | Provisional | M3 clearance, assumed. Not measured |
-| `MotorPilotDiameter` | 22.00 mm | **Provisional** | Provisional | NEMA 17 nominal. Not measured |
-| `MotorPilotHeight` | 2.00 mm | **Provisional** | Provisional | NEMA 17 nominal. IMG_5231/IMG_5232 cannot be differenced because IMG_5232's decimals are unreadable |
 | `MotorShaftDiameter` | 5.00 mm | **Provisional** | Provisional | IMG_5225 reads `4.9?`. Use 5.00 nominal until the second decimal is confirmed |
 | `BearingInnerDiameter` | 8.00 mm | **Provisional** | Provisional | No bearing measured. 8 mm assumes a 608-series |
 | `BearingOuterDiameter` | 22.00 mm | **Provisional** | Provisional | No bearing measured |

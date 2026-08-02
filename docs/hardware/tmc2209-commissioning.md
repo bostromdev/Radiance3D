@@ -34,9 +34,11 @@ baseline values:
 - Controller: ESP32 development board, ESP-WROOM-32, USB serial, 3.3 V logic
 - Drivers: BIGTREETECH TMC2209 V1.3, UART controlled, STEP/DIR interface,
   diagnostic reporting enabled, current configured in RMS milliamps
-- Motors: NEMA 17 bipolar, 4-wire, 1.8° full-step, 200 full steps/revolution,
-  1.0 A rated phase current, 3.5 Ω phase resistance, approximately 0.13 N·m holding
-  torque
+- Motors: NEMA 17 bipolar, 4-wire, model `42HDB0014NC-24B`, 1.8° full-step, 200 full
+  steps/revolution, 1.0 A rated phase current, 3.5 Ω phase resistance, 3.4 mH phase
+  inductance, approximately 0.13 N·m holding torque. Coil A is black + green, coil B
+  is red + blue — see [wiring](wiring.md). Verify the pairs with a multimeter before
+  connecting a motor: about 3.5 Ω within a pair, open circuit between pairs
 
 The GPIO assignments below are a working baseline for the current firmware but remain
 provisional until the exact board revision and carrier label map are confirmed.

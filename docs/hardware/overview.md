@@ -12,9 +12,11 @@ The current baseline is:
 - Controller: ESP32 development board, ESP-WROOM-32, USB serial, 3.3 V logic
 - Drivers: BIGTREETECH TMC2209 V1.3, UART controlled, STEP/DIR interface, driver
   diagnostics enabled, current configured in RMS milliamps
-- Motors: NEMA 17 bipolar, 1.8° full-step, 200 full steps/revolution, 1.0 A rated
-  phase current, 3.5 Ω phase resistance, approximately 0.13 N·m holding torque.
-  Physical dimensions are measured — see [`Measurements/nema17.md`](../../Measurements/nema17.md)
+- Motors: NEMA 17 bipolar, model `42HDB0014NC-24B`, 1.8° full-step, 200 full
+  steps/revolution, 1.0 A rated phase current, 3.5 Ω phase resistance, 3.4 mH phase
+  inductance, approximately 0.13 N·m holding torque. Coil A is black + green, coil B
+  is red + blue. Nameplate data and measured dimensions are in
+  [`Measurements/nema17.md`](../../Measurements/nema17.md)
 - Motion: 16 microsteps, direct drive, 3200 microsteps/revolution,
   0.1125° commanded microstep resolution
 - Power: 12 V standalone battery, inline fuse, master disconnect, TMC2209 VM power,

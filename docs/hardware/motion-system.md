@@ -9,10 +9,12 @@ clearances still limit travel unless a future slip ring is tested and documented
 
 Each axis uses one YEJMKJ/LYLANMO NEMA 17 bipolar 4-wire stepper. The selected motors
 are 1.8° full-step, 200 full steps/revolution, rated at 1.0 A phase current, 3.5 Ω
-phase resistance, and about 0.13 N·m holding torque. These values come from the
-selected hardware and are not generic placeholders. Physical dimensions of the
-actual motors are recorded in [`Measurements/nema17.md`](../../Measurements/nema17.md);
-they are measured, not nominal, and the motors are the short-body variant.
+phase resistance, 3.4 mH phase inductance, and about 0.13 N·m holding torque. These
+come from the motor nameplate — model `42HDB0014NC-24B` — and are not generic
+placeholders. Coil A is black + green, coil B is red + blue; see
+[wiring](wiring.md). Physical dimensions of the actual motors are recorded in
+[`Measurements/nema17.md`](../../Measurements/nema17.md); they are measured, not
+nominal, and the motors are the short-body variant.
 
 Version 1 uses BIGTREETECH TMC2209 V1.3 drivers. They are UART controlled, use the
 STEP/DIR interface, expose driver diagnostics, and allow the firmware to set current

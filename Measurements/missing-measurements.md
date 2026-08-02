@@ -58,53 +58,33 @@ Two categories:
   measured.
 - **Related pictures:** `Nema-17/IMG_5229.HEIC`, `Nema-17/IMG_5230.HEIC`.
 
-### NEMA 17 — overall length including pilot boss
-
-- **Component:** NEMA 17 stepper
-- **Missing dimension:** overall length front boss face to rear face — reads either
-  `22.11 mm` or `22.71 mm`
-- **Why it matters:** subtracting this from the 20.76 mm body length is how the pilot
-  boss height is derived. The two candidate readings give a 1.35 mm or a 1.95 mm boss —
-  a 0.6 mm difference in how deep the register counterbore must be.
-- **How to measure:** re-shoot with the LCD square to the camera and well lit from
-  behind the camera. Better still, measure the boss height directly with a depth gauge.
-- **Related picture:** `Nema-17/IMG_5232.HEIC`.
-
 ---
 
 ## 2. Not measured — no photo exists
 
 ### NEMA 17 — mounting-hole pattern
 
+> This is now the largest remaining unknown on the motor itself. Everything else on
+> the pan and tilt motor mounts is measured.
+
 - **Missing dimension:** mounting-hole spacing (centre to centre) and hole diameter
 - **Why it matters:** this is the single most important dimension for both motor
   mounts. The NEMA 17 standard is 31.0 mm square with M3 clearance holes, but that is
-  a nominal standard, not a measurement of these motors.
+  a nominal standard, not a measurement of these motors. All four holes are visible on
+  the motor face in `IMG_5247.HEIC`, so this is one caliper reading away.
 - **How to measure:** caliper between the outside edges of two adjacent holes, then
   subtract one hole diameter, to get centre-to-centre. Measure the hole diameter with
   the caliper's internal jaws.
 
-### NEMA 17 — pilot boss
+### NEMA 17 — shaft flat
 
-- **Missing dimension:** pilot boss diameter and height
-- **Why it matters:** the boss is what centres the motor in its mount. The
-  counterbore in the printed part is sized directly from it.
-- **How to measure:** caliper across the raised circular boss for diameter; depth
-  gauge or caliper depth rod against the face plate for height.
-
-### NEMA 17 — shaft flat, and the face-plate shaft datum
-
-- **Partially resolved.** Shaft length from the **pilot boss face** to the shaft end is
-  measured at 22.39 mm — see [`nema17.md`](nema17.md).
-- **Still missing:** shaft length from the **face plate**, flat length, flat depth.
-- **Why it matters:** the face-plate figure is what vendor listings quote and what a
-  motor mount is usually dimensioned from. It equals `22.39 mm + pilot boss height`,
-  and the pilot boss height is not measured, so the face-plate figure is unavailable.
-  Measuring the pilot boss height (above) resolves both at once. The flat determines
-  whether a grub screw seats properly rather than marring the round shaft.
-- **How to measure:** caliper depth rod from the front face plate to the shaft end for
-  the face-plate length; caliper across the shaft on the flat, compared with the round
-  diameter, for flat depth.
+- **Resolved:** shaft length is measured at 22.39 mm from the pilot boss face, and the
+  face-plate figure derives to 24.37 mm — see [`nema17.md`](nema17.md).
+- **Still missing:** flat length and flat depth on the output shaft.
+- **Why it matters:** determines whether a coupler grub screw seats on the flat or
+  mars the round shaft, and how much the coupler can be slid along the shaft.
+- **How to measure:** caliper across the shaft on the flat, compared with the round
+  diameter, for flat depth; caliper along the flat for its length.
 - **Provenance gap:** the 22.39 mm reading has no source photograph. Every other value
   in this folder is traceable to an image. A caliper photo would close that gap.
 

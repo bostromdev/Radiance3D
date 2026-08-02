@@ -53,9 +53,11 @@ unlimited in Version 1.
 - USB serial is the Version 1 transport. Wi-Fi, Ethernet, and Bluetooth remain future
   transport options but are intentionally unused in Version 1.
 - Two YEJMKJ/LYLANMO NEMA 17 bipolar 4-wire steppers with 1.8° full-step geometry,
-  200 full steps/revolution, 1.0 A rated phase current, 3.5 Ω phase resistance, and
-  approximately 0.13 N·m holding torque. These are the short-body variant; measured
-  dimensions are in [`Measurements/nema17.md`](../../Measurements/nema17.md).
+  200 full steps/revolution, 1.0 A rated phase current, 3.5 Ω phase resistance,
+  3.4 mH phase inductance, and approximately 0.13 N·m holding torque. The nameplate
+  model is `42HDB0014NC-24B`. These are the short-body variant; nameplate data and
+  measured dimensions are in
+  [`Measurements/nema17.md`](../../Measurements/nema17.md).
 - Two BIGTREETECH TMC2209 V1.3 stepper-driver instances with UART configuration,
   ESP32-controlled STEP/DIR, and firmware-controlled enable. The driver profile must
   be validated against each carrier's actual R10, UART wiring, sense resistor, board

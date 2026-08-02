@@ -9,6 +9,27 @@ must identify the exact board and every connector pin, signal reference, voltage
 domain, wire rating, shielding, grounding point, switch behavior, and emergency
 isolation before a physical build is called supported.
 
+## Motor phase wiring
+
+The motors are model `42HDB0014NC-24B`. The nameplate gives the coil pairing directly:
+
+| Wire colour | Phase |
+|---|---|
+| Black | A+ |
+| Green | A− |
+| Red | B+ |
+| Blue | B− |
+
+Coil A is **black + green**. Coil B is **red + blue**. Splitting a pair across the two
+driver outputs makes the motor buzz, jitter or lock instead of turning, and it is not
+always obvious from the sound which pair is wrong.
+
+Confirm with a multimeter before energising: about 3.5 Ω within a pair, open circuit
+between pairs. Phase resistance and the rest of the nameplate data are recorded in
+[`Measurements/nema17.md`](../../Measurements/nema17.md).
+
+Motors must never be connected or disconnected while the drivers are powered.
+
 ## Required electrical boundaries
 
 - ESP32 logic is 3.3 V. Do not assume a driver module, switch module, display, or

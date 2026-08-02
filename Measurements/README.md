@@ -25,7 +25,7 @@ All dimensions are in millimetres.
 
 | Component | Documentation | Source pictures |
 |---|---|---|
-| NEMA 17 stepper motor (×2) | [`nema17.md`](nema17.md) | `Nema-17/` — IMG_5221.jpg, IMG_5223–IMG_5232.HEIC |
+| NEMA 17 stepper motor (×2), model 42HDB0014NC-24B | [`nema17.md`](nema17.md) | `Nema-17/` — IMG_5221.jpg, IMG_5223–IMG_5232.HEIC, IMG_5247–IMG_5250.HEIC |
 | BIGTREETECH TMC2209 V1.3 driver (×2) | [`tmc2209-v1.3.md`](tmc2209-v1.3.md) | `TMC2209 v1.3/` — IMG_5233–IMG_5240.HEIC |
 | ELEGOO ESP32 devkit (×1) | [`esp32-devkit.md`](esp32-devkit.md) | `ESP32-ELEGOO/` — IMG_5241–IMG_5246.HEIC |
 
@@ -45,17 +45,16 @@ Full detail, including how to take each one, is in
 
 - NEMA 17 face width across flats (decimals unreadable)
 - NEMA 17 shaft diameter (second decimal unreadable)
-- NEMA 17 overall length including pilot boss (reads 22.11 or 22.71)
 - NEMA 17 — one completely unreadable display, and two legible values whose measured
   feature cannot be identified
 
 **Not measured at all:**
 
-- NEMA 17 mounting-hole spacing and diameter
-- NEMA 17 pilot boss diameter and height
-- NEMA 17 shaft length from the **face plate** (the boss-face figure is measured at
-  22.39 mm; the face-plate figure needs the pilot boss height), flat length, flat depth
-- TMC2209 PCB thickness, header pitch, header row spacing, heatsink footprint
+- NEMA 17 mounting-hole spacing and diameter — the largest remaining unknown on the
+  motor; every other motor-mount dimension is now measured
+- NEMA 17 shaft flat length and flat depth
+- TMC2209 heatsink length along the PCB long axis (one reading closes it)
+- TMC2209 PCB thickness, header pitch, header row spacing
 - ESP32 mounting holes and header pin length
 - Bearings — inner diameter, outer diameter, width
 - Shaft couplers — bores, outer diameter, length

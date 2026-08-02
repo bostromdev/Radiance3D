@@ -20,7 +20,7 @@ than duplicating the tables.
 
 | Part | Identification | Qty | Dimensions |
 |---|---|---:|---|
-| NEMA 17 bipolar stepper | YEJMKJ / LYLANMO | 2 | [`nema17.md`](../../Measurements/nema17.md) |
+| NEMA 17 bipolar stepper | YEJMKJ / LYLANMO `42HDB0014NC-24B` | 2 | [`nema17.md`](../../Measurements/nema17.md) |
 | TMC2209 V1.3 driver module | BIGTREETECH | 2 | [`tmc2209-v1.3.md`](../../Measurements/tmc2209-v1.3.md) |
 | ESP32 devkit, ESP-WROOM-32, USB-C | ELEGOO | 1 | [`esp32-devkit.md`](../../Measurements/esp32-devkit.md) |
 
