@@ -42,6 +42,12 @@ NON-NEGOTIABLE RULES
 7. Protect the motor shafts. A motor shaft must not carry a side load or a cantilevered
    mass. Every rotating axis is carried on its own bearings; the motor supplies torque
    through a coupler only.
+7a. Both motors have a connector on the rear end cap that stands 9.38 mm proud, with a
+   16.43 mm housing. Adding cable bend clearance, that is about 21.4 mm of dead space
+   behind any motor. Whichever way a motor faces, this space must be modelled and the
+   connector must stay reachable for wiring. When you recommend a motor orientation,
+   state where that 21.4 mm goes and what it costs in stack height. Do not recommend an
+   orientation without pricing it.
 8. Place the pan and tilt axes as close together as practical, and put the antenna's
    active centre as close as practical to the point where the two axes intersect.
    Offset between the antenna phase centre and the axis intersection is a measurement
@@ -69,8 +75,18 @@ BIGTREETECH TMC2209 V1.3 driver, quantity 2, measured WITH heatsink installed:
   Heatsink front edge to PCB back edge        13.73 mm
   Overall installed height,
     heatsink top to header pin tips           22.24 mm
-  Note: the heatsink is NOT centred on the PCB. The left and right offsets differ by
-  about 1 mm, so the driver is handed. Do not model a symmetric pocket.
+  Derived from the two width readings, not separately measured:
+    Heatsink width                            8.29 mm   (12.21 + 11.22 - 15.14)
+    Heatsink offset from PCB centre           0.495 mm  ((12.21 - 11.22) / 2)
+    Heatsink front edge from PCB front edge    6.41 mm   (20.14 - 13.73)
+
+  Note: the heatsink is NOT centred on the PCB. It sits 0.495 mm off centre across the
+  width, so the driver is handed. Do not model a symmetric pocket.
+
+  Note: the heatsink LENGTH is unknown. Only one reading was taken along the PCB long
+  axis, so the heatsink's front edge is fixed but its back edge is not. Model the
+  driver bay from the 22.24 mm overall height and the PCB outline only. Do not model
+  the heatsink footprint until the missing reading is taken.
 
 ELEGOO ESP32 devkit with ESP-WROOM-32, USB-C, quantity 1:
   PCB length                                  51.47 mm
@@ -166,10 +182,15 @@ Before you create any geometry, do all seven of these and stop for my approval:
      motor shaft is protected from side loading, how close the two axes come to
      intersecting, where the antenna's active centre sits relative to that
      intersection, and how the cable route stays clear through the full travel.
-  6. Design fit-test coupons FIRST for every uncertain dimension — the bearing seat,
-     the motor pilot boss register, the motor mounting-hole pattern, the shaft
-     coupler bore and the heat-set insert boss. These are small printable test pieces,
-     not full parts. Tell me what to print and what to measure on each one.
+  6. Design fit-test coupons for the PRINTED side of each uncertain fit — the bearing
+     seat bore, the motor pilot boss register, the motor mounting-hole pattern and the
+     heat-set insert boss. These are small printable test pieces, not full parts. Tell
+     me what to print and what to measure on each one.
+     A coupon measures how MY PRINTER deviates from a known number. It cannot discover
+     the dimension of a metal part. Do not propose a coupon to find a bearing's outer
+     diameter or a motor shaft's diameter — those are caliper measurements I must take
+     first. Tell me which metal dimensions I have to measure before each coupon is
+     worth printing.
   7. Only after I have reviewed that measurement review, begin Pan_Base. Model
      Pan_Base only. Stop when it is complete and wait for my approval before starting
      Pan_Motor_Mount.

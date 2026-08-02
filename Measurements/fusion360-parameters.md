@@ -50,8 +50,11 @@ Derived by expression. Fusion will keep these correct when their inputs change.
 | Parameter | Expression | Source | Type | Notes |
 |---|---:|---|---|---|
 | `MotorPocketDepth` | `MotorBodyLength + PrintClearance` | Calculated | Calculated | Pocket for the motor body only |
-| `MotorRearClearance` | `MotorConnectorProtrusion + CableBendClearance` | Calculated | Calculated | Space behind the motor for the connector and its plug |
+| `MotorRearClearance` | `MotorConnectorProtrusion + CableBendClearance` | Calculated | Calculated | Space behind the motor for the connector and its plug. 21.38 mm at current values — this decides whether the pan motor can face shaft-up |
 | `DriverBayHeight` | `DriverInstalledHeight + HeatsinkAirGap` | Calculated | Calculated | Never make the bay exactly `DriverInstalledHeight`; the heatsink needs air |
+| `DriverHeatsinkWidth` | `DriverHeatsinkLeftToPcbRight + DriverHeatsinkRightToPcbLeft - DriverPcbWidth` | Calculated | Calculated | 8.29 mm. Fully measured — no provisional input |
+| `DriverHeatsinkOffset` | `(DriverHeatsinkLeftToPcbRight - DriverHeatsinkRightToPcbLeft) / 2` | Calculated | Calculated | 0.495 mm from the PCB centre. This is why the driver is handed |
+| `DriverHeatsinkFrontEdge` | `DriverPcbLength - DriverHeatsinkFrontToPcbBack` | Calculated | Calculated | 6.41 mm from the PCB front edge. The heatsink's **back** edge is unknown — see `missing-measurements.md` |
 | `Esp32PocketLength` | `Esp32PcbLength + 2 * PrintClearance` | Calculated | Calculated | Tray pocket, removable fit |
 | `Esp32PocketWidth` | `Esp32PcbWidth + 2 * PrintClearance` | Calculated | Calculated | Tray pocket, removable fit |
 | `MotorFaceHalf` | `MotorFaceWidth / 2` | Calculated | Calculated | Used to centre the motor on its mount |

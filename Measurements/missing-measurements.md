@@ -101,10 +101,24 @@ Two categories:
   length; caliper across the shaft on the flat, compared to the round diameter, for
   flat depth.
 
+### TMC2209 V1.3 — one reading closes the heatsink footprint
+
+- **Missing dimension:** heatsink **back** edge to PCB **front** edge, along the PCB
+  long axis — the counterpart to the 13.73 mm reading in IMG_5237
+- **Why it matters:** the width pair (12.21 and 11.22) already gives a heatsink width
+  of 8.29 mm and a 0.495 mm offset from the PCB centre. Along the long axis only one
+  reading exists, so the heatsink's front edge is known (6.41 mm from the PCB front
+  edge) but its length is not. Without it the heatsink footprint cannot be modelled,
+  only its height.
+- **How to measure:** exactly as IMG_5237 was taken, but with the jaws referenced from
+  the opposite pair of edges. The two readings should sum to more than the 20.14 mm
+  PCB length; the excess is the heatsink length.
+- **Related picture:** `TMC2209 v1.3/IMG_5237.HEIC` gives the first half of the pair.
+
 ### TMC2209 V1.3 — remaining features
 
-- **Missing dimensions:** PCB thickness, header pin pitch, header row spacing,
-  heatsink footprint (length × width), header pin length below the board
+- **Missing dimensions:** PCB thickness, header pin pitch, header row spacing, header
+  pin length below the board
 - **Why it matters:** needed to design a driver bay, a retention clip, or a socket
   strip position rather than just an outer envelope.
 - **How to measure:** caliper on a clear PCB edge for thickness; caliper across the
