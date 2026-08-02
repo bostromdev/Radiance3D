@@ -28,8 +28,8 @@ unless the part is re-measured or replaced, and the **CAD value**, which is an
 expression built from it.
 
 ```text
-MotorPilotHeight       = 2.00 mm                            <- measured, frozen
-MotorPilotPocketDepth  = MotorPilotHeight + PrintClearance  <- CAD, tune here
+mMotorPilotHeight       = 2.00 mm                            <- measured, frozen
+cMotorPilotPocketDepth  = mMotorPilotHeight + dPrintClearance   <- CAD, tune here
 ```
 
 When a printed part fits badly, the fix is a clearance parameter — never the measured

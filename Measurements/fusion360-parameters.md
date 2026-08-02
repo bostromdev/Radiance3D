@@ -25,22 +25,64 @@ Every critical dimension exists twice:
 
 | | Parameter | Changes when |
 |---|---|---|
-| **Measured value** | e.g. `MotorPilotHeight` | Never — only if the part is re-measured or replaced |
-| **CAD value** | e.g. `MotorPilotPocketDepth` | Freely — it is an expression, and fit is tuned through the clearance term |
+| **Measured value** | e.g. `mMotorPilotHeight` | Never — only if the part is re-measured or replaced |
+| **CAD value** | e.g. `cMotorPilotPocketDepth` | Freely — it is an expression, and fit is tuned through the clearance term |
 
 ```text
-MotorPilotHeight        = 2.00 mm                              <- measured, frozen
-MotorPilotPocketDepth   = MotorPilotHeight + PrintClearance    <- CAD, tune via clearance
+mMotorPilotHeight        = 2.00 mm                              <- measured, frozen
+cMotorPilotPocketDepth   = mMotorPilotHeight + dPrintClearance    <- CAD, tune via clearance
 ```
 
-When a printed part comes out too tight, the fix is `PrintClearance` or
-`BearingFitAllowance` — **never** the measured number. Editing a measured value to fix
+When a printed part comes out too tight, the fix is `dPrintClearance` or
+`dBearingFitAllowance` — **never** the measured number. Editing a measured value to fix
 a fit destroys the record of what the hardware actually is, and the error then
 propagates silently into every other feature that references it.
 
-This is why the fit parameters are separate, single-purpose, and few: `PrintClearance`,
-`BearingFitAllowance`, `MountingClearance`, `HeatsinkAirGap`, `CableBendClearance`. All
+This is why the fit parameters are separate, single-purpose, and few: `dPrintClearance`,
+`dBearingFitAllowance`, `dMountingClearance`, `dHeatsinkAirGap`, `dCableBendClearance`. All
 tuning happens in those.
+
+## Naming convention
+
+Parameter names carry their type as a prefix, matching what Fusion Assistant generates,
+so the repository and the Fusion parameter table use identical names:
+
+| Prefix | Type | Example |
+|---|---|---|
+| `m` | Measured | `mMotorPilotDiameter` |
+| `c` | Calculated | `cMotorPilotSeatDiameter` |
+| `d` | Design choice | `dPrintClearance` |
+| `p` | Provisional | `pBearingOuterDiameter` |
+
+The prefix is visible at every use site, so a provisional value cannot be mistaken for
+a measured one inside an expression.
+
+## Fit policy — PETG, forgiving
+
+Target fit is a slip fit at **+0.04 mm per side** (`dPrintClearance`), giving roughly
+0.08 mm total across a bore or slot.
+
+> [!CAUTION]
+> **0.04 mm per side is machining-grade, not FFF-grade.** Typical fused-filament slip
+> fits need 0.15–0.25 mm per side, and PETG is worse than PLA — it swells, strings, and
+> holes print undersized. At 0.04 mm per side most printers will produce an interference
+> fit that needs force or reaming, which is the opposite of forgiving.
+>
+> This is left at 0.04 mm because it is what was specified, and because the structure
+> makes it safe: it is one parameter, nothing measured depends on it, and the register
+> coupon will report the true figure in one print. **Expect the coupon to push it to
+> 0.15–0.25 mm.** Change the parameter, not any measured value.
+
+Fit classes are deliberately separate, because they are not the same problem:
+
+| Parameter | Fit class | Sign | Applies to |
+|---|---|---|---|
+| `dPrintClearance` | Slip fit | Positive — adds material clearance | Motor pilot register, board pockets, card slots, general part-to-part |
+| `dBearingFitAllowance` | Press fit | Negative — bore is *smaller* than the bearing | Bearing outer-race seats only |
+| `dMountingClearance` | Loose | Positive, generous | Fastened interfaces where position is set by the fastener |
+
+Never apply `dPrintClearance` to a bearing seat. A bearing that slips into its housing
+is a failed bearing seat.
 
 ---
 
@@ -50,30 +92,30 @@ Traceable to a caliper reading and a photograph.
 
 | Parameter | Expression | Source | Type | Notes |
 |---|---:|---|---|---|
-| `MotorBodyDiagonal` | 54.30 mm | nema17.md — IMG_5223 | Measured | Corner to corner across chamfered corners |
-| `MotorBodyLength` | 20.84 mm | nema17.md — IMG_5249 | Measured | Front face plate to rear face plate, excludes pilot boss. IMG_5231 gave 20.76 mm |
-| `MotorLengthWithBoss` | 22.85 mm | nema17.md — IMG_5248 | Measured | Pilot boss face to rear face |
-| `MotorOverallLength` | 45.18 mm | nema17.md — IMG_5250 | Measured | Shaft tip to rear face — the full axial envelope |
-| `MotorPilotDiameter` | 21.97 mm | nema17.md — IMG_5247 | Measured | Register that centres the motor. Was provisional at 22.00 mm |
-| `MotorPilotHeight` | 2.00 mm | nema17.md — derived, ±0.06 mm | Measured | Derivation gives 1.95 and 2.01 by two routes; 2.00 adopted. **Frozen — tune fit via `PrintClearance`** |
-| `Ad8317OverallWidth` | 55.84 mm | ad8317.md — IMG_5257, IMG_5258 | Measured | SMA tip to tip, along the SMA axis |
-| `Ad8317PcbLength` | 36.27 mm | ad8317.md — IMG_5261 | Measured | Bare PCB, along the SMA axis |
-| `Ad8317PcbWidth` | 35.72 mm | ad8317.md — IMG_5262 | Measured | Bare PCB, perpendicular. **Board is not square** |
-| `Ad8317ShieldCanLength` | 17.36 mm | ad8317.md — IMG_5259, IMG_5260 | Measured | RF shield can only; mean of 17.34 / 17.38 |
-| `MotorConnectorProtrusion` | 9.38 mm | nema17.md — IMG_5226, IMG_5227 | Measured | Height of rear connector above end-cap face; two independent readings agreed |
-| `MotorConnectorLength` | 16.43 mm | nema17.md — IMG_5228 | Measured | 6-position housing on the rear end cap |
-| `MotorShaftLengthFromBoss` | 22.39 mm | nema17.md — operator measurement | Measured | **Datum is the pilot boss face, not the motor face plate.** No source photograph |
-| `DriverPcbLength` | 20.14 mm | tmc2209-v1.3.md — IMG_5234 | Measured | Bare PCB long axis |
-| `DriverPcbWidth` | 15.14 mm | tmc2209-v1.3.md — IMG_5233, IMG_5238 | Measured | Bare PCB short axis; repeat read 15.16 mm |
-| `DriverHeatsinkLeftToPcbRight` | 12.21 mm | tmc2209-v1.3.md — IMG_5235 | Measured | Heatsink left face to far PCB edge |
-| `DriverHeatsinkRightToPcbLeft` | 11.22 mm | tmc2209-v1.3.md — IMG_5236 | Measured | Heatsink right face to far PCB edge |
-| `DriverHeatsinkFrontToPcbBack` | 13.73 mm | tmc2209-v1.3.md — IMG_5237 | Measured | Heatsink front face to far PCB edge |
-| `DriverInstalledHeight` | 22.24 mm | tmc2209-v1.3.md — IMG_5239 | Measured | Heatsink top to header-pin tips; full envelope |
-| `Esp32PcbLength` | 51.47 mm | esp32-devkit.md — IMG_5241 | Measured | Bare board outline |
-| `Esp32PcbWidth` | 28.23 mm | esp32-devkit.md — IMG_5242 | Measured | Bare board outline |
-| `Esp32PcbThickness` | 1.33 mm | esp32-devkit.md — IMG_5245 | Measured | Thinner than the usual 1.6 mm assumption |
-| `Esp32BoardHeightWithModule` | 4.38 mm | esp32-devkit.md — IMG_5246 | Measured | PCB plus ESP-WROOM-32; excludes header pins below |
-| `Esp32UsbCWidth` | 8.83 mm | esp32-devkit.md — IMG_5243, IMG_5244 | Measured | Receptacle shell only; plug overmould is wider |
+| `mMotorBodyDiagonal` | 54.30 mm | nema17.md — IMG_5223 | Measured | Corner to corner across chamfered corners |
+| `mMotorBodyLength` | 20.84 mm | nema17.md — IMG_5249 | Measured | Front face plate to rear face plate, excludes pilot boss. IMG_5231 gave 20.76 mm |
+| `mMotorLengthWithBoss` | 22.85 mm | nema17.md — IMG_5248 | Measured | Pilot boss face to rear face |
+| `mMotorOverallLength` | 45.18 mm | nema17.md — IMG_5250 | Measured | Shaft tip to rear face — the full axial envelope |
+| `mMotorPilotDiameter` | 21.97 mm | nema17.md — IMG_5247 | Measured | Register that centres the motor. Was provisional at 22.00 mm |
+| `mMotorPilotHeight` | 2.00 mm | nema17.md — derived, ±0.06 mm | Measured | Derivation gives 1.95 and 2.01 by two routes; 2.00 adopted. **Frozen — tune fit via `dPrintClearance`** |
+| `mAd8317OverallWidth` | 55.84 mm | ad8317.md — IMG_5257, IMG_5258 | Measured | SMA tip to tip, along the SMA axis |
+| `mAd8317PcbLength` | 36.27 mm | ad8317.md — IMG_5261 | Measured | Bare PCB, along the SMA axis |
+| `mAd8317PcbWidth` | 35.72 mm | ad8317.md — IMG_5262 | Measured | Bare PCB, perpendicular. **Board is not square** |
+| `mAd8317ShieldCanLength` | 17.36 mm | ad8317.md — IMG_5259, IMG_5260 | Measured | RF shield can only; mean of 17.34 / 17.38 |
+| `mMotorConnectorProtrusion` | 9.38 mm | nema17.md — IMG_5226, IMG_5227 | Measured | Height of rear connector above end-cap face; two independent readings agreed |
+| `mMotorConnectorLength` | 16.43 mm | nema17.md — IMG_5228 | Measured | 6-position housing on the rear end cap |
+| `mMotorShaftLengthFromBoss` | 22.39 mm | nema17.md — operator measurement | Measured | **Datum is the pilot boss face, not the motor face plate.** No source photograph |
+| `mDriverPcbLength` | 20.14 mm | tmc2209-v1.3.md — IMG_5234 | Measured | Bare PCB long axis |
+| `mDriverPcbWidth` | 15.14 mm | tmc2209-v1.3.md — IMG_5233, IMG_5238 | Measured | Bare PCB short axis; repeat read 15.16 mm |
+| `mDriverHeatsinkLeftToPcbRight` | 12.21 mm | tmc2209-v1.3.md — IMG_5235 | Measured | Heatsink left face to far PCB edge |
+| `mDriverHeatsinkRightToPcbLeft` | 11.22 mm | tmc2209-v1.3.md — IMG_5236 | Measured | Heatsink right face to far PCB edge |
+| `mDriverHeatsinkFrontToPcbBack` | 13.73 mm | tmc2209-v1.3.md — IMG_5237 | Measured | Heatsink front face to far PCB edge |
+| `mDriverInstalledHeight` | 22.24 mm | tmc2209-v1.3.md — IMG_5239 | Measured | Heatsink top to header-pin tips; full envelope |
+| `mEsp32PcbLength` | 51.47 mm | esp32-devkit.md — IMG_5241 | Measured | Bare board outline |
+| `mEsp32PcbWidth` | 28.23 mm | esp32-devkit.md — IMG_5242 | Measured | Bare board outline |
+| `mEsp32PcbThickness` | 1.33 mm | esp32-devkit.md — IMG_5245 | Measured | Thinner than the usual 1.6 mm assumption |
+| `mEsp32BoardHeightWithModule` | 4.38 mm | esp32-devkit.md — IMG_5246 | Measured | PCB plus ESP-WROOM-32; excludes header pins below |
+| `mEsp32UsbCWidth` | 8.83 mm | esp32-devkit.md — IMG_5243, IMG_5244 | Measured | Receptacle shell only; plug overmould is wider |
 
 ## Calculated
 
@@ -81,26 +123,26 @@ Derived by expression. Fusion will keep these correct when their inputs change.
 
 | Parameter | Expression | Source | Type | Notes |
 |---|---:|---|---|---|
-| `MotorPocketDepth` | `MotorBodyLength + PrintClearance` | Calculated | Calculated | Pocket for the motor body only |
-| `MotorRearClearance` | `MotorConnectorProtrusion + CableBendClearance` | Calculated | Calculated | Space behind the motor for the connector and its plug. 21.38 mm at current values — this decides whether the pan motor can face shaft-up |
-| `DriverBayHeight` | `DriverInstalledHeight + HeatsinkAirGap` | Calculated | Calculated | Never make the bay exactly `DriverInstalledHeight`; the heatsink needs air |
-| `DriverHeatsinkWidth` | `DriverHeatsinkLeftToPcbRight + DriverHeatsinkRightToPcbLeft - DriverPcbWidth` | Calculated | Calculated | 8.29 mm. Fully measured — no provisional input |
-| `DriverHeatsinkOffset` | `(DriverHeatsinkLeftToPcbRight - DriverHeatsinkRightToPcbLeft) / 2` | Calculated | Calculated | 0.495 mm from the PCB centre. This is why the driver is handed |
-| `DriverHeatsinkFrontEdge` | `DriverPcbLength - DriverHeatsinkFrontToPcbBack` | Calculated | Calculated | 6.41 mm from the PCB front edge. The heatsink's **back** edge is unknown — see `missing-measurements.md` |
-| `Esp32PocketLength` | `Esp32PcbLength + 2 * PrintClearance` | Calculated | Calculated | Tray pocket, removable fit |
-| `Esp32PocketWidth` | `Esp32PcbWidth + 2 * PrintClearance` | Calculated | Calculated | Tray pocket, removable fit |
-| `MotorFaceHalf` | `MotorFaceWidth / 2` | Calculated | Calculated | Used to centre the motor on its mount |
-| `MotorPilotPocketDepth` | `MotorPilotHeight + PrintClearance` | Calculated | Calculated | The counterbore in the printed mount. Tune fit here, never in `MotorPilotHeight` |
-| `MotorPilotSeatDiameter` | `MotorPilotDiameter + PrintClearance` | Calculated | Calculated | The register bore in the printed mount |
-| `DriverBayLength` | `DriverPcbLength + 2 * PrintClearance` | Calculated | Calculated | Driver bay footprint, removable fit |
-| `DriverBayWidth` | `DriverPcbWidth + 2 * PrintClearance` | Calculated | Calculated | Driver bay footprint, removable fit |
-| `Esp32SlotThickness` | `Esp32PcbThickness + PrintClearance` | Calculated | Calculated | Card-slot width. The board is 1.33 mm, not 1.6 mm |
-| `Ad8317SmaProtrusion` | `(Ad8317OverallWidth - Ad8317PcbLength) / 2` | Calculated | Calculated | 9.78 mm per side. Normal for an edge-launch SMA, which corroborates the two readings |
-| `Ad8317PocketLength` | `Ad8317PcbLength + 2 * PrintClearance` | Calculated | Calculated | Removable holder, not an interference fit — this board carries RF |
-| `Ad8317PocketWidth` | `Ad8317PcbWidth + 2 * PrintClearance` | Calculated | Calculated | Removable holder |
-| `MotorShaftLengthFromFace` | `MotorShaftLengthFromBoss + MotorPilotHeight` | Calculated | Calculated | 24.40 mm — the vendor-style figure. Now fully derived from measured values |
-| `CouplerShaftEngagement` | `CouplerLength / 2` | Calculated | Calculated | Motor-side engagement. Must stay below `MotorShaftLengthFromBoss` (22.39 mm) |
-| `BearingSeatBore` | `BearingOuterDiameter - BearingFitAllowance` | Calculated | Calculated | Press-fit seat; validate with a coupon first |
+| `cMotorPocketDepth` | `mMotorBodyLength + dPrintClearance` | Calculated | Calculated | Pocket for the motor body only |
+| `cMotorRearClearance` | `mMotorConnectorProtrusion + dCableBendClearance` | Calculated | Calculated | Space behind the motor for the connector and its plug. 21.38 mm at current values — this decides whether the pan motor can face shaft-up |
+| `cDriverBayHeight` | `mDriverInstalledHeight + dHeatsinkAirGap` | Calculated | Calculated | Never make the bay exactly `mDriverInstalledHeight`; the heatsink needs air |
+| `cDriverHeatsinkWidth` | `mDriverHeatsinkLeftToPcbRight + mDriverHeatsinkRightToPcbLeft - mDriverPcbWidth` | Calculated | Calculated | 8.29 mm. Fully measured — no provisional input |
+| `cDriverHeatsinkOffset` | `(mDriverHeatsinkLeftToPcbRight - mDriverHeatsinkRightToPcbLeft) / 2` | Calculated | Calculated | 0.495 mm from the PCB centre. This is why the driver is handed |
+| `cDriverHeatsinkFrontEdge` | `mDriverPcbLength - mDriverHeatsinkFrontToPcbBack` | Calculated | Calculated | 6.41 mm from the PCB front edge. The heatsink's **back** edge is unknown — see `missing-measurements.md` |
+| `cEsp32PocketLength` | `mEsp32PcbLength + 2 * dPrintClearance` | Calculated | Calculated | Tray pocket, removable fit |
+| `cEsp32PocketWidth` | `mEsp32PcbWidth + 2 * dPrintClearance` | Calculated | Calculated | Tray pocket, removable fit |
+| `cMotorFaceHalf` | `pMotorFaceWidth / 2` | Calculated | Calculated | Used to centre the motor on its mount |
+| `cMotorPilotPocketDepth` | `mMotorPilotHeight + dPrintClearance` | Calculated | Calculated | The counterbore in the printed mount. Tune fit here, never in `mMotorPilotHeight` |
+| `cMotorPilotSeatDiameter` | `mMotorPilotDiameter + dPrintClearance` | Calculated | Calculated | The register bore in the printed mount |
+| `cDriverBayLength` | `mDriverPcbLength + 2 * dPrintClearance` | Calculated | Calculated | Driver bay footprint, removable fit |
+| `cDriverBayWidth` | `mDriverPcbWidth + 2 * dPrintClearance` | Calculated | Calculated | Driver bay footprint, removable fit |
+| `cEsp32SlotThickness` | `mEsp32PcbThickness + dPrintClearance` | Calculated | Calculated | Card-slot width. The board is 1.33 mm, not 1.6 mm |
+| `cAd8317SmaProtrusion` | `(mAd8317OverallWidth - mAd8317PcbLength) / 2` | Calculated | Calculated | 9.78 mm per side. Normal for an edge-launch SMA, which corroborates the two readings |
+| `cAd8317PocketLength` | `mAd8317PcbLength + 2 * dPrintClearance` | Calculated | Calculated | Removable holder, not an interference fit — this board carries RF |
+| `cAd8317PocketWidth` | `mAd8317PcbWidth + 2 * dPrintClearance` | Calculated | Calculated | Removable holder |
+| `cMotorShaftLengthFromFace` | `mMotorShaftLengthFromBoss + mMotorPilotHeight` | Calculated | Calculated | 24.40 mm — the vendor-style figure. Now fully derived from measured values |
+| `cCouplerShaftEngagement` | `pCouplerLength / 2` | Calculated | Calculated | Motor-side engagement. Must stay below `mMotorShaftLengthFromBoss` (22.39 mm) |
+| `cBearingSeatBore` | `pBearingOuterDiameter - dBearingFitAllowance` | Calculated | Calculated | Press-fit seat; validate with a coupon first |
 
 ## Provisional — must be replaced before printing for fit
 
@@ -109,25 +151,25 @@ These are placeholders. Each one has an entry in
 
 | Parameter | Expression | Source | Type | Notes |
 |---|---:|---|---|---|
-| `MotorFaceWidth` | 42.30 mm | **Provisional** | Provisional | IMG_5221 reads `42` but decimals are unreadable. 42.30 is the NEMA 17 nominal, not a measurement |
-| `MotorHoleSpacing` | 31.00 mm | **Provisional** | Provisional | NEMA 17 nominal square pattern. Not verified on these motors |
-| `MotorHoleDiameter` | 3.40 mm | **Provisional** | Provisional | M3 clearance, assumed. Not measured |
-| `MotorShaftDiameter` | 5.00 mm | **Provisional** | Provisional | IMG_5225 reads `4.9?`. Use 5.00 nominal until the second decimal is confirmed |
-| `BearingInnerDiameter` | 8.00 mm | **Provisional** | Provisional | No bearing measured. 8 mm assumes a 608-series |
-| `BearingOuterDiameter` | 22.00 mm | **Provisional** | Provisional | No bearing measured |
-| `BearingWidth` | 7.00 mm | **Provisional** | Provisional | No bearing measured |
-| `CouplerOuterDiameter` | 19.00 mm | **Provisional** | Provisional | No coupler measured |
-| `CouplerLength` | 25.00 mm | **Provisional** | Provisional | No coupler measured; drives the tilt-assembly height |
-| `CouplerBoreMotorSide` | 5.00 mm | **Provisional** | Provisional | Assumed to match the shaft |
-| `CouplerBoreDrivenSide` | 8.00 mm | **Provisional** | Provisional | No coupler measured |
-| `InsertOuterDiameter` | 4.60 mm | **Provisional** | Provisional | Common M3 heat-set insert knurl OD. Not measured |
-| `InsertLength` | 5.70 mm | **Provisional** | Provisional | Common M3 heat-set insert length. Not measured |
-| `InsertPilotDiameter` | 4.00 mm | **Provisional** | Provisional | Pilot hole for the above. Verify against the insert supplier and a test coupon |
-| `LimitSwitchBodyLength` | 20.00 mm | **Provisional** | Provisional | No switch measured |
-| `LimitSwitchHoleSpacing` | 9.50 mm | **Provisional** | Provisional | No switch measured |
-| `AntennaBodyDiameter` | 10.00 mm | **Provisional** | Provisional | No antenna selected or measured |
-| `CoaxOuterDiameter` | 3.00 mm | **Provisional** | Provisional | No coax measured. RG316-class assumption |
-| `CoaxMinBendRadius` | 15.00 mm | **Provisional** | Provisional | Take from the coax datasheet, not by bending the cable |
+| `pMotorFaceWidth` | 42.30 mm | **Provisional** | Provisional | IMG_5221 reads `42` but decimals are unreadable. 42.30 is the NEMA 17 nominal, not a measurement |
+| `pMotorHoleSpacing` | 31.00 mm | **Provisional** | Provisional | NEMA 17 nominal square pattern. Not verified on these motors |
+| `pMotorHoleDiameter` | 3.40 mm | **Provisional** | Provisional | M3 clearance, assumed. Not measured |
+| `pMotorShaftDiameter` | 5.00 mm | **Provisional** | Provisional | IMG_5225 reads `4.9?`. Use 5.00 nominal until the second decimal is confirmed |
+| `pBearingInnerDiameter` | 8.00 mm | **Provisional** | Provisional | No bearing measured. 8 mm assumes a 608-series |
+| `pBearingOuterDiameter` | 22.00 mm | **Provisional** | Provisional | No bearing measured |
+| `pBearingWidth` | 7.00 mm | **Provisional** | Provisional | No bearing measured |
+| `pCouplerOuterDiameter` | 19.00 mm | **Provisional** | Provisional | No coupler measured |
+| `pCouplerLength` | 25.00 mm | **Provisional** | Provisional | No coupler measured; drives the tilt-assembly height |
+| `pCouplerBoreMotorSide` | 5.00 mm | **Provisional** | Provisional | Assumed to match the shaft |
+| `pCouplerBoreDrivenSide` | 8.00 mm | **Provisional** | Provisional | No coupler measured |
+| `pInsertOuterDiameter` | 4.60 mm | **Provisional** | Provisional | Common M3 heat-set insert knurl OD. Not measured |
+| `pInsertLength` | 5.70 mm | **Provisional** | Provisional | Common M3 heat-set insert length. Not measured |
+| `pInsertPilotDiameter` | 4.00 mm | **Provisional** | Provisional | Pilot hole for the above. Verify against the insert supplier and a test coupon |
+| `pLimitSwitchBodyLength` | 20.00 mm | **Provisional** | Provisional | No switch measured |
+| `pLimitSwitchHoleSpacing` | 9.50 mm | **Provisional** | Provisional | No switch measured |
+| `pAntennaBodyDiameter` | 10.00 mm | **Provisional** | Provisional | No antenna selected or measured |
+| `pCoaxOuterDiameter` | 3.00 mm | **Provisional** | Provisional | No coax measured. RG316-class assumption |
+| `pCoaxMinBendRadius` | 15.00 mm | **Provisional** | Provisional | Take from the coax datasheet, not by bending the cable |
 
 ## Design choice
 
@@ -135,20 +177,20 @@ Chosen deliberately. No measurement is expected behind these; they are tuning kn
 
 | Parameter | Expression | Source | Type | Notes |
 |---|---:|---|---|---|
-| `WallThickness` | 3.00 mm | Design choice | Design | PETG prototype; increase for the pan base if it flexes |
-| `BaseThickness` | 6.00 mm | Design choice | Design | Stationary pan base floor |
-| `PrintClearance` | 0.30 mm | Design choice | Design | General part-to-part clearance. Adjust after the first fit coupon |
-| `BearingFitAllowance` | 0.05 mm | Design choice | Design | Press-fit interference for a bearing seat. Very printer-dependent — coupon first |
-| `HeatsinkAirGap` | 8.00 mm | Design choice | Design | Free air above the TMC2209 heatsink. Do not reduce without a thermal test |
-| `CableBendClearance` | 12.00 mm | Design choice | Design | Space behind a motor connector for the plug and wire bend |
-| `MountingClearance` | 1.00 mm | Design choice | Design | Slack around fastened interfaces |
-| `FilletRadiusStructural` | 3.00 mm | Design choice | Design | Structural fillets at load-bearing intersections |
-| `FilletRadiusCosmetic` | 1.00 mm | Design choice | Design | Edge break |
-| `RibThickness` | 2.40 mm | Design choice | Design | Stiffening ribs; a multiple of a 0.4 mm nozzle width |
-| `TiltAxisHeight` | 90.00 mm | Design choice | Design | Height of the tilt axis above the pan platform. Set for antenna swing clearance |
-| `AntennaCentreOffset` | 0.00 mm | Design choice | Design | Target: antenna active centre on the pan/tilt axis intersection. Non-zero is an RF error term |
-| `AxisIntersectionOffset` | 0.00 mm | Design choice | Design | Target: pan and tilt axes intersect. Record the real value once geometry is fixed |
-| `CounterweightMassTarget` | 0.00 mm | Design choice | Design | Placeholder. Set once the antenna and cradle mass are known |
+| `dWallThickness` | 3.00 mm | Design choice | Design | PETG prototype; increase for the pan base if it flexes |
+| `dBaseThickness` | 6.00 mm | Design choice | Design | Stationary pan base floor |
+| `dPrintClearance` | 0.04 mm | Design choice | Design | Slip fit, **per side** (~0.08 mm total). PETG. See the fit-policy caution above — expect the coupon to push this to 0.15–0.25 mm |
+| `dBearingFitAllowance` | 0.05 mm | Design choice | Design | Press-fit **interference** for a bearing seat: the bore is this much *smaller* than the bearing OD. Never use `dPrintClearance` here |
+| `dHeatsinkAirGap` | 8.00 mm | Design choice | Design | Free air above the TMC2209 heatsink. Do not reduce without a thermal test |
+| `dCableBendClearance` | 12.00 mm | Design choice | Design | Space behind a motor connector for the plug and wire bend |
+| `dMountingClearance` | 1.00 mm | Design choice | Design | Slack around fastened interfaces |
+| `dFilletRadiusStructural` | 3.00 mm | Design choice | Design | Structural fillets at load-bearing intersections |
+| `dFilletRadiusCosmetic` | 1.00 mm | Design choice | Design | Edge break |
+| `dRibThickness` | 2.40 mm | Design choice | Design | Stiffening ribs; a multiple of a 0.4 mm nozzle width |
+| `dTiltAxisHeight` | 90.00 mm | Design choice | Design | Height of the tilt axis above the pan platform. Set for antenna swing clearance |
+| `dAntennaCentreOffset` | 0.00 mm | Design choice | Design | Target: antenna active centre on the pan/tilt axis intersection. Non-zero is an RF error term |
+| `dAxisIntersectionOffset` | 0.00 mm | Design choice | Design | Target: pan and tilt axes intersect. Record the real value once geometry is fixed |
+| `dCounterweightMassTarget` | 0.00 mm | Design choice | Design | Placeholder. Set once the antenna and cradle mass are known |
 
 ## How to use this table
 

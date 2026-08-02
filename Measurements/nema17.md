@@ -78,7 +78,7 @@ with a ±0.06 mm measurement tolerance. That is well inside what a PETG print ca
 FFF dimensional variation is normally larger — so it is adequate for prototype CAD.
 
 **This value is frozen.** If a printed register comes out tight, change
-`PrintClearance`, never `MotorPilotHeight`. See the fit rule in
+`dPrintClearance`, never `mMotorPilotHeight`. See the fit rule in
 [`fusion360-parameters.md`](fusion360-parameters.md).
 
 ### Shaft length datum

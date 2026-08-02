@@ -24,7 +24,16 @@ NON-NEGOTIABLE RULES
 
 1. Millimetres throughout. Never switch units.
 2. Every dimension must come from a named user parameter. No hard-coded numbers in
-   any sketch or feature.
+   any sketch or feature. Name parameters with a type prefix so the type is visible at
+   every use site: m = measured, c = calculated, d = design choice, p = provisional.
+   For example mMotorPilotDiameter, cMotorPilotSeatDiameter, dPrintClearance,
+   pBearingOuterDiameter.
+2a. NEVER modify a measured value to fix a fit. A measured parameter is frozen; it
+   changes only if I re-measure or replace the part. Every CAD feature that touches
+   hardware is an expression built from a measured value plus a clearance parameter.
+   If a print comes out tight, the fix is dPrintClearance or dBearingFitAllowance, and
+   nothing else. Overwriting a measurement with a print allowance destroys the record
+   of what the hardware actually is.
 3. Each major part is a separate Fusion component, named as listed below.
 4. The MEASURED dimensions below are the source of truth. They were taken with
    calipers on the actual parts. Do not replace them with datasheet or "standard"
@@ -144,8 +153,8 @@ DESIGN CHOICES - MINE, ADJUSTABLE
 
   Wall thickness                               3.00 mm
   Base thickness                               6.00 mm
-  General print clearance                      0.30 mm
-  Bearing press-fit allowance                  0.05 mm
+  dPrintClearance, slip fit PER SIDE           0.04 mm   (~0.08 mm total across a bore)
+  dBearingFitAllowance, press-fit INTERFERENCE  0.05 mm   (bore SMALLER than bearing OD)
   Free air above the driver heatsink           8.00 mm
   Cable bend clearance behind a connector     12.00 mm
   Mounting clearance                           1.00 mm
@@ -153,6 +162,31 @@ DESIGN CHOICES - MINE, ADJUSTABLE
   Cosmetic fillet radius                       1.00 mm
   Rib thickness                                2.40 mm
   Tilt axis height above the pan platform     90.00 mm
+
+=====================================================================
+FIT POLICY - PETG, FORGIVING
+=====================================================================
+
+Printing in PETG on a fused-filament printer. Target is a slip fit at +0.04 mm per
+side, about 0.08 mm total across a bore or slot.
+
+Fit classes are NOT interchangeable. Apply the right one:
+
+  dPrintClearance       slip fit, POSITIVE   motor pilot register, board pockets,
+                                             card slots, general part-to-part
+  dBearingFitAllowance  press fit, NEGATIVE  bearing outer-race seats ONLY - the bore
+                                             is SMALLER than the bearing OD
+  dMountingClearance    loose, POSITIVE      fastened joints where the fastener sets
+                                             position
+
+Never apply dPrintClearance to a bearing seat. A bearing that slips into its housing
+is a failed bearing seat.
+
+Note on the 0.04 mm figure: that is machining-grade, not FFF-grade. Typical
+fused-filament slip fits need 0.15-0.25 mm per side and PETG runs tighter than PLA.
+Expect the register coupon to push dPrintClearance up. That is fine and expected -
+it is one parameter, and no measured value depends on it. Say so if a feature you are
+designing would be unprintable at 0.04 mm, but do not change the value yourself.
 
 =====================================================================
 COMPONENTS TO DESIGN, IN ORDER
