@@ -29,7 +29,7 @@ expression built from it.
 
 ```text
 mMotorPilotHeight       = 2.00 mm                            <- measured, frozen
-cMotorPilotPocketDepth  = mMotorPilotHeight + dPrintClearance   <- CAD, tune here
+cMotorPilotPocketDepth  = mMotorPilotHeight + dPrintClearance  <- CAD, tune here
 ```
 
 When a printed part fits badly, the fix is a clearance parameter — never the measured

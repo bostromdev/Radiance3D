@@ -59,26 +59,35 @@ a measured one inside an expression.
 
 ## Fit policy — PETG, forgiving
 
-Target fit is a slip fit at **+0.04 mm per side** (`dPrintClearance`), giving roughly
-0.08 mm total across a bore or slot.
+Target fit is a slip fit at **+0.15 mm per side** (`dPrintClearance`), giving 0.30 mm
+total across a bore or slot.
+
+**0.04 mm per side was specified, and has been overridden to 0.15 mm.** That is a
+judgement call, and it is one line to revert.
+
+Reason: 0.04 mm per side is machining-grade, not FFF-grade. PETG bores print undersized
+by roughly 0.1–0.3 mm on diameter from die swell and perimeter pull-in, *before* any
+clearance is applied. The printer eats 0.04 mm before a fit exists, so the result is an
+interference fit needing force or a reamer — the opposite of forgiving. 0.15 mm per
+side (0.30 mm total) is a standard PETG slip fit that still assembles by hand.
+
+The register coupon settles it in one print. Change `dPrintClearance`, never a
+measured value.
 
 > [!CAUTION]
-> **0.04 mm per side is machining-grade, not FFF-grade.** Typical fused-filament slip
-> fits need 0.15–0.25 mm per side, and PETG is worse than PLA — it swells, strings, and
-> holes print undersized. At 0.04 mm per side most printers will produce an interference
-> fit that needs force or reaming, which is the opposite of forgiving.
->
-> This is left at 0.04 mm because it is what was specified, and because the structure
-> makes it safe: it is one parameter, nothing measured depends on it, and the register
-> coupon will report the true figure in one print. **Expect the coupon to push it to
-> 0.15–0.25 mm.** Change the parameter, not any measured value.
+> **Shallow features sit inside the elephant-foot zone.** The motor pilot register is
+> only 2.00 mm deep. Printed face-down, the whole feature is within the first few
+> layers, where PETG squishes outward and shrinks the bore — tight at the bottom,
+> correct at the top, and the motor rocks. Print that face **up**, or rely on
+> `dBoreMouthChamfer`. State the print orientation for every part with a shallow
+> register.
 
 Fit classes are deliberately separate, because they are not the same problem:
 
 | Parameter | Fit class | Sign | Applies to |
 |---|---|---|---|
 | `dPrintClearance` | Slip fit | Positive — adds material clearance | Motor pilot register, board pockets, card slots, general part-to-part |
-| `dBearingFitAllowance` | Press fit | Negative — bore is *smaller* than the bearing | Bearing outer-race seats only |
+| `dBearingFitAllowance` | Press fit | Zero — bore at nominal; the printer's undersizing supplies the interference | Bearing outer-race seats only |
 | `dMountingClearance` | Loose | Positive, generous | Fastened interfaces where position is set by the fastener |
 
 Never apply `dPrintClearance` to a bearing seat. A bearing that slips into its housing
@@ -179,14 +188,15 @@ Chosen deliberately. No measurement is expected behind these; they are tuning kn
 |---|---:|---|---|---|
 | `dWallThickness` | 3.00 mm | Design choice | Design | PETG prototype; increase for the pan base if it flexes |
 | `dBaseThickness` | 6.00 mm | Design choice | Design | Stationary pan base floor |
-| `dPrintClearance` | 0.04 mm | Design choice | Design | Slip fit, **per side** (~0.08 mm total). PETG. See the fit-policy caution above — expect the coupon to push this to 0.15–0.25 mm |
-| `dBearingFitAllowance` | 0.05 mm | Design choice | Design | Press-fit **interference** for a bearing seat: the bore is this much *smaller* than the bearing OD. Never use `dPrintClearance` here |
+| `dPrintClearance` | 0.15 mm | Design choice | Design | Slip fit, **per side** (0.30 mm total across a bore). PETG starting value. Was specified at 0.04 mm — see the fit-policy note |
+| `dBearingFitAllowance` | 0.00 mm | Design choice | Design | Bore modelled at the exact bearing OD. FFF already undersizes holes, which supplies the interference — do not stack a second one. Never use `dPrintClearance` here |
 | `dHeatsinkAirGap` | 8.00 mm | Design choice | Design | Free air above the TMC2209 heatsink. Do not reduce without a thermal test |
 | `dCableBendClearance` | 12.00 mm | Design choice | Design | Space behind a motor connector for the plug and wire bend |
 | `dMountingClearance` | 1.00 mm | Design choice | Design | Slack around fastened interfaces |
 | `dFilletRadiusStructural` | 3.00 mm | Design choice | Design | Structural fillets at load-bearing intersections |
 | `dFilletRadiusCosmetic` | 1.00 mm | Design choice | Design | Edge break |
 | `dRibThickness` | 2.40 mm | Design choice | Design | Stiffening ribs; a multiple of a 0.4 mm nozzle width |
+| `dBoreMouthChamfer` | 0.50 mm | Design choice | Design | Chamfer at the mouth of every bore and register, so squished first layers have somewhere to go |
 | `dTiltAxisHeight` | 90.00 mm | Design choice | Design | Height of the tilt axis above the pan platform. Set for antenna swing clearance |
 | `dAntennaCentreOffset` | 0.00 mm | Design choice | Design | Target: antenna active centre on the pan/tilt axis intersection. Non-zero is an RF error term |
 | `dAxisIntersectionOffset` | 0.00 mm | Design choice | Design | Target: pan and tilt axes intersect. Record the real value once geometry is fixed |

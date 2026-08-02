@@ -153,8 +153,11 @@ DESIGN CHOICES - MINE, ADJUSTABLE
 
   Wall thickness                               3.00 mm
   Base thickness                               6.00 mm
-  dPrintClearance, slip fit PER SIDE           0.04 mm   (~0.08 mm total across a bore)
-  dBearingFitAllowance, press-fit INTERFERENCE  0.05 mm   (bore SMALLER than bearing OD)
+  dPrintClearance, slip fit PER SIDE           0.15 mm   (0.30 mm total across a bore)
+  dBearingFitAllowance, press-fit INTERFERENCE  0.00 mm   (bore AT bearing OD; the
+                                                          printer's own undersizing
+                                                          supplies the interference)
+  dBoreMouthChamfer                             0.50 mm   (mouth of every bore/register)
   Free air above the driver heatsink           8.00 mm
   Cable bend clearance behind a connector     12.00 mm
   Mounting clearance                           1.00 mm
@@ -182,11 +185,18 @@ Fit classes are NOT interchangeable. Apply the right one:
 Never apply dPrintClearance to a bearing seat. A bearing that slips into its housing
 is a failed bearing seat.
 
-Note on the 0.04 mm figure: that is machining-grade, not FFF-grade. Typical
-fused-filament slip fits need 0.15-0.25 mm per side and PETG runs tighter than PLA.
-Expect the register coupon to push dPrintClearance up. That is fine and expected -
-it is one parameter, and no measured value depends on it. Say so if a feature you are
-designing would be unprintable at 0.04 mm, but do not change the value yourself.
+ELEPHANT FOOT ON SHALLOW FEATURES - this is the one that will bite:
+The motor pilot register is only 2.00 mm deep. If that face is printed downward, the
+entire feature lies within the first few layers, where PETG squishes outward and the
+bore comes out undersized at the bottom and correct at the top. The motor then rocks.
+For every part containing a shallow register, bore or locating feature, state the print
+orientation explicitly and prefer printing that face UPWARD. Apply dBoreMouthChamfer at
+the mouth of every bore and register regardless of orientation.
+
+PETG bores also print undersized by roughly 0.1-0.3 mm on diameter from die swell and
+perimeter pull-in, before any clearance is applied. That is why dBearingFitAllowance is
+0.00: model the bearing seat at the exact bearing OD and let the printer's own
+undersizing supply the press fit. Do not stack a designed interference on top of it.
 
 =====================================================================
 COMPONENTS TO DESIGN, IN ORDER
