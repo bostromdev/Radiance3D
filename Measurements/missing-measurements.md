@@ -92,14 +92,21 @@ Two categories:
 - **How to measure:** caliper across the raised circular boss for diameter; depth
   gauge or caliper depth rod against the face plate for height.
 
-### NEMA 17 — shaft length and flat
+### NEMA 17 — shaft flat, and the face-plate shaft datum
 
-- **Missing dimension:** shaft length from the face plate, flat length, flat depth
-- **Why it matters:** determines coupler engagement, whether a grub screw lands on the
-  flat, and how much shaft the tilt cradle can use.
+- **Partially resolved.** Shaft length from the **pilot boss face** to the shaft end is
+  measured at 22.39 mm — see [`nema17.md`](nema17.md).
+- **Still missing:** shaft length from the **face plate**, flat length, flat depth.
+- **Why it matters:** the face-plate figure is what vendor listings quote and what a
+  motor mount is usually dimensioned from. It equals `22.39 mm + pilot boss height`,
+  and the pilot boss height is not measured, so the face-plate figure is unavailable.
+  Measuring the pilot boss height (above) resolves both at once. The flat determines
+  whether a grub screw seats properly rather than marring the round shaft.
 - **How to measure:** caliper depth rod from the front face plate to the shaft end for
-  length; caliper across the shaft on the flat, compared to the round diameter, for
-  flat depth.
+  the face-plate length; caliper across the shaft on the flat, compared with the round
+  diameter, for flat depth.
+- **Provenance gap:** the 22.39 mm reading has no source photograph. Every other value
+  in this folder is traceable to an image. A caliper photo would close that gap.
 
 ### TMC2209 V1.3 — one reading closes the heatsink footprint
 

@@ -66,6 +66,14 @@ NEMA 17 stepper motor, YEJMKJ / LYLANMO, quantity 2 (one pan, one tilt):
   Motor body length, face plate to rear face  20.76 mm   (short-body / "pancake")
   Rear connector protrusion above end cap      9.38 mm
   Rear connector housing length               16.43 mm   (6-position housing)
+  Output shaft length above the pilot boss    22.39 mm
+
+  DATUM WARNING on the 22.39 mm shaft length: it is measured from the top face of the
+  raised circular boss the shaft emerges from, NOT from the motor face plate. It is
+  therefore not the number a vendor listing means by "shaft length". The face-plate
+  figure would be 22.39 mm plus the pilot boss height, and the pilot boss height is
+  provisional. Model the shaft from the boss face, which is measured. Do not silently
+  treat 22.39 mm as a face-plate dimension.
 
 BIGTREETECH TMC2209 V1.3 driver, quantity 2, measured WITH heatsink installed:
   PCB length                                  20.14 mm
@@ -108,7 +116,6 @@ built and updated later. Flag every feature that depends on one.
   Motor pilot boss diameter                   22.00 mm
   Motor pilot boss height                      2.00 mm
   Motor shaft diameter                         5.00 mm   (photo reads "4.9?")
-  Motor shaft length                          20.00 mm
   Bearing inner diameter                       8.00 mm
   Bearing outer diameter                      22.00 mm
   Bearing width                                7.00 mm

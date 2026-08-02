@@ -53,7 +53,8 @@ Full detail, including how to take each one, is in
 
 - NEMA 17 mounting-hole spacing and diameter
 - NEMA 17 pilot boss diameter and height
-- NEMA 17 shaft length, flat length and flat depth
+- NEMA 17 shaft length from the **face plate** (the boss-face figure is measured at
+  22.39 mm; the face-plate figure needs the pilot boss height), flat length, flat depth
 - TMC2209 PCB thickness, header pitch, header row spacing, heatsink footprint
 - ESP32 mounting holes and header pin length
 - Bearings — inner diameter, outer diameter, width

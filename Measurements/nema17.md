@@ -22,7 +22,29 @@ override any generic NEMA 17 dimensions found online.
 | Connector protrusion above end-cap face | 9.38 mm | IMG_5226.HEIC | Confirmed by a second shot at a different angle |
 | Connector protrusion above end-cap face (repeat) | 9.38 mm | IMG_5227.HEIC | Independent repeat of IMG_5226; same value |
 | Motor connector housing length | 16.43 mm | IMG_5228.HEIC | White 6-position polarised housing on the rear end cap |
+| Output shaft length, from pilot boss face to shaft end | 22.39 mm | operator measurement — no photograph | **Datum is the top face of the raised circular boss around the shaft, not the motor face plate.** See the datum note below |
 | Motor face width (across flats) | ≈42 mm | IMG_5221.jpg | **Integer only.** Photo resolution does not resolve the decimals — see `missing-measurements.md` |
+
+### Shaft length datum
+
+The 22.39 mm reading is taken from the top of the pilot boss — the raised circular
+feature the shaft emerges from — to the end of the shaft. It is **not** the figure a
+vendor listing means by "shaft length", which is normally measured from the motor face
+plate.
+
+To get the face-plate figure, add the pilot boss height:
+
+```text
+shaft length from face plate = 22.39 mm + pilot boss height
+```
+
+Pilot boss height is **not measured** (see `missing-measurements.md`), so the
+face-plate figure is not yet available. Model from the boss face datum, which is
+measured, rather than from the face plate.
+
+This value has no source photograph — it was reported directly rather than read from a
+caliper picture. Every other measurement in this folder is traceable to an image. A
+photo of this measurement would close that gap.
 
 ## Values read but not yet usable
 
@@ -53,8 +75,10 @@ recorded here for traceability and listed in
   `missing-measurements.md`.
 - **Pilot diameter and height:** not confirmed. The pilot boss is visible in
   IMG_5231/IMG_5232 but the two readings cannot be safely differenced.
-- **Shaft:** diameter reads 4.9 mm to one decimal (nominal 5 mm). Length, flat depth,
-  and flat length are not measured.
+- **Shaft:** 22.39 mm of shaft stands proud of the pilot boss. That is ample for a
+  standard 25 mm coupler, which engages roughly half its length (~12.5 mm) on the
+  motor side. Diameter reads 4.9 mm to one decimal (nominal 5 mm); flat depth and flat
+  length are not measured.
 - **Required print clearance:** use a fit-test coupon before committing a bore or
   pocket. See [`fusion360-parameters.md`](fusion360-parameters.md).
 - **Unclear or missing dimensions:** see [`missing-measurements.md`](missing-measurements.md).
