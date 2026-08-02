@@ -1,6 +1,6 @@
 # Fusion 360 BOM template
 
-Use this as the starting BOM for the first prototype. Fill in the real part numbers and suppliers once the hardware is selected.
+Use this as the starting BOM for the first prototype. Because the relevant hardware is already in the project, this can stay as a simple mechanical checklist first; fill in part numbers and suppliers only if you want a formal procurement list.
 
 ## Mechanical
 

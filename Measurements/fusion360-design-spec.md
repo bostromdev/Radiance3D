@@ -76,7 +76,7 @@ The cable route should be planned before the frame is finalized. Cable routing m
 
 ## 5. Part-number placeholders
 
-If exact part numbers are not yet available, record them as placeholders in the model notes and in the BOM. Do not guess.
+You already have the relevant hardware in the project, so part numbers are optional for this first mechanical pass. If you want a cleaner BOM later, record them as placeholders in the model notes and in the BOM. Do not guess.
 
 | Item | Placeholder field | Notes |
 |---|---|---|
