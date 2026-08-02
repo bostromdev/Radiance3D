@@ -4,6 +4,10 @@ Paste everything inside the code block below into Fusion 360 Assistant. It is wr
 to be self-contained — it carries the measured dimensions with it, so the assistant
 does not need access to this repository.
 
+For the most recent implementation notes, also review
+[`fusion360-design-spec.md`](fusion360-design-spec.md) and
+[`fusion360-bom-template.md`](fusion360-bom-template.md).
+
 Source of the numbers: [`nema17.md`](nema17.md), [`tmc2209-v1.3.md`](tmc2209-v1.3.md),
 [`esp32-devkit.md`](esp32-devkit.md), [`fusion360-parameters.md`](fusion360-parameters.md),
 [`missing-measurements.md`](missing-measurements.md).
