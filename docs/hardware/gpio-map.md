@@ -26,7 +26,7 @@ No home switch is installed or assigned. The firmware rejects a homing request u
 physical switches are added and documented; StallGuard is diagnostics only, not a
 homing substitute. Firmware limits remain intentionally provisional and are not the
 mechanical architecture specification. **Design Intent:** the mechanical system targets
-one controlled 360° pan turn with a managed moving harness; final limits require CAD
+one managed 360° pan turn from cable neutral; final limits require CAD
 and physical testing.
 
 GPIO39 is input-only and is used only as UART RX. GPIO36 is input-only and is used only

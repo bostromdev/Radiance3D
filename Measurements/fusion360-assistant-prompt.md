@@ -1,290 +1,80 @@
-# Fusion 360 Assistant prompt
+# Autodesk Fusion handoff — Radiance3D Revision 1
 
-The enclosure has not yet been designed. Treat all listed component locations as
-conceptual only and follow [`../docs/hardware/reference-architecture.md`](../docs/hardware/reference-architecture.md)
-for the official non-dimensioned placement baseline.
+Paste the following into Autodesk Fusion or a CAD-design agent.
 
-Paste everything inside the code block below into Fusion 360 Assistant. It is written
-to be self-contained — it carries the measured dimensions with it, so the assistant
-does not need access to this repository.
+```text
+Design Radiance3D Revision 1: an open PETG desktop instrument that rotates an
+interchangeable 5.8 GHz Antenna Under Test for radiation-pattern measurement. Optimize
+measurement repeatability, stability, RF consistency, serviceability, then appearance.
 
-For the most recent implementation notes, also review
-[`fusion360-design-spec.md`](fusion360-design-spec.md) and
-[`fusion360-bom-template.md`](fusion360-bom-template.md).
+Start with a component-envelope layout study. Do not create full structural geometry
+first. Solve the smallest stable arrangement inside a hard 220 × 220 mm base boundary,
+center the pan axis, determine the smallest practical lightweight pan platform, place
+stationary electronics outside its swept envelope, and present dimensions, access
+envelopes, and moving sweeps for approval. Use engineering judgment for reversible
+prototype choices rather than repeatedly asking for noncritical dimensions.
 
-Source of the numbers: [`nema17.md`](nema17.md), [`tmc2209-v1.3.md`](tmc2209-v1.3.md),
-[`esp32-devkit.md`](esp32-devkit.md), [`fusion360-parameters.md`](fusion360-parameters.md),
-[`missing-measurements.md`](missing-measurements.md).
+FIXED ARCHITECTURE
+- Open base; electronics remain visible and serviceable. No sealed enclosure or battery.
+- Centred stationary pan NEMA-17 directly drives a lightweight platform through a
+  removable clamp-style hub on its 5 mm D-shaft.
+- The rotating platform carries the tilt NEMA-17, direct-drive tilt hub/carriage,
+  vertical AD8317, interchangeable AUT, cable guides, and moving silicone harness only.
+- No external bearings, separate shafts, shaft couplers, slip ring, or mandatory limit switches.
+- AD8317 EVAL BD / NWDZ V1.0 is selected. The AUT threads directly onto its SMA; no
+  AUT-to-detector coax. The external VTX stays stationary and off-scanner.
+- Stationary base carries ESP32, two TMC2209 V1.3 drivers, two ZX-052 V2.0 converters,
+  external 12 V/GND entry, distribution, and open wiring.
+- Power: direct 12 V to both driver VM/GND branches; Buck A gives regulated 5.0 V to
+  ESP32; Buck B independently gives regulated 5.0 V to AD8317. Never parallel outputs;
+  do not add a third converter.
 
----
+MEASURED ENVELOPES, MM
+NEMA-17: 43.46 maximum face/body clearance envelope; 20.84 safe body length;
+21.97 × 2.00 pilot; 31.00 × 31.00 nominal-square hole pattern; 5.00 shaft major;
+4.60 flat-to-opposite thickness; 0.20 derived radial flat depth; 22.39 shaft length
+from pilot face; rear connector 9.53 protrusion and 16.44 housing envelope.
+TMC2209 each: 20.14 × 15.14 PCB; 22.24 installed height.
+ESP32: 51.47 × 28.23 PCB; 1.33 PCB thickness; 4.38 top-side height; 8.83 USB-C shell.
+ZX-052 each: 66.07 × 36.48 PCB. VIN is at one end, VOUT at the other; display,
+adjuster and pushbutton face upward. The approximately 2.15 edge reading is not total height.
+AD8317: 36.27 × 35.72 PCB; 55.84 SMA-tip-to-tip; 9.78 protrusion per side;
+17.36 shield-can length. Approximately 40.37 diagonal feature readings are not a hole pattern.
 
-````text
-You are helping me design the first Radiance3D pan-and-tilt prototype in Fusion 360.
+DIRECT DRIVE
+Use removable D-profile split clamps, captive-nut clamps, or equivalent compact hubs.
+Do not use a loose round PETG bore, a separate coupler, a set screw cutting into PETG,
+or hard axial preload. Keep rotating mass and shaft cantilevers small, balance the tilt
+load, keep fasteners accessible, and make both motors replaceable. The AD8317 PCB is
+not the structural hub. Use vertical edge/strap retention plus a lightweight preferably
+nonconductive guide to relieve antenna bending load without blocking SMA access.
 
-Radiance3D is an antenna radiation-pattern measurement platform. The mechanism rotates
-the AD8317-mounted antenna under test (AUT) in azimuth (pan) and elevation (tilt) while
-an external stationary 5.8 GHz VTX transmits. The AUT threads directly onto the
-vertically mounted AD8317 SMA; no RG316 jumper connects the AUT and detector.
-Positioning repeatability matters more than speed, and the structure must not distort
-the radiation pattern more than necessary.
+OPEN ELECTRONICS
+Use adjustable edge clips, shallow trays, rails, straps, removable crossbars, or zip-tie
+slots; missing PCB hole coordinates do not block CAD. Preserve ESP32 USB-C/buttons/OLED,
+TMC2209 heatsink/VREF/header/wiring access, both buck displays/adjusters/pushbuttons/
+terminals, screwdriver and wire-insertion directions, tall-component clearance,
+ventilation, and 18/22 AWG wire bends. Separate motor wiring from the AD8317 analog route.
 
-=====================================================================
-NON-NEGOTIABLE RULES
-=====================================================================
+MOTION AND HARNESS
+Pan target is one managed complete 360° turn from a neutral cable position, then return
+toward neutral; never unlimited winding. Tilt target is the largest collision-free range,
+desirably near −90° to +90°, with actual travel reported from CAD. Model one flexible
+bundle containing four tilt phases, AD8317 +5 V, GND, VOUT, and analog return. Include
+service loop, strain relief at both ends, bend clearance, guides, and protection from
+the platform, hubs, and motor connectors. Exact wire lengths follow CAD.
 
-1. Millimetres throughout. Never switch units.
-2. Every dimension must come from a named user parameter. No hard-coded numbers in
-   any sketch or feature. Name parameters with a type prefix so the type is visible at
-   every use site: m = measured, c = calculated, d = design choice, p = provisional.
-   For example mMotorPilotDiameter, cMotorPilotSeatDiameter, dPrintClearance,
-   pBearingOuterDiameter.
-2a. NEVER modify a measured value to fix a fit. A measured parameter is frozen; it
-   changes only if I re-measure or replace the part. Every CAD feature that touches
-   hardware is an expression built from a measured value plus a clearance parameter.
-   If a print comes out tight, the fix is dPrintClearance or dBearingFitAllowance, and
-   nothing else. Overwriting a measurement with a print allowance destroys the record
-   of what the hardware actually is.
-3. The enclosure is not designed yet: all locations are conceptual, not dimensioned.
-   Place ESP32 and both drivers/bucks in the stationary base; place only the tilt motor,
-   vertically mounted AD8317, and antenna mount on the rotating platform. The pan motor
-   is fixed in the base and the target motion is one controlled 360° turn, not unlimited
-   continuous rotation. Model a managed moving harness, with lengths TBD AFTER CAD.
-4. Each major part is a separate Fusion component, named as listed below.
-5. The MEASURED dimensions below are the source of truth. They were taken with
-   calipers on the actual parts. Do not replace them with datasheet or "standard"
-   values, even where a standard value looks rounder or more familiar.
-6. Never guess a critical fit dimension. Anything marked PROVISIONAL is a placeholder
-   for a measurement I have not taken yet. If a feature's fit depends on a PROVISIONAL
-   value, say so out loud before modelling it, and design that feature so the
-   parameter can change without rebuilding the part.
-7. Design for PETG on a fused-filament printer:
-   - avoid overhangs steeper than 45 degrees where a design change can prevent them
-   - minimise support material; state the intended print orientation for each part
-   - use structural fillets at load-bearing intersections and ribs instead of thick
-     solid walls
-   - use heat-set threaded inserts wherever a fastener will be removed more than once
-8. Protect the motor shafts. A motor shaft must not carry a side load or a cantilevered
-   mass. Every rotating axis is carried on its own bearings; the motor supplies torque
-   through a coupler only.
-7a. Both motors have a connector on the rear end cap that stands 9.38 mm proud, with a
-   16.43 mm housing. Adding cable bend clearance, that is about 21.4 mm of dead space
-   behind any motor. Whichever way a motor faces, this space must be modelled and the
-   connector must stay reachable for wiring. When you recommend a motor orientation,
-   state where that 21.4 mm goes and what it costs in stack height. Do not recommend an
-   orientation without pricing it.
-9. Place the pan and tilt axes as close together as practical, and put the antenna's
-   active centre as close as practical to the point where the two axes intersect.
-   Offset between the antenna phase centre and the axis intersection is a measurement
-   error, not just an aesthetic issue. Report any offset you cannot eliminate.
-10. Route the moving silicone harness so it never binds, stretches, or wraps through
-    one controlled 360° pan turn; its bend radius is a hard constraint, not a guideline.
-    The external VTX coax is off-scanner and there is no AUT-to-detector coax jumper.
-11. Work on ONE major component at a time. Do not start the next component until I
-    have reviewed and approved the current one.
+CAD RULES
+Use mm and named parameters: m=measured/frozen, c=calculated, d=design choice,
+p=provisional. Never alter m-values to tune print fit. Design PETG parts with ribs,
+structural fillets, minimal support, explicit print orientation, removable modules,
+open wiring, and editable M3-compatible provisional hardware. Print motor-pilot and
+5.00/4.60 D-shaft clamp coupons before full hubs or platforms. Do not invent purchased parts.
 
-=====================================================================
-MEASURED DIMENSIONS - SOURCE OF TRUTH
-=====================================================================
-
-NEMA 17 stepper motor, model 42HDB0014NC-24B, quantity 2 (one pan, one tilt):
-  Motor body diagonal, corner to corner       54.30 mm
-  Motor body length, face plate to rear face  20.84 mm   (short-body / "pancake")
-  Overall length, boss face to rear face      22.85 mm
-  Overall length, shaft tip to rear face      45.18 mm   (full axial envelope)
-  Pilot boss diameter                         21.97 mm   (the centring register)
-  Rear connector protrusion above end cap      9.38 mm
-  Rear connector housing length               16.43 mm   (6-position housing)
-  Output shaft length above the pilot boss    22.39 mm
-
-  Derived, not separately measured:
-    Pilot boss height                          2.00 mm   +/- 0.06  (22.85 - 20.84 = 2.01;
-                                                          45.18 - 22.39 - 20.84 = 1.95;
-                                                          the two routes agree to 0.06 mm)
-    Shaft length from the face plate          24.39 mm   (22.39 + 2.00)
-
-  DATUM WARNING on the 22.39 mm shaft length: it is measured from the top face of the
-  raised circular boss the shaft emerges from, NOT from the motor face plate. It is
-  therefore not the number a vendor listing means by "shaft length". The face-plate
-  figure is 24.39 mm. Prefer the 22.39 mm boss datum where a feature can be dimensioned
-  from the boss. Do not silently treat 22.39 mm as a face-plate dimension.
-
-BIGTREETECH TMC2209 V1.3 driver, quantity 2, measured WITH heatsink installed:
-  PCB length                                  20.14 mm
-  PCB width                                   15.14 mm
-  Heatsink left edge to PCB right edge        12.21 mm
-  Heatsink right edge to PCB left edge        11.22 mm
-  Heatsink front edge to PCB back edge        13.73 mm
-  Overall installed height,
-    heatsink top to header pin tips           22.24 mm
-  Derived from the two width readings, not separately measured:
-    Heatsink width                            8.29 mm   (12.21 + 11.22 - 15.14)
-    Heatsink offset from PCB centre           0.495 mm  ((12.21 - 11.22) / 2)
-    Heatsink front edge from PCB front edge    6.41 mm   (20.14 - 13.73)
-
-  Note: the heatsink is NOT centred on the PCB. It sits 0.495 mm off centre across the
-  width, so the driver is handed. Do not model a symmetric pocket.
-
-  Note: the heatsink LENGTH is unknown. Only one reading was taken along the PCB long
-  axis, so the heatsink's front edge is fixed but its back edge is not. Model the
-  driver bay from the 22.24 mm overall height and the PCB outline only. Do not model
-  the heatsink footprint until the missing reading is taken.
-
-ELEGOO ESP32 devkit with ESP-WROOM-32, USB-C, quantity 1:
-  PCB length                                  51.47 mm
-  PCB width                                   28.23 mm
-  PCB thickness                                1.33 mm   (NOT 1.6 mm)
-  Board height including module                4.38 mm   (excludes header pins below)
-  USB-C receptacle width                       8.83 mm   (plug overmould is wider)
-
-=====================================================================
-PROVISIONAL VALUES - NOT MEASURED, DO NOT TRUST
-=====================================================================
-
-I have not measured these. The values are nominal placeholders so the model can be
-built and updated later. Flag every feature that depends on one.
-
-  Motor face width across flats               42.30 mm   (photo shows "42", decimals unreadable)
-  Motor mounting-hole spacing                 31.00 mm
-  Motor mounting-hole diameter                 3.40 mm
-  Motor shaft diameter                         5.00 mm   (photo reads "4.9?")
-  Bearing inner diameter                       8.00 mm
-  Bearing outer diameter                      22.00 mm
-  Bearing width                                7.00 mm
-  Coupler outer diameter                      19.00 mm
-  Coupler length                              25.00 mm
-  Coupler bore, motor side                     5.00 mm
-  Coupler bore, driven side                    8.00 mm
-  Heat-set insert outer diameter               4.60 mm
-  Heat-set insert length                       5.70 mm
-  Heat-set insert pilot diameter               4.00 mm
-  Limit switch body length                    20.00 mm
-  Limit switch mounting-hole spacing           9.50 mm
-  Antenna body diameter                       10.00 mm
-  Coax outer diameter                          3.00 mm
-  Coax minimum bend radius                    15.00 mm
-
-=====================================================================
-DESIGN CHOICES - MINE, ADJUSTABLE
-=====================================================================
-
-  Wall thickness                               3.00 mm
-  Base thickness                               6.00 mm
-  dPrintClearance, slip fit PER SIDE           0.15 mm   (0.30 mm total across a bore)
-  dBearingFitAllowance, press-fit INTERFERENCE  0.00 mm   (bore AT bearing OD; the
-                                                          printer's own undersizing
-                                                          supplies the interference)
-  dBoreMouthChamfer                             0.50 mm   (mouth of every bore/register)
-  Free air above the driver heatsink           8.00 mm
-  Cable bend clearance behind a connector     12.00 mm
-  Mounting clearance                           1.00 mm
-  Structural fillet radius                     3.00 mm
-  Cosmetic fillet radius                       1.00 mm
-  Rib thickness                                2.40 mm
-  Tilt axis height above the pan platform     90.00 mm
-
-=====================================================================
-FIT POLICY - PETG, FORGIVING
-=====================================================================
-
-Printing in PETG on a fused-filament printer. Target is a slip fit at +0.04 mm per
-side, about 0.08 mm total across a bore or slot.
-
-Fit classes are NOT interchangeable. Apply the right one:
-
-  dPrintClearance       slip fit, POSITIVE   motor pilot register, board pockets,
-                                             card slots, general part-to-part
-  dBearingFitAllowance  press fit, NEGATIVE  bearing outer-race seats ONLY - the bore
-                                             is SMALLER than the bearing OD
-  dMountingClearance    loose, POSITIVE      fastened joints where the fastener sets
-                                             position
-
-Never apply dPrintClearance to a bearing seat. A bearing that slips into its housing
-is a failed bearing seat.
-
-ELEPHANT FOOT ON SHALLOW FEATURES - this is the one that will bite:
-The motor pilot register is only 2.00 mm deep. If that face is printed downward, the
-entire feature lies within the first few layers, where PETG squishes outward and the
-bore comes out undersized at the bottom and correct at the top. The motor then rocks.
-For every part containing a shallow register, bore or locating feature, state the print
-orientation explicitly and prefer printing that face UPWARD. Apply dBoreMouthChamfer at
-the mouth of every bore and register regardless of orientation.
-
-PETG bores also print undersized by roughly 0.1-0.3 mm on diameter from die swell and
-perimeter pull-in, before any clearance is applied. That is why dBearingFitAllowance is
-0.00: model the bearing seat at the exact bearing OD and let the printer's own
-undersizing supply the press fit. Do not stack a designed interference on top of it.
-
-=====================================================================
-COMPONENTS TO DESIGN, IN ORDER
-=====================================================================
-
-  1.  Pan_Base                  Stationary base. Carries everything.
-  2.  Pan_Motor_Mount           Holds the pan NEMA 17. Shaft down or up, your
-                                recommendation with reasoning.
-  3.  Pan_Platform              Rotating platform, carried on a bearing, not on the
-                                motor shaft.
-  4.  Tilt_Support_Frame        Rises from the pan platform. Carries the tilt axis at
-                                both ends.
-  5.  Tilt_Motor_Mount          Holds the tilt NEMA 17 on one side of the frame.
-  6.  Tilt_Bearing_Support      Opposite side of the frame. Second bearing for the
-                                tilt axis so the motor shaft carries no side load.
-  7.  Antenna_Cradle            Rotates with the tilt axis. Holds the AUT.
-  8.  Antenna_Mount_Adjustable  Lets the antenna's active centre be positioned onto
-                                the axis intersection.
-  9.  Cable_Routing             Guides, clips and strain relief through the moving
-                                envelope.
-  10. Limit_Switch_Mounts       One adjustable homing switch per axis.
-  11. Electronics_Tray          Removable. Holds the ESP32, both TMC2209 drivers and
-                                the buck converter.
-  12. Counterweight_Mount       Optional. Balances the tilt axis about its pivot.
-
-=====================================================================
-WHAT TO DO FIRST - DO NOT SKIP TO MODELLING
-=====================================================================
-
-Before you create any geometry, do all seven of these and stop for my approval:
-
-  1. Review the measured dimensions above.
-  2. List every measurement you understand and what you will use it for.
-  3. List every dimension that is missing or ambiguous and that you need from me
-     before the design can be finished. Be specific about which feature is blocked.
-  4. Create the initial Fusion user-parameter table, grouped as Measured, Provisional,
-     Design choice and Calculated. Put the word PROVISIONAL in the comment field of
-     every provisional parameter.
-  5. Explain your proposed pan-and-tilt architecture: bearing arrangement, how each
-     motor shaft is protected from side loading, how close the two axes come to
-     intersecting, where the antenna's active centre sits relative to that
-     intersection, and how the cable route stays clear through the full travel.
-  6. Design fit-test coupons for the PRINTED side of each uncertain fit — the bearing
-     seat bore, the motor pilot boss register, the motor mounting-hole pattern and the
-     heat-set insert boss. These are small printable test pieces, not full parts. Tell
-     me what to print and what to measure on each one.
-     The pilot boss register coupon is the cheapest useful one, because both of its
-     inputs are already measured (21.97 mm diameter, 2.00 mm deep). It tests only my
-     printer's clearance, so start there.
-     A coupon measures how MY PRINTER deviates from a known number. It cannot discover
-     the dimension of a metal part. Do not propose a coupon to find a bearing's outer
-     diameter or a motor shaft's diameter — those are caliper measurements I must take
-     first. Tell me which metal dimensions I have to measure before each coupon is
-     worth printing.
-  7. Only after I have reviewed that measurement review, begin Pan_Base. Model
-     Pan_Base only. Stop when it is complete and wait for my approval before starting
-     Pan_Motor_Mount.
-
-Do not model all twelve components in one pass. Do not substitute a standard value for
-a measured one. If something is unclear, ask me instead of assuming.
-````
-
----
-
-## After the first component
-
-When Fusion Assistant reports back:
-
-- Check that no feature silently used a PROVISIONAL value where a real measurement
-  exists.
-- Print the fit-test coupons before approving `Pan_Base`. A bearing seat or a motor
-  register that is wrong by 0.2 mm will not be visible on screen.
-- Feed any newly taken measurements back into the component file in this folder first,
-  then update [`fusion360-parameters.md`](fusion360-parameters.md), then update the
-  Fusion parameter. The measurement file stays canonical.
+Before structural geometry, report the proposed base and platform dimensions, component
+arrangement, connector/service envelopes, swept volumes, pan/tilt cantilever distances,
+estimated moving mass when possible, both shaft CG offsets, achievable tilt range,
+one-turn harness behavior, and any direct-drive loading concern. Prove every component
+remains within 220 × 220 mm. Then design one subsystem at a time and pause for approval.
+Keep every choice reversible and parameterized.
+```

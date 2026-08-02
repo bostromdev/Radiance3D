@@ -1,109 +1,110 @@
-# Reference architecture — CAD design intent
+# Reference architecture — Revision 1 CAD design intent
 
-## Status and terminology
+## Status
 
-**Conceptual architecture only. Final placement determined during CAD.** The enclosure
-has not yet been designed, so this document identifies what connects and the intended
-subsystem boundaries—not dimensions, mounting coordinates, cable lengths, or final
-board orientations.
+**Conceptual architecture only. Final placement determined during CAD.** Revision 1
+is an open desktop prototype within a 220 × 220 mm maximum base, not an enclosure or a
+production machine. The subsystem boundaries and direct-drive mechanism are fixed;
+Fusion solves the compact component layout and printed geometry.
 
-### Verified Hardware
-
-Verified Hardware is physically owned, photographed or measured, or electrically
-confirmed. The authoritative list, photographs, electrical facts, and harness standards
-remain in [owned hardware](owned-hardware.md), [power tree](power-tree.md), and
-[electrical/RF cabling standard](wire-standard.md).
-
-### Design Intent
-
-Design Intent is the planned enclosure layout, cable routing, conceptual subsystem
-placement, and board orientation that Autodesk Fusion will resolve. It is not a claim
-that any mechanical arrangement already exists.
-
-## PRIMARY DESIGN OBJECTIVE
-
-Radiance3D is a precision RF measurement instrument. Every mechanical decision should
-prioritize, in order:
+## Design priorities
 
 1. Measurement repeatability
-2. Mechanical rigidity
+2. Mechanical stability
 3. RF consistency
 4. Calibration repeatability
 5. Serviceability
 6. Manufacturability
 
-Cosmetic appearance is secondary.
-
-## Conceptual subsystem boundaries
+## Architecture
 
 ```text
-                         external stationary 5.8 GHz VTX
-                                  │ RF transmission through air
-                                  ▼
-                    AUT threads directly onto AD8317 SMA
-                                  │
-                 ┌───────────────────────────────────┐
-                 │ DESIGN INTENT: ROTATING PLATFORM   │
-                 │  • tilt motor                      │
-                 │  • AD8317 detector                 │
-                 │  • antenna mount / AUT             │
-                 └───────────────────────────────────┘
-                                  │
-       controlled rotation intent │ moving silicone harness only
-      (one 360° turn, not unlimited│ • tilt motor wiring
-           continuous rotation)   │ • AD8317 5 V/GND and VOUT/AGND
-                                  │
-                 ┌───────────────────────────────────┐
-                 │ DESIGN INTENT: STATIONARY BASE     │
-                 │  • fixed pan motor                 │
-                 │  • ESP32 DevKit                    │
-                 │  • TMC2209 pan + tilt drivers      │
-                 │  • ZX-052 Buck A and Buck B        │
-                 │  • internal 12 V distribution      │
-                 │  • +12V IN / GND IN entry          │
-                 └───────────────────────────────────┘
-                                  │
-                        off-board 12 V bench source
+                 external stationary 5.8 GHz VTX
+                              │ free-space RF
+                              ▼
+                 interchangeable Antenna Under Test
+                              │ direct threaded SMA
+                              ▼
+                  vertically mounted AD8317 detector
+                              │ lightweight tilt carriage
+                              ▼
+                     tilt NEMA-17 5 mm D-shaft
+                 removable clamp hub; no coupler/bearing
+                              │
+                     DIRECT-DRIVE PAN PLATFORM
+                              │ moving silicone harness
+                 one managed turn from cable neutral
+                              ▼
+                      pan NEMA-17 5 mm D-shaft
+                 removable clamp hub; no coupler/bearing
+                              │
+┌──────────────────────────────────────────────────────────────┐
+│ DESIGN INTENT: STATIONARY BASE — open, maximum 220 × 220 mm │
+│ centred pan motor; ESP32; pan + tilt TMC2209;               │
+│ ZX-052 Buck A + Buck B; 12 V entry/distribution             │
+└──────────────────────────────────────────────────────────────┘
+                              │
+                    off-board 12 V bench source
 ```
 
-### Electrical architecture — Verified Hardware
+The **DESIGN INTENT: ROTATING PLATFORM** contains only the lightweight pan platform,
+tilt motor, clamp hub and carriage, vertical AD8317, interchangeable AUT, cable guides,
+and moving silicone harness.
 
-The external two-conductor 12 V input feeds internal distribution, two TMC2209 VM/GND
-branches, and the two independent ZX-052 5 V branches. Grounds share one defined
-reference and the two 5 V outputs are never connected together. These are electrical
-rules, not enclosure-placement instructions.
+## Direct drive
 
-### RF architecture — Verified Hardware and Design Intent
+Each motor's internal bearings support the Revision-1 load. Revision 1 has no external bearings, separate shafts, or shaft couplers. A removable clamp-style hub engages the
+measured 5.00 mm D-shaft without hard axial preload. CAD minimizes rotating mass,
+cantilever distance, mechanical shock, acceleration, and centre-of-gravity offset.
+The AD8317 PCB is retained by the carriage; it is not itself the structural hub.
 
-The external stationary 5.8 GHz VTX is not mounted on the scanner. **Design Intent:**
-the AUT directly threads onto the AD8317 SMA, with no detector-to-antenna RG316 jumper.
-The AD8317 `VOUT` is `SIG-003` silicone wire back to the stationary ESP32 ADC. Exact
-detector orientation, AUT clearance, and VTX test geometry remain CAD/bench work.
+Fusion must report pan and tilt cantilever distance, approximate rotating mass when
+known, centre-of-gravity offset from both motor shafts, collision-free tilt travel, and
+any direct-drive load concern. Direct drive is selected but not mechanically validated.
+External bearing-supported axes are future upgrades only if prototype testing requires
+them.
 
-### Mechanical intent — Design Intent
+## RF and detector
 
-The stationary-base and rotating-platform contents above are intended subsystem
-boundaries. The pan motor is intended to remain in the stationary base; the moving
-harness is intended to carry only tilt-motor and AD8317 wiring. One controlled 360°
-rotation is the architecture target, not unlimited continuous rotation.
+The external stationary 5.8 GHz VTX remains off-scanner. The AUT directly threads onto
+the AD8317 SMA; there is **no detector-to-antenna RG316 jumper**. The selected AD8317
+EVAL BD / NWDZ V1.0 is vertical and moves with the AUT. Adjustable edge/strap retention
+preserves both SMA connectors, electrical pads, and corner-hole areas. A lightweight,
+preferably nonconductive guide may relieve antenna bending load without inserting coax.
 
-Final CAD determines mounting locations, enclosure form, cable-guide geometry, service
-loop size, strain-relief method, bend radii, bearings, clearances, and all cable lengths.
-The return-to-home behavior required to prevent cumulative cable twist is described as
-the **Firmware-defined return-to-home strategy to prevent cumulative cable twist**. Its
-implementation and safe limits remain deferred until physical testing.
+## Stationary electronics and power
 
-## Future CAD work
+The centred pan motor, ESP32, two TMC2209s, both ZX-052 converters, power entry, and
+distribution remain stationary. Boards are openly mounted with reversible trays, rails,
+clips, straps, crossbars, or zip-tie slots; unknown hole coordinates do not block CAD.
 
-Fusion design will translate this conceptual architecture into measured interfaces and
-then document dimensions, hardware retention, cable routing, and service access. No
-unknown geometry is validated by this repository before that work exists.
+External 12 V/GND feeds both TMC2209 VM/GND branches and two separate converters:
+ZX-052 Buck A supplies regulated 5.0 V to the ESP32; ZX-052 Buck B supplies regulated
+5.0 V to the AD8317. Their outputs are never paralleled. There is no third converter,
+internal battery, battery compartment, or sealed electronics enclosure.
+
+## Motion and harness
+
+Pan targets one managed 360° turn from a neutral cable position, not unlimited
+continuous rotation. The **Firmware-defined return-to-home strategy to prevent cumulative cable twist** follows the CAD motion study and prototype test. Tilt targets
+the largest collision-free range; approximately −90° to +90° is desirable but not
+guaranteed before CAD.
+
+The moving silicone bundle contains four tilt-motor phases, AD8317 +5 V, GND, VOUT,
+and analog return. CAD supplies a service loop, bend clearance, strain relief at both
+ends, guides, and protection from the platform, hubs, and motor connectors. Final wire
+lengths remain post-CAD measurements.
+
+## Fusion layout obligation
+
+Fusion first performs a component-envelope and swept-volume study, centers the pan
+axis, finds the smallest practical pan platform, places stationary electronics outside
+its sweep, proves all hardware stays inside 220 × 220 mm, and preserves every connector,
+display, adjustment, terminal, cooling, and wiring-access direction. Exact placement is
+a CAD result, not prescribed here.
 
 ## Future Expansion
 
-### Not Required for Revision 1
-
-The following are informational possibilities only. They do not change Revision 1
-hardware, firmware, GPIO, electrical architecture, or BOM: slip ring support,
-alternate detector modules, alternate ESP32 variants, camera mounting, different motors,
-protective covers, larger antennas, and additional sensors.
+External bearings, separate shafts, couplers, limit switches, a slip ring, guards,
+alternate detectors, and other sensors are optional future work. None is required for
+Revision 1.

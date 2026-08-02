@@ -46,8 +46,8 @@ no CAD, no printed part, and no measured antenna pattern.
 dimension. Measured, photographed, and traceable — 35 photos, every value citing the
 picture it came from.
 
-Measured so far: the NEMA 17 motors (`42HDB0014NC-24B`), the TMC2209 V1.3 drivers with
-heatsinks, the ELEGOO ESP32 devkit, and the AD8317 detector board.
+Measured so far: the NEMA 17 motors (`42HDB0014NC-24B`), TMC2209 V1.3 drivers with
+heatsinks, ELEGOO ESP32 devkit, two ZX-052 V2.0 converters, and the AD8317 detector.
 
 Two rules that folder enforces:
 
@@ -56,8 +56,11 @@ Two rules that folder enforces:
 - **Nothing is guessed.** Values that can't be read confidently are marked unclear and
   listed in [`missing-measurements.md`](Measurements/missing-measurements.md).
 
-Still missing, and blocking the CAD: bearings, shaft couplers, fasteners, the antenna
-mount, and the NEMA 17 mounting-hole pattern.
+Revision 1 is an open, direct-drive desktop prototype within a 220 × 220 mm base. Its
+motor pilot, 31 mm mounting pattern, and 5 mm D-shaft profile are measured. Unknown PCB
+hole patterns do not block CAD: Fusion uses reversible edge clips, rails, straps, or
+zip-tie slots. Remaining dimensions are carried as named provisional parameters only
+where a feature actually depends on them.
 
 ## CAD
 

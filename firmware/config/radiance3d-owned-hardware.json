@@ -28,18 +28,22 @@
     "digital_control_voltage_v": 5.0,
     "rf_analog_voltage_v": 5.0,
     "buck_converters": [
-      {"model": "ZX-052 V2.0", "branch": "digital-control", "input": "internal-12V-distribution", "output": "ESP32-VIN"},
-      {"model": "ZX-052 V2.0", "branch": "rf-analog", "input": "internal-12V-distribution", "output": "AD8317-5V"}
+      {"model": "ZX-052 V2.0", "branch": "digital-control", "input": "internal-12V-distribution", "output": "ESP32-VIN", "pcb_dimensions_mm": [66.07, 36.48]},
+      {"model": "ZX-052 V2.0", "branch": "rf-analog", "input": "internal-12V-distribution", "output": "AD8317-5V", "pcb_dimensions_mm": [66.07, 36.48]}
     ],
     "outputs_paralleled": false,
     "common_ground_required": true
   },
   "mechanical_architecture": {
-    "status": "conceptual-for-Autodesk-Fusion-design; not dimensioned",
+    "status": "revision-1 direct-drive open desktop prototype; final layout determined during CAD",
     "enclosure_designed": false,
-    "stationary_base": ["ESP32 DevKit", "two BIGTREETECH TMC2209 V1.3 drivers", "ZX-052 Buck Converter A", "ZX-052 Buck Converter B", "external +12V/GND input", "internal power distribution"],
-    "rotating_platform": ["tilt motor", "AD8317 detector", "antenna mount"],
-    "pan_rotation": "one controlled 360 degree rotation; not unlimited continuous rotation",
+    "base_maximum_mm": [220.0, 220.0],
+    "electronics_mounting": "open stationary base with reversible edge clips, shallow trays, straps, rails, crossbars, or zip-tie slots",
+    "stationary_base": ["centered pan motor", "ESP32 DevKit", "two BIGTREETECH TMC2209 V1.3 drivers", "ZX-052 Buck Converter A", "ZX-052 Buck Converter B", "external +12V/GND input", "internal power distribution"],
+    "rotating_platform": ["lightweight direct-drive pan platform", "tilt motor", "direct-drive tilt carriage", "vertically mounted AD8317 detector", "interchangeable antenna under test", "moving silicone-wire harness"],
+    "drive_architecture": "motor 5 mm D-shafts use removable clamp-style hubs; no external bearings, separate shafts, or shaft couplers",
+    "pan_rotation": "one managed 360 degree rotation from a neutral cable position; not unlimited continuous rotation",
+    "tilt_rotation": "largest practical collision-free range; approximately -90 to +90 degrees is a conceptual target pending CAD",
     "moving_harness": "tilt motor and AD8317 wiring only; lengths TBD AFTER CAD",
     "rf_measurement": "external stationary 5.8GHz VTX; AUT directly threads onto vertically mounted AD8317 SMA; no RG316 jumper"
   },
@@ -67,7 +71,16 @@
     "rated_phase_current_a": 1.0,
     "phase_resistance_ohm": 3.5,
     "holding_torque_nm": 0.13,
-    "dimensions_mm": [42, 42, 21],
+    "dimensions_mm": [43.46, 43.46, 20.84],
+    "dimension_note": "43.46 mm is the larger measured face/body clearance envelope; precision location uses the 21.97 mm pilot and nominally square 31.00 mm hole pattern",
+    "mounting_hole_pattern_mm": [31.0, 31.0],
+    "shaft_major_diameter_mm": 5.0,
+    "shaft_flat_to_opposite_round_mm": 4.6,
+    "shaft_flat_radial_depth_mm": 0.2,
+    "pilot_diameter_mm": 21.97,
+    "pilot_height_mm": 2.0,
+    "rear_connector_maximum_protrusion_mm": 9.53,
+    "rear_connector_housing_envelope_mm": 16.44,
     "phase_wiring": {"A+": "Black", "A-": "Green", "B+": "Red", "B-": "Blue"}
   },
   "detector": {
@@ -75,6 +88,7 @@
     "quantity": 1,
     "photo": null,
     "supply_voltage_v": 5.0,
+    "mechanical_selection": "selected for Revision 1; vertically mounted with direct-threaded AUT and adjustable edge/strap retention",
     "adc_pin": 36,
     "adc_unit": "ADC1",
     "filter": {"kind": "median_then_mean", "median_samples": 5, "mean_samples": 8},
