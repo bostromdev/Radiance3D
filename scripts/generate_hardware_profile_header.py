@@ -132,7 +132,8 @@ def _axis(profile: dict[str, Any], name: str) -> dict[str, Any]:
         ("maximum_bench_test_steps", 2**31 - 1),
         ("motion_timeout_ms", 2**31 - 1),
     ):
-        _int(axis.get(key), f"{prefix}.{key}", minimum=1 if key not in {"uart_address"} else 0, maximum=upper)
+        minimum = -1 if key == "home_switch_pin" else (0 if key == "uart_address" else 1)
+        _int(axis.get(key), f"{prefix}.{key}", minimum=minimum, maximum=upper)
     if axis["commissioning_current_ma"] > axis["maximum_rms_current_ma"]:
         raise ProfileError(f"{prefix} commissioning current exceeds its safe ceiling")
     _string(axis.get("driver"), f"{prefix}.driver")
@@ -190,11 +191,21 @@ def validate_profile(profile: dict[str, Any]) -> tuple[dict[str, Any], dict[str,
             for key in ("uart_tx_pin", "uart_rx_pin", "step_pin", "direction_pin", "enable_pin", "home_switch_pin")
         ],
     ]
+    pins = [pin for pin in pins if pin >= 0]
     if len(pins) != len(set(pins)):
         raise ProfileError("controller and axis GPIO assignments must be unique")
     for axis in (azimuth, elevation):
         if axis["step_pin"] >= 34 or axis["direction_pin"] >= 34 or axis["enable_pin"] >= 34 or axis["uart_tx_pin"] >= 34:
             raise ProfileError("STEP/DIR/ENABLE/TX cannot use input-only ESP32 GPIOs")
+    detector = _mapping(profile.get("detector"), "detector")
+    adc_pin = _int(detector.get("adc_pin"), "detector.adc_pin", minimum=0, maximum=39)
+    if adc_pin not in {32, 33, 34, 35, 36, 37, 38, 39}:
+        raise ProfileError("detector.adc_pin must be an ADC1-capable ESP32 GPIO")
+    if adc_pin in pins:
+        raise ProfileError("detector ADC pin must not share a controller GPIO")
+    power = _mapping(profile.get("power"), "power")
+    if power.get("outputs_paralleled") is not False:
+        raise ProfileError("buck converter outputs must not be paralleled")
     return controller, drivers, {"azimuth": azimuth, "elevation": elevation}
 
 

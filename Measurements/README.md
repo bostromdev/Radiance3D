@@ -2,6 +2,10 @@
 
 This folder is the **canonical source for every physical dimension in Radiance3D**.
 
+The enclosure has not yet been designed. Measurements support conceptual Fusion work;
+the [reference architecture](../docs/hardware/reference-architecture.md) defines the
+official non-dimensioned placement baseline.
+
 Every number here was measured with a digital caliper on the actual parts in hand and
 is traceable to a photograph in this folder. Hardware, mechanical, assembly, BOM and
 CAD documents elsewhere in the repository must link here rather than repeat these

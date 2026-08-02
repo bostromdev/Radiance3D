@@ -16,7 +16,7 @@ endif()
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
 set(RADIANCE3D_PROFILE
-    "${CMAKE_CURRENT_LIST_DIR}/../config/provisional-esp32dev-v1.json")
+    "${CMAKE_CURRENT_LIST_DIR}/../config/radiance3d-owned-hardware.json")
 set(RADIANCE3D_GENERATED_INCLUDE_DIR "${CMAKE_BINARY_DIR}/generated")
 file(MAKE_DIRECTORY "${RADIANCE3D_GENERATED_INCLUDE_DIR}")
 set(RADIANCE3D_GENERATED_PROFILE_HEADER

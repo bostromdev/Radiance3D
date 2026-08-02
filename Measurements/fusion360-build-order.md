@@ -1,5 +1,9 @@
 # Fusion 360 build order — first prototype
 
+The enclosure has not yet been designed. All locations in this document are conceptual
+placement intent only; use the [reference architecture](../docs/hardware/reference-architecture.md)
+as the official non-dimensioned baseline before choosing CAD dimensions.
+
 This is the practical next-step plan for the first Radiance3D prototype. It is intentionally scoped so you can build the structure one component at a time without guessing.
 
 ## 0. Before modeling anything
@@ -15,6 +19,10 @@ Before you model the first part, confirm these items from the existing measureme
 ## 1. Build Pan_Base first
 
 Create the stationary base first. This defines the envelope for everything else.
+
+The 12 V source is permanently off-board beneath the workbench. Do not model a battery
+compartment, retention feature, or battery-weight allowance. Model only an accessible,
+strain-relieved `+12V IN` / `GND IN` entry and its route to internal distribution.
 
 ### Goals
 - Provide a stable platform for the pan axis.
@@ -57,7 +65,9 @@ Once the base is reviewed, add the pan motor mount.
 
 ## 3. Build Pan_Platform third
 
-Now model the rotating platform that carries the tilt assembly.
+Now model the rotating platform that carries only the tilt motor, vertically mounted
+AD8317 detector, and antenna mount. The AUT threads directly onto the detector SMA;
+do not add an antenna-to-detector coax jumper.
 
 ### Goals
 - Create the pan platform as a bearing-supported rotating part.
@@ -164,13 +174,18 @@ Cable routing should be designed as part of the structure, not added later.
 
 ### Goals
 - Prevent cable binding or stretching through motion.
-- Respect the minimum bend radius of the coax or cable being used.
+- Model RF paths as RG316 50 Ω coax with a centre-and-shield envelope; model silicone
+  electrical harnesses separately, never as the same cable type.
+- Respect the measured minimum bend radius of the RG316 coax and the bend clearance of
+  each silicone harness.
 - Keep the cable path away from fasteners and the moving bearing faces.
 
 ### Model requirements
 - Include clips or guides in the frame and base.
 - Leave generous bend radius room.
-- Prevent the cable from wrapping around the axis as it moves.
+- Prevent either cabling system from wrapping around the axis as it moves.
+- Label CAD routes with `RF-###` for coax and `PWR-###`, `SIG-###`, or `MTR-###` for
+  silicone harnesses.
 
 ## 10. Build Limit_Switch_Mounts tenth
 

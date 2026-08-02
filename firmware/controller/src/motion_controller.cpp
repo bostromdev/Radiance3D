@@ -89,12 +89,12 @@ bool ControllerConfig::valid() const {
 
 ControllerConfig provisional_simulator_config() {
   ControllerConfig config;
-  config.azimuth.minimum_angle_deg = 0.0;
-  config.azimuth.maximum_angle_deg = 360.0;
+  config.azimuth.minimum_angle_deg = -90.0;
+  config.azimuth.maximum_angle_deg = 90.0;
   config.azimuth.home_offset_deg = 0.0;
   config.azimuth.motor_rms_current_ma = 400;
-  config.elevation.minimum_angle_deg = -90.0;
-  config.elevation.maximum_angle_deg = 90.0;
+  config.elevation.minimum_angle_deg = -45.0;
+  config.elevation.maximum_angle_deg = 45.0;
   config.elevation.home_offset_deg = 0.0;
   config.elevation.motor_rms_current_ma = 400;
   return config;

@@ -49,8 +49,8 @@ void test_motion_requires_homing_and_uses_configured_limits() {
 
   TEST_ASSERT_TRUE(engine.handle("MOVE 0 0 5").find("ERR NOT_HOMED") == 0);
   TEST_ASSERT_EQUAL_STRING("OK HOME AXIS=BOTH", engine.handle("HOME BOTH").c_str());
-  TEST_ASSERT_TRUE(engine.handle("SCAN_STEP 359 -90 5").find("OK SCAN_STEP") == 0);
-  TEST_ASSERT_TRUE(engine.handle("MOVE 0 91 5").find("ERR LIMIT_REACHED") == 0);
+  TEST_ASSERT_TRUE(engine.handle("SCAN_STEP 90 -45 5").find("OK SCAN_STEP") == 0);
+  TEST_ASSERT_TRUE(engine.handle("MOVE 0 46 5").find("ERR LIMIT_REACHED") == 0);
 }
 
 void test_stop_invalidates_position_and_requires_rehoming() {

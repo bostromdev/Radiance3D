@@ -120,7 +120,7 @@ GpioValidationResult validate_esp32_gpio(
       config.emergency_stop_pin,
   };
   for (std::size_t index = 0; index < pins.size(); ++index) {
-    if (index == pins.size() - 1 && pins[index] < 0) {
+    if (pins[index] < 0) {
       continue;
     }
     if (!valid_gpio(pins[index])) {
@@ -131,7 +131,7 @@ GpioValidationResult validate_esp32_gpio(
       result.bootstrapping_pin_mask |= 1ULL << pins[index];
     }
     for (std::size_t other = index + 1; other < pins.size(); ++other) {
-      if (other == pins.size() - 1 && pins[other] < 0) {
+      if (pins[other] < 0) {
         continue;
       }
       if (pins[index] == pins[other]) {

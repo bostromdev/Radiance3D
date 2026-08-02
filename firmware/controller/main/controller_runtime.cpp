@@ -510,6 +510,9 @@ bool configure_input_interrupts() {
   IsrInput* const inputs[] = {&state.emergency_input, &state.azimuth_home_input,
                                &state.elevation_home_input};
   for (std::size_t index = 0; index < 3; ++index) {
+    if (pins[index] < 0) {
+      continue;
+    }
     const gpio_num_t pin = static_cast<gpio_num_t>(pins[index]);
     if (gpio_set_intr_type(pin, GPIO_INTR_ANYEDGE) != ESP_OK ||
         gpio_isr_handler_add(pin, input_isr, inputs[index]) != ESP_OK) {

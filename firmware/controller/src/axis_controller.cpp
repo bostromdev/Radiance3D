@@ -112,10 +112,11 @@ bool AxisController::initialize() {
   state_.enabled = false;
   state_.trust_loss_reason = TrustLossReason::startup;
   if (config_.name == nullptr || config_.name[0] == '\0' ||
-      config_.home_switch_pin < 0 || !config_.motion.valid() ||
+      !config_.motion.valid() ||
       config_.motion.motor_rms_current_ma == 0 ||
-      !platform_.configure_pin(config_.home_switch_pin,
-                               config_.home_switch_input_mode) ||
+      (config_.home_switch_pin >= 0 &&
+       !platform_.configure_pin(config_.home_switch_pin,
+                                config_.home_switch_input_mode)) ||
       !driver_.initialize()) {
     state_.fault = driver_.is_connected()
                        ? FaultCode::invalid_configuration
@@ -173,6 +174,9 @@ void AxisController::mark_position_untrusted(const TrustLossReason reason) {
 }
 
 bool AxisController::home_switch_active_raw() const {
+  if (config_.home_switch_pin < 0) {
+    return false;
+  }
   const bool level_high = platform_.read_pin(config_.home_switch_pin);
   return config_.motion.homing.switch_normally_closed ? level_high
                                                       : !level_high;
@@ -321,6 +325,9 @@ MotionResult AxisController::bench_move_steps(
 }
 
 MotionResult AxisController::start_homing(const std::uint32_t command_id) {
+  if (config_.home_switch_pin < 0) {
+    return MotionResult{false, FaultCode::invalid_configuration};
+  }
   if (state_.moving) {
     return MotionResult{false, FaultCode::invalid_argument};
   }
