@@ -2,8 +2,8 @@
 
 > **Visualize the invisible.**
 
-Open-source hardware and software for automated 3D antenna radiation-pattern
-measurement and visualization.
+Hardware and software for automated 3D antenna radiation-pattern measurement and
+visualization, developed in the open. See [LICENSE](LICENSE) for terms.
 
 > [!IMPORTANT]
 > Radiance3D is being built in my house right now, and it is genuinely easy to make —
@@ -198,9 +198,9 @@ and supervision. See [SECURITY.md](SECURITY.md) for vulnerability reporting.
 
 ## License
 
-Software and documentation in this repository are licensed under the
-[MIT License](LICENSE). Future hardware design files may use a separate
-open-hardware license when verified design files are actually published.
+See [LICENSE](LICENSE) for the terms that apply to this repository. All rights are
+reserved; this is not an open-source licence, despite the project being developed in
+the open. Contact the address in `LICENSE` for commercial licensing enquiries.
 
 ## Citation
 

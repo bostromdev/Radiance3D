@@ -21,4 +21,5 @@ Not measured: bearings, couplers, fasteners, antenna mount, limit switches, LM25
 buck converters, RF detector — see
 [`missing-measurements.md`](../Measurements/missing-measurements.md).
 
-Future verified hardware files may receive a separate open-hardware license.
+Future verified hardware files may receive a separate licence. See
+[LICENSE](../LICENSE) for the terms that currently apply.

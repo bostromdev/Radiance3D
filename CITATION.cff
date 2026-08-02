@@ -5,7 +5,8 @@ type: software
 authors:
   - family-names: "bostromdev"
 repository-code: "https://github.com/bostromdev/Radiance3D"
-license: MIT
+license-url: "https://github.com/bostromdev/Radiance3D/blob/main/LICENSE"
 abstract: >-
-  An open-source hardware and software platform in early development for
-  automated 3D antenna radiation-pattern measurement and visualization.
+  A hardware and software platform in early development for automated 3D antenna
+  radiation-pattern measurement and visualization. Developed in the open; see
+  LICENSE for terms.
