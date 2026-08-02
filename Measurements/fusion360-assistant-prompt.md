@@ -80,9 +80,8 @@ NEMA 17 stepper motor, model 42HDB0014NC-24B, quantity 2 (one pan, one tilt):
   DATUM WARNING on the 22.39 mm shaft length: it is measured from the top face of the
   raised circular boss the shaft emerges from, NOT from the motor face plate. It is
   therefore not the number a vendor listing means by "shaft length". The face-plate
-  figure would be 22.39 mm plus the pilot boss height, and the pilot boss height is
-  provisional. Model the shaft from the boss face, which is measured. Do not silently
-  treat 22.39 mm as a face-plate dimension.
+  figure is 24.37 mm. Prefer the 22.39 mm boss datum where a feature can be dimensioned
+  from the boss. Do not silently treat 22.39 mm as a face-plate dimension.
 
 BIGTREETECH TMC2209 V1.3 driver, quantity 2, measured WITH heatsink installed:
   PCB length                                  20.14 mm
